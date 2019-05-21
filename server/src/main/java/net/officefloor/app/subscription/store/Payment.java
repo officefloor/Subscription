@@ -13,7 +13,7 @@ import lombok.NonNull;
 import lombok.RequiredArgsConstructor;
 
 /**
- * Domain {@link Entity}.
+ * Payment {@link Entity}.
  * 
  * @author Daniel Sagenschneider
  */
@@ -21,22 +21,27 @@ import lombok.RequiredArgsConstructor;
 @Data
 @NoArgsConstructor
 @RequiredArgsConstructor
-public class Domain {
+public class Payment {
 
 	@Id
 	private Long id;
 
 	@Index
 	@NonNull
-	private String domain;
+	private Ref<User> user;
 
 	@Index
 	@NonNull
-	private Ref<User> user;
-	
-	@Index
-	@NonNull
 	private Ref<Invoice> invoice;
+
+	/**
+	 * Amount in cents.
+	 */
+	@NonNull
+	private Integer amount;
+
+	@NonNull
+	private String receipt;
 
 	private Date timestamp = new Date(System.currentTimeMillis());
 }

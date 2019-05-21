@@ -8,7 +8,6 @@ import org.junit.Test;
 import org.junit.rules.RuleChain;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.googlecode.objectify.Ref;
 
 import net.officefloor.app.subscription.AuthenticateLogic.AuthenticateRequest;
 import net.officefloor.app.subscription.AuthenticateLogic.AuthenticateResponse;
@@ -35,22 +34,17 @@ public class AuthenticateLogicTest {
 	 * 
 	 * @param objectify {@link ObjectifyRule}.
 	 * @param name      Name of {@link User}.
-	 * @param email     Email for {@link User}.
-	 * @param photoUrl  Photo URL for {@link User}.
-	 * @return Google sign-in ID.
+	 * @param roles     Roles.
+	 * @return {@link User}.
 	 */
-	public static String setupUser(ObjectifyRule objectify, String name, String email, String photoUrl) {
-		String googleId = "MOCK_GOOGLE_ID_" + name;
-		User user = new User(email);
+	public static User setupUser(ObjectifyRule objectify, String name, String... roles) {
+		String noSpaceName = name.replaceAll("\\w", "_");
+		User user = new User(noSpaceName + "@officefloor.org");
 		user.setName(name);
-		user.setPhotoUrl(photoUrl);
+		user.setPhotoUrl("https://google.com/" + noSpaceName + ".png");
+		user.setRoles(roles);
 		objectify.store(user);
-		GoogleSignin login = new GoogleSignin(googleId, email);
-		login.setUser(Ref.create(user));
-		login.setName(name);
-		login.setPhotoUrl(photoUrl);
-		objectify.store(login);
-		return googleId;
+		return user;
 	}
 
 	private GoogleIdTokenRule verifier = new GoogleIdTokenRule();
@@ -78,14 +72,15 @@ public class AuthenticateLogicTest {
 		assertEquals("Should be successful", 200, response.getStatus().getStatusCode());
 
 		// Ensure login created in store
-		GoogleSignin login = this.obectify.get(GoogleSignin.class,
-				(load) -> load.filter("email", "daniel@officefloor.net"));
+		GoogleSignin login = this.obectify
+				.get(GoogleSignin.class, 1, (load) -> load.filter("email", "daniel@officefloor.net")).get(0);
 		assertNotNull("Should have the login", login);
+		assertNotNull("Should have google id", login.getGoogleId());
 		assertEquals("Incorrect name", "Daniel Sagenschneider", login.getName());
 		assertEquals("Incorrect photoUrl", "http://officefloor.net/photo.png", login.getPhotoUrl());
 
 		// Ensure user created in store
-		User user = this.obectify.get(User.class, (load) -> load.filter("email", "daniel@officefloor.net"));
+		User user = this.obectify.get(User.class, 1, (load) -> load.filter("email", "daniel@officefloor.net")).get(0);
 		assertEquals("Incorrect user", user.getId(), login.getUser().get().getId());
 		assertEquals("Incorrect name", "Daniel Sagenschneider", user.getName());
 		assertEquals("Incorrect photoUrl", "http://officefloor.net/photo.png", user.getPhotoUrl());
