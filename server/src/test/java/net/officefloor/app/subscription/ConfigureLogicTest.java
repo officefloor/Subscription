@@ -62,9 +62,8 @@ public class ConfigureLogicTest {
 
 		// Configure system
 		User user = AuthenticateLogicTest.setupUser(this.objectify, "Daniel");
-		String token = this.jwt.createAccessToken(user);
-		MockHttpResponse response = this.server.send(MockWoofServer.mockRequest("/configure").method(HttpMethod.POST)
-				.header("authorization", "Bearer " + token).header("content-type", "application/json").entity(mapper
+		MockHttpResponse response = this.server.send(this.jwt.authorize(user, MockWoofServer.mockRequest("/configure"))
+				.method(HttpMethod.POST).header("content-type", "application/json").entity(mapper
 						.writeValueAsString(new Configuration("sandbox", "MOCK_CLIENT_ID", "MOCK_CLIENT_SECRET"))));
 		response.assertResponse(200, mapper.writeValueAsString(new Configured(true)));
 
@@ -91,9 +90,8 @@ public class ConfigureLogicTest {
 		this.objectify.store(existing);
 
 		// Configure system
-		String token = this.jwt.createAccessToken(user);
-		MockHttpResponse response = this.server.send(MockWoofServer.mockRequest("/configure").method(HttpMethod.POST)
-				.header("authorization", "Bearer " + token).header("content-type", "application/json").entity(mapper
+		MockHttpResponse response = this.server.send(this.jwt.authorize(user, MockWoofServer.mockRequest("/configure"))
+				.method(HttpMethod.POST).header("content-type", "application/json").entity(mapper
 						.writeValueAsString(new Configuration("sandbox", "MOCK_CLIENT_ID", "MOCK_CLIENT_SECRET"))));
 		response.assertResponse(200, mapper.writeValueAsString(new Configured(true)));
 
@@ -114,9 +112,8 @@ public class ConfigureLogicTest {
 
 		// Non-admin attempt to configure
 		User user = AuthenticateLogicTest.setupUser(this.objectify, "Daniel");
-		String token = this.jwt.createAccessToken(user);
-		MockHttpResponse response = this.server.send(MockWoofServer.mockRequest("/configure").method(HttpMethod.POST)
-				.header("authorization", "Bearer " + token).header("content-type", "application/json")
+		MockHttpResponse response = this.server.send(this.jwt.authorize(user, MockWoofServer.mockRequest("/configure"))
+				.method(HttpMethod.POST).header("content-type", "application/json")
 				.entity(mapper.writeValueAsString(new Configuration("changed", "CHANGE_ID", "CHANGE_SECRET"))));
 		response.assertResponse(403, JacksonHttpObjectResponderFactory
 				.getEntity(new HttpException(HttpStatus.FORBIDDEN, "Must have 'admin' role"), mapper));

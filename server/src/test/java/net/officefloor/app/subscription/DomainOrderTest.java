@@ -91,10 +91,9 @@ public class DomainOrderTest {
 
 		// Send request
 		User user = AuthenticateLogicTest.setupUser(this.objectify, "Daniel");
-		String token = this.jwt.createAccessToken(user);
 		MockHttpResponse response = this.server
-				.send(MockWoofServer.mockRequest("/createDomainOrder").method(HttpMethod.POST)
-						.header("authorization", "Bearer " + token).header("content-type", "application/json")
+				.send(this.jwt.authorize(user, MockWoofServer.mockRequest("/createDomainOrder")).method(HttpMethod.POST)
+						.header("content-type", "application/json")
 						.entity(mapper.writeValueAsString(new DomainOrderRequest("officefloor.org"))));
 
 		// Ensure correct response
@@ -130,10 +129,9 @@ public class DomainOrderTest {
 		this.objectify.store(invoice);
 
 		// Send request
-		String token = this.jwt.createAccessToken(user);
 		MockHttpResponse response = this.server
-				.send(MockWoofServer.mockRequest("/captureDomainOrder").method(HttpMethod.POST)
-						.header("authorization", "Bearer " + token).header("content-type", "application/json")
+				.send(this.jwt.authorize(user, MockWoofServer.mockRequest("/captureDomainOrder"))
+						.method(HttpMethod.POST).header("content-type", "application/json")
 						.entity(mapper.writeValueAsString(new DomainCaptureRequest("MOCK_ORDER_ID"))));
 
 		// Ensure correct response
