@@ -1,0 +1,45 @@
+<div class="container">
+	<form [formGroup]="configurationForm" (submit)="updateConfiguration()">
+		<h1>PayPal</h1>
+		<fieldset class="form-group">
+			<div class="row">
+				<legend class="col-form-label col-sm-2">Environment</legend>
+				<div class="col-sm-10">
+					<div class="form-check-inline">
+						<input class="form-check-input" type="radio"
+							id="paypalEnvironmentSandbox" formControlName="paypalEnvironment"
+							value="sandbox"> <label class="form-check-label"
+							for="paypalEnvironmentSandbox">Sandbox</label>
+					</div>
+					<div class="form-check-inline">
+						<input class="form-check-input" type="radio"
+							id="paypalEnvironmentProduction"
+							formControlName="paypalEnvironment" value="production"> <label
+							class="form-check-label" for="paypalEnvironmentSandbox">Production</label>
+					</div>
+				</div>
+			</div>
+		</fieldset>
+		<div class="form-group row">
+			<label for="paypalClientId" class="col-form-label col-sm-2">Client
+				ID</label>
+			<div class="col-sm-10">
+				<input type="text" class="form-control"
+					formControlName="paypalClientId" id="paypalClientId">
+			</div>
+		</div>
+		<div class="form-group row">
+			<label for="paypalClientSecret" class="col-form-label col-sm-2">Client
+				Secret</label>
+			<div class="col-sm-10">
+				<input type="text" class="form-control"
+					formControlName="paypalClientSecret" id="paypalClientSecret">
+			</div>
+		</div>
+		<div class="row">
+			<div class="col-sm-2">
+				<button class="btn btn-primary">Save</button>
+			</div>
+		</div>
+	</form>
+</div>

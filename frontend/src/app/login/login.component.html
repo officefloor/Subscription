@@ -1,13 +1,7 @@
-
-<button (click)="signIn()">Sign in</button>
-
-<button (click)="signOut()">Sign out</button>
-
-<div *ngIf="user">
-	<img src="{{ user.photoUrl }}">
-
-	<div>
-		<h4>{{ user.name }}</h4>
-		<p>{{ user.email }}</p>
-	</div>
+<div [hidden]="user">
+	<button (click)="signIn()" class="btn">Sign in</button>
+</div>
+<div [hidden]="!user">
+	<img src="{{ user ? user.photoUrl : '' }}">
+	<button (click)="signOut()" class="btn">Sign out</button>
 </div>

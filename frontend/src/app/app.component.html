@@ -1,8 +1,15 @@
-<!--The content below is only a placeholder and can be replaced.-->
-<div style="text-align: center">
-	<h1>Welcome to {{ title }}!</h1>
-	<app-login></app-login>
-	<app-checkout></app-checkout>
-</div>
+<header>
+	<div class="float-right login">
+		<app-login></app-login>
+	</div>
+	<div class="header">
+		<h1 class="text-center">{{title}}</h1>
+	</div>
+</header>
 
-<router-outlet></router-outlet>
+<div [hidden]="!user">
+	<router-outlet></router-outlet>
+</div>
+<div [hidden]="user">
+	Please login
+</div>

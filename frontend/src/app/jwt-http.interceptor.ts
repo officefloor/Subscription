@@ -5,6 +5,8 @@ import { map, switchMap, filter, take, finalize, catchError } from 'rxjs/operato
 import { AuthenticationService } from './authentication.service';
 import { AccessTokenResponse } from './server-api.service';
 
+declare let JSON: any
+
 @Injectable()
 export class JwtHttpInterceptor implements HttpInterceptor {
 
@@ -28,7 +30,7 @@ export class JwtHttpInterceptor implements HttpInterceptor {
             } else {
                 return req;
             }
-        };
+        }
 
         // Undertake the request
         return next.handle( jwtRequest( req, this.authenticationService.getAccessToken() ) ).pipe(

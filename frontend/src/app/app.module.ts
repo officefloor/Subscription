@@ -2,13 +2,16 @@ import { BrowserModule } from '@angular/platform-browser';
 import { NgModule } from '@angular/core';
 import { HttpClientModule, HTTP_INTERCEPTORS } from '@angular/common/http';
 import { JwtHttpInterceptor } from './jwt-http.interceptor';
-
 import { AppRoutingModule } from './app-routing.module';
 import { AppComponent } from './app.component';
 import { SocialLoginModule, AuthServiceConfig } from "angularx-social-login";
 import { GoogleLoginProvider, FacebookLoginProvider, LinkedInLoginProvider } from "angularx-social-login";
 import { LoginComponent } from './login/login.component';
 import { CheckoutComponent } from './checkout/checkout.component';
+import { ConfigureComponent } from './configure/configure.component';
+import { MainComponent } from './main/main.component';
+import { NgbModule } from '@ng-bootstrap/ng-bootstrap';
+import { ReactiveFormsModule } from '@angular/forms';
 
 let config = new AuthServiceConfig( [
     {
@@ -25,11 +28,15 @@ export function provideConfig() {
     declarations: [
         AppComponent,
         LoginComponent,
-        CheckoutComponent
+        CheckoutComponent,
+        ConfigureComponent,
+        MainComponent
     ],
     imports: [
         BrowserModule,
         HttpClientModule,
+        ReactiveFormsModule,
+        NgbModule,
         SocialLoginModule,
         AppRoutingModule
     ],
