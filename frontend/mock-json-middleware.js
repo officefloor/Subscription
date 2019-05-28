@@ -1,3 +1,5 @@
+let configurationCount = 0
+
 module.exports = (req, res, next) => {
 	
 	switch(req.path) {
@@ -12,7 +14,15 @@ module.exports = (req, res, next) => {
 			accessToken: 'MOCK_ACCESS_TOKEN'
 		})
 		break
+	case '/configuration':
+		configurationCount++;		
+		if (configurationCount % 3 === 0) {
+			res.sendStatus(403)
+			return
+		}
+		next()
+		break
 	default:
-		next();
+		next()
 	}
 }

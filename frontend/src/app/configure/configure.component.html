@@ -1,4 +1,10 @@
-<div class="container">
+<div [hidden]="isInitialised" class="container">
+	<p>Loading ...</p>
+</div>
+<div [hidden]="!errorMessage" class="container">
+	<div class="alert alert-danger" role="alert">{{errorMessage}}</div>
+</div>
+<div [hidden]="!isInitialised || errorMessage" class="container">
 	<form [formGroup]="configurationForm" (submit)="updateConfiguration()">
 		<h1>PayPal</h1>
 		<fieldset class="form-group">
@@ -38,7 +44,7 @@
 		</div>
 		<div class="row">
 			<div class="col-sm-2">
-				<button class="btn btn-primary">Save</button>
+				<button class="btn btn-primary" [disabled]="isSaving">Save</button>
 			</div>
 		</div>
 	</form>

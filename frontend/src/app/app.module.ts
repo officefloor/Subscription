@@ -30,7 +30,7 @@ export function provideConfig() {
         LoginComponent,
         CheckoutComponent,
         ConfigureComponent,
-        MainComponent
+        MainComponent,
     ],
     imports: [
         BrowserModule,

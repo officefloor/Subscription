@@ -1,16 +1,37 @@
+import { Configuration } from '../app/server-api.service'
+import { Observable, BehaviorSubject } from 'rxjs'
+import { ServerApiService } from '../app/server-api.service'
+import 'zone.js/dist/zone-error' // easier development debugging
+
 // This file can be replaced during build by using the `fileReplacements` array.
 // `ng build --prod` replaces `environment.ts` with `environment.prod.ts`.
 // The list of file replacements can be found in `angular.json`.
 
 export const environment = {
-  production: false
-};
+    production: false
+}
 
-/*
- * For easier debugging in development mode, you can import the following file
- * to ignore zone related error stack frames such as `zone.run`, `zoneDelegate.invokeTask`.
- *
- * This import should be commented out in production mode because it will have a negative impact
- * on performance if an error is thrown.
- */
-// import 'zone.js/dist/zone-error';  // Included with Angular CLI.
+// Load default configuration for development
+export function getDefaultConfiguration( serverApiService: ServerApiService ): Observable<Configuration> {
+
+    // Initiate the default configuration
+    const defaultConfiguration = new BehaviorSubject<Configuration>( {
+        paypalEnvironment: '',
+        paypalClientId: '',
+        paypalClientSecret: '',
+    } )
+
+    // Attempt to load default configuration
+    serverApiService.getDefaultConfiguration().subscribe(( configuration: Configuration ) => {
+
+        // Update the default configuration
+        defaultConfiguration.next( configuration )
+
+    }, ( error: any ) => {
+        // Log failure and just use no configuration
+        console.warn( 'Failed to load default configuration', error )
+    } )
+
+    // Return the default configuration
+    return defaultConfiguration
+}
