@@ -1,10 +1,7 @@
-<div [hidden]="isInitialised" class="container">
-	<p>Loading ...</p>
-</div>
 <div [hidden]="!errorMessage" class="container">
 	<div class="alert alert-danger" role="alert">{{errorMessage}}</div>
 </div>
-<div [hidden]="!isInitialised || errorMessage" class="container">
+<div [hidden]="errorMessage" class="container">
 	<form [formGroup]="configurationForm" (submit)="updateConfiguration()">
 		<h1>PayPal</h1>
 		<fieldset class="form-group">

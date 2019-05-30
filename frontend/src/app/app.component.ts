@@ -9,12 +9,18 @@ import { AuthenticationService } from './authentication.service';
 } )
 export class AppComponent {
 
-    user: SocialUser;
+    isInitialised: boolean = false
+
+    user: SocialUser
 
     constructor( private authenticationService: AuthenticationService ) {
-        this.authenticationService.authenticationState().subscribe(( user: SocialUser ) => this.user = user );
+
+        // Determine when ready
+        this.authenticationService.readyState().subscribe(( isReady: boolean ) => this.isInitialised = isReady )
+
+
+        // Keep track of logged in user
+        this.authenticationService.authenticationState().subscribe(( user: SocialUser ) => this.user = user )
     }
 
-
-    title = 'OfficeFloor Subscription';
 }

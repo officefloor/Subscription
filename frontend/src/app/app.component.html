@@ -1,15 +1,28 @@
 <header>
-	<div class="float-right login">
+	<div [hidden]="!isInitialised" class="float-right login">
 		<app-login></app-login>
 	</div>
 	<div class="header">
-		<h1 class="text-center">{{title}}</h1>
+		<h1 class="text-center">OfficeFloor Subscription</h1>
 	</div>
 </header>
 
-<div [hidden]="!user">
-	<router-outlet></router-outlet>
+<div [hidden]="isInitialised">
+	<div class="d-flex justify-content-center">
+		<div class="spinner-border" role="status">
+			<span class="sr-only">Loading...</span>
+		</div>
+	</div>
 </div>
-<div [hidden]="user">
-	Please login
+<div [hidden]="!isInitialised">
+	<div [hidden]="!user" class="container">
+		<router-outlet></router-outlet>
+	</div>
+	<div [hidden]="user" class="container">
+		<p>Welcome to OfficeFloor subscription</p>
+		<div>
+			Please
+			<app-login></app-login>
+		</div>
+	</div>
 </div>

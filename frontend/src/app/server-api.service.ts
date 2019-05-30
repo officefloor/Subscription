@@ -33,25 +33,52 @@ export class ServerApiService {
     }
 
     public getDefaultConfiguration(): Observable<Configuration> {
-        return this.http.get<Configuration>( `${this.serverUrl}/defaultConfiguration` )
+        return this.http.get<Configuration>( `${this.serverUrl}/configuration/default` )
     }
 
     public updateConfiguration( configuration: Configuration ): Observable<void> {
         return this.http.post<void>( `${this.serverUrl}/configuration`, configuration )
     }
+
+    public getDomains(): Observable<Domain[]> {
+        return this.http.get<Domain[]>( `${this.serverUrl}/domains` )
+    }
 }
 
 export interface AuthenticateResponse {
-    refreshToken: string;
-    accessToken: string;
+    refreshToken: string
+    accessToken: string
 }
 
 export interface AccessTokenResponse {
-    accessToken: string;
+    accessToken: string
 }
 
 export interface Configuration {
-    paypalEnvironment: string;
-    paypalClientId: string;
-    paypalClientSecret: string;
+    paypalEnvironment: string
+    paypalClientId: string
+    paypalClientSecret: string
+}
+
+export interface Domain {
+    domainName: string
+    expires: number
+}
+
+export interface DomainPayment {
+    paymentDate: number
+    extendsSubscriptionToDate: number
+    isSubscriptionReset: boolean
+    user: User
+}
+
+export interface User {
+    id: number
+    name: string
+    email: string
+    photoUrl: string
+}
+
+export interface Invoice {
+
 }

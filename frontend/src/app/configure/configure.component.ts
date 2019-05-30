@@ -1,8 +1,9 @@
 import { Component, OnInit } from '@angular/core';
 import { FormGroup, FormControl } from '@angular/forms';
 import { ServerApiService, Configuration } from '../server-api.service';
-import { AuthenticationService } from '../authentication.service';
 import { getDefaultConfiguration } from '../../environments/environment';
+import { SocialUser } from "angularx-social-login";
+import { AuthenticationService } from '../authentication.service';
 
 declare let JSON: any
 
@@ -12,8 +13,6 @@ declare let JSON: any
     styleUrls: ['./configure.component.css']
 } )
 export class ConfigureComponent implements OnInit {
-
-    isInitialised: boolean = false
 
     isSaving: boolean = false
 
@@ -26,47 +25,41 @@ export class ConfigureComponent implements OnInit {
     errorMessage: string = null
 
     constructor(
+        private serverApiService: ServerApiService,
         private authenticationService: AuthenticationService,
-        private serverApiService: ServerApiService
     ) { }
 
     ngOnInit() {
-        // Load configuration (on login/logout)
-        this.authenticationService.authenticationState().subscribe(( user: any ) => {
+        this.authenticationService.authenticationState().subscribe(( user: SocialUser ) => {
 
-            // Only load if logged in
+            // Only load configuration if logged in user
             if ( !user ) {
                 return
             }
 
-            // Load the configuration
+            // Load configuration
             this.serverApiService.getConfiguration().subscribe(( configuration: Configuration ) => {
-                try {
 
-                    // Function to load values
-                    const setFormValues = ( config: Configuration ) => {
-                        this.configurationForm.patchValue( {
-                            paypalEnvironment: config.paypalEnvironment,
-                            paypalClientId: config.paypalClientId,
-                            paypalClientSecret: config.paypalClientSecret,
-                        } )
-                    }
-
-                    // Determine if have saved values
-                    if ( configuration.paypalEnvironment ) {
-                        setFormValues( configuration )
-
-                    } else {
-                        // Use configured defaults
-                        getDefaultConfiguration( this.serverApiService ).subscribe(( defaults: Configuration ) => {
-                            setFormValues( defaults )
-                        } )
-                    }
-
-                } finally {
-                    // Flag now able to view form
-                    this.isInitialised = true
+                // Function to load values
+                const setFormValues = ( config: Configuration ) => {
+                    this.configurationForm.patchValue( {
+                        paypalEnvironment: config.paypalEnvironment,
+                        paypalClientId: config.paypalClientId,
+                        paypalClientSecret: config.paypalClientSecret,
+                    } )
                 }
+
+                // Determine if have saved values
+                if ( configuration.paypalEnvironment ) {
+                    setFormValues( configuration )
+
+                } else {
+                    // Use configured defaults
+                    getDefaultConfiguration( this.serverApiService ).subscribe(( defaults: Configuration ) => {
+                        setFormValues( defaults )
+                    } )
+                }
+
             }, this.handleError() )
         } )
     }
@@ -89,7 +82,6 @@ export class ConfigureComponent implements OnInit {
         return ( error ) => {
 
             // Ensure put into state to display error
-            this.isInitialised = true
             this.isSaving = false
 
             // Indicate detail of the error

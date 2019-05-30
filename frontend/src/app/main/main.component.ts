@@ -12,10 +12,22 @@ export class MainComponent implements OnInit {
     user: SocialUser = null;
 
     constructor( private authentication: AuthenticationService ) {
-        authentication.authenticationState().subscribe(( user: SocialUser ) => this.user = user );
     }
 
     ngOnInit() {
+        this.authentication.authenticationState().subscribe(( user: SocialUser ) => {
+
+            // Flag the user to indicate logged in
+            this.user = user
+
+            // Nothing further if not logged in
+            if ( !this.user ) {
+                return
+            }
+
+            // Load the domains
+            
+        } )
     }
 
 }
