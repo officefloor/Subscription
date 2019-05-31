@@ -45,6 +45,14 @@ export class DomainComponent implements OnInit {
             // Load the domain payments for domain
             this.serverApiService.getPayments( this.domainName ).subscribe(( domainPayments: DomainPayments ) => {
 
+                // Determine if payments
+                if ( !domainPayments.payments || ( domainPayments.payments.length === 0 ) ) {
+                    this.localExpireDate = null
+                    this.payments = null
+                    this.sortedPayments = []
+                    return
+                }
+
                 const LOCAL_DATE_FORMAT = 'D MMM YYYY'
                 const expireMoment = parseDate( domainPayments.expiresDate )
                 this.localExpireDate = expireMoment.format( LOCAL_DATE_FORMAT )

@@ -1,2 +1,22 @@
 /* You can add global styles to this file, and also import other style files */
 @import "~@angular/material/prebuilt-themes/indigo-pink.css";
+
+table {
+	border-radius: 1em;
+}
+
+table thead:first-child th:first-child {
+	border-top-left-radius: 1em;
+}
+
+table thead:first-child th:last-child {
+	border-top-right-radius: 1em;
+}
+
+table tr:last-child td:first-child {
+	border-bottom-left-radius: 1em;
+}
+
+table tr:last-child td:last-child {
+	border-bottom-right-radius: 1em;
+}
