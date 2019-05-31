@@ -62,23 +62,5 @@ export interface Configuration {
 
 export interface Domain {
     domainName: string
-    expires: number
-}
-
-export interface DomainPayment {
-    paymentDate: number
-    extendsSubscriptionToDate: number
-    isSubscriptionReset: boolean
-    user: User
-}
-
-export interface User {
-    id: number
-    name: string
-    email: string
-    photoUrl: string
-}
-
-export interface Invoice {
-
+    expiresDate: string
 }

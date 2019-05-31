@@ -1,5 +1,27 @@
-<div [hidden]="!user" class="container">
-	<!--  
-	<app-checkout></app-checkout>
-	-->
+<div class="container">
+	<table matSort (matSortChange)="sortDomains($event)"
+		class="table table-striped table-borderlesstable-hover">
+		<thead class="table-primary">
+			<th scope="col" mat-sort-header="domain">Domain</th>
+			<th scope="col" mat-sort-header="expireDate">Expire Date</th>
+			<th scope="col" mat-sort-header="expire">Expire</th>
+			<th></th>
+		</thead>
+		<tbody>
+			<tr *ngFor="let domain of sortedDomains">
+				<td>{{domain.domainName}}</td>
+				<td [class.table-danger]="domain.isExpired"
+					[class.table-success]="!domain.isExpired">{{domain.localExpires}}</td>
+				<td [class.table-danger]="domain.isExpired"
+					[class.table-warning]="domain.isExpireSoon">{{domain.timeAgo}}</td>
+				<td [class.table-danger]="domain.isExpired"
+					[class.table-warning]="domain.isExpireSoon"><a
+					[routerLink]="['/domain/', domain.domainName]" class="btn"
+					[class.btn-danger]="domain.isExpired"
+					[class.btn-warning]="domain.isExpireSoon && !domain.isExpired"
+					[class.btn-primary]="!domain.isExpireSoon && !domain.isExpired">{{domain.isExpired
+						? 'Renew' : 'Extend'}}</a></td>
+			</tr>
+		</tbody>
+	</table>
 </div>

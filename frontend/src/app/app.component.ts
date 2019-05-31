@@ -18,7 +18,6 @@ export class AppComponent {
         // Determine when ready
         this.authenticationService.readyState().subscribe(( isReady: boolean ) => this.isInitialised = isReady )
 
-
         // Keep track of logged in user
         this.authenticationService.authenticationState().subscribe(( user: SocialUser ) => this.user = user )
     }
