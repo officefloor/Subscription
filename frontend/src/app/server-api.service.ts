@@ -2,6 +2,7 @@ import { Injectable } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { Observable } from 'rxjs';
 import { environment } from '../environments/environment';
+import * as moment from 'moment'
 
 declare let window: any
 
@@ -43,6 +44,14 @@ export class ServerApiService {
     public getDomains(): Observable<Domain[]> {
         return this.http.get<Domain[]>( `${this.serverUrl}/domains` )
     }
+
+    public getPayments( domainName: string ): Observable<DomainPayments> {
+        return this.http.get<DomainPayments>( `${this.serverUrl}/payments/${domainName}` )
+    }
+}
+
+export function parseDate( value: string ): moment.Moment {
+    return moment( value, 'ddd, D MMM YYYY H:mm:ss [GMT]' )
 }
 
 export interface AuthenticateResponse {
@@ -63,4 +72,19 @@ export interface Configuration {
 export interface Domain {
     domainName: string
     expiresDate: string
+}
+
+export interface DomainPayments {
+    domainName: string
+    expiresDate: string
+    payments: Payment[]
+}
+
+export interface Payment {
+    paymentDate: string
+    extendsToDate: string
+    isRestartSubscription: boolean
+    paidByName: string
+    paidByEmail: string
+    paymentOrderId: string
 }

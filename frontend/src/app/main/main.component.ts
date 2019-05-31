@@ -1,7 +1,7 @@
 import { Component, OnInit } from '@angular/core'
 import { AuthenticationService } from '../authentication.service'
 import { SocialUser } from "angularx-social-login"
-import { ServerApiService, Domain } from '../server-api.service'
+import { ServerApiService, parseDate, Domain } from '../server-api.service'
 import * as moment from 'moment'
 import { Sort } from '@angular/material/sort'
 
@@ -40,7 +40,7 @@ export class MainComponent implements OnInit {
                 // Load the new domains
                 this.domains = []
                 for ( let domain of domains ) {
-                    const expireMoment = moment( domain.expiresDate )
+                    const expireMoment = parseDate( domain.expiresDate )
                     const localExpires = expireMoment.format( "D MMM YYYY" )
                     const sortExpires = expireMoment.unix()
                     const timeAgo = expireMoment.fromNow()
@@ -71,7 +71,7 @@ export class MainComponent implements OnInit {
     sortDomains( sort: Sort ) {
         const data: DomainRow[] = this.domains.slice()
         if ( !sort.active || sort.direction === '' ) {
-            this.sortedDomains = this.domains
+            this.sortedDomains = data
             return
         }
 
@@ -87,7 +87,7 @@ export class MainComponent implements OnInit {
     }
 
     compare( a: number | string, b: number | string, isAsc: boolean ) {
-        return ( a < b ? -1 : 1 ) * ( isAsc ? 1 : -1 );
+        return ( a < b ? -1 : 1 ) * ( isAsc ? 1 : -1 )
     }
 }
 

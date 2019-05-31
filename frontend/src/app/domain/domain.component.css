@@ -1,0 +1,15 @@
+.subscription-complete-date {
+	font-weight: bold;
+}
+
+.restart-row {
+	border-bottom: 3pt solid black
+}
+
+.restart-date {
+	font-style: italic;
+}
+
+.payer {
+	font-style: italic;
+}

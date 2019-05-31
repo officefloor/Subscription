@@ -1,1 +1,26 @@
-<p>domain {{domainName}}</p>
+<div class="container">
+	<div class="row">Domain: {{domainName}}</div>
+	<div class="row">Expires: {{localExpireDate}}</div>
+	<div class="row">
+		<table class="table table-striped table-borderless table-hover">
+			<thead class="table-primary">
+				<th scope="col">Start</th>
+				<th scope="col">End</th>
+				<th scope="col">Paid&nbsp;By</th>
+				<th scope="col">Order&nbsp;#</th>
+				<th scope="col">Paid&nbsp;on</th>
+			</thead>
+			<tbody>
+				<tr *ngFor="let payment of sortedPayments"
+					[class.restart-row]="payment.isRestartSubscription">
+					<td [class.restart-date]="payment.isRestartSubscription">{{payment.subscriptionStartDate}}</td>
+					<td
+						[class.subscription-complete-date]="payment.isSubscriptionCompletion">{{payment.subscriptionEndDate}}</td>
+					<td [class.payer]="payment.isPaidByYou">{{payment.paidBy}}</td>
+					<td>{{payment.paymentOrderId}}</td>
+					<td>{{payment.paymentDate}}</td>
+				</tr>
+			</tbody>
+		</table>
+	</div>
+</div>
