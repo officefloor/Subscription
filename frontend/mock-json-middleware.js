@@ -22,14 +22,6 @@ module.exports = (req, res, next) => {
 		}
 		next()
 		break
-	case "/configuration/default":
-		res.send({
-			paypalEnvironment: 'sandbox',
-			paypalClientId: 'DEFAULT_CLIENT_ID',
-			paypalClientSecret: 'DEFAULT_CLIENT_SECRET'
-			}
-		)
-		break
 	default:
 		next()
 	}

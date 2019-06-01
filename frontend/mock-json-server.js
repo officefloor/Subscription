@@ -66,7 +66,6 @@ module.exports = () => {
 			})
 		}
 		return {
-			id: domainName,
 			domainName: domainName,
 			expiresDate: extendsToDate.format(DATE_FORMAT),
 			payments: payments,
@@ -77,26 +76,37 @@ module.exports = () => {
 	// Create data template
 	const data = {
 		configuration: {},
+		defaultConfiguration: {
+			paypalEnvironment: 'sandbox',
+			paypalClientId: 'DEFAULT_CLIENT_ID',
+			paypalClientSecret: 'DEFAULT_CLIENT_SECRET'
+		},
 		domains: [{
-			domainName: 'officefloor.org',
+			domainName: 'sagenschneider.net',
 			expiresDate: lastYear
 		}, {
-			domainName: 'sagenschneider.net',
-			expiresDate: soon
+			domainName: 'activicy.com',
+			expiresDate: lastYear
 		}, {
 			domainName: 'officefloor.net',
 			expiresDate: soon
 		}, {
-			domainName: 'activicy.com',
+			domainName: 'officefloor.org',
 			expiresDate: nextYear
 		}],
-		payments: [
+		domainPayments: [
+			createPayments('activicy.com', 10, 5, false, createDetails(2)),
 			createPayments('officefloor.org', 8, 10, true, createDetails(2)),
 			createPayments('officefloor.net', 15, 15, false, createDetails(2)),
-			createPayments('activicy.com', 10, 5, false, createDetails(2)),
-			{ id: 'sagenschneider.net' }
+			{ domainName: 'sagenschneider.net' }
 		]
 	}
+	data.domainPayments.forEach((domain) => {
+		domain.id = domain.domainName
+		if ('officefloor.net' === domain.domainName) {
+			domain.expiresDate = soon
+		}
+	})
 	
 	// Return the base data
 	return data

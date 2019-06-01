@@ -1,7 +1,7 @@
 import { Component, OnInit } from '@angular/core'
 import { ActivatedRoute, ParamMap } from '@angular/router'
 import { switchMap } from 'rxjs/operators'
-import { ServerApiService, parseDate, DomainPayments, Payment } from '../server-api.service'
+import { ServerApiService, parseDate, isExpired, isExpireSoon, DomainPayments, Payment } from '../server-api.service'
 import { AuthenticationService } from '../authentication.service'
 import { SocialUser } from "angularx-social-login"
 import * as moment from 'moment'
@@ -16,7 +16,13 @@ export class DomainComponent implements OnInit {
 
     domainName: string
 
-    localExpireDate: string
+    isViewDomain: boolean = false
+
+    localExpire: string = null
+
+    isExpired: boolean = true
+
+    isExpireSoon: boolean = false
 
     payments: PaymentRow[] = []
 
@@ -43,21 +49,25 @@ export class DomainComponent implements OnInit {
             const userEmail = user.email
 
             // Load the domain payments for domain
-            this.serverApiService.getPayments( this.domainName ).subscribe(( domainPayments: DomainPayments ) => {
+            this.serverApiService.getDomainPayments( this.domainName ).subscribe(( domainPayments: DomainPayments ) => {
 
                 // Determine if payments
                 if ( !domainPayments.payments || ( domainPayments.payments.length === 0 ) ) {
-                    this.localExpireDate = null
-                    this.payments = null
-                    this.sortedPayments = []
+                    this.isViewDomain = false
                     return
                 }
 
-                const LOCAL_DATE_FORMAT = 'D MMM YYYY'
+                // View the domain
+                this.isViewDomain = true
                 const expireMoment = parseDate( domainPayments.expiresDate )
-                this.localExpireDate = expireMoment.format( LOCAL_DATE_FORMAT )
+                this.localExpire = expireMoment.fromNow()
+
+                // Determine how long ago expired
+                this.isExpired = isExpired( expireMoment )
+                this.isExpireSoon = isExpireSoon( expireMoment )
 
                 // Load the payments
+                const LOCAL_DATE_FORMAT = 'D MMM YYYY'
                 this.payments = []
                 let startDate: string = null
                 for ( let payment of domainPayments.payments ) {
@@ -102,7 +112,6 @@ export class DomainComponent implements OnInit {
                 if ( this.sortedPayments.length > 0 ) {
                     this.sortedPayments[0].isSubscriptionCompletion = true
                 }
-
 
             }, ( error: any ) => {
                 console.log( 'TODO error: ', error )

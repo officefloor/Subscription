@@ -5,7 +5,7 @@
 		"ng": "ng",
 		"lint": "ng lint",
 		"test": "ng test",
-		"mock-server": "json-server --watch --middlewares mock-json-middleware.js --port 8080 mock-json-server.js",
+		"mock-server": "json-server --watch --routes mock-json-routes.json --middlewares mock-json-middleware.js --port 8080 mock-json-server.js",
 		"start": "ng serve --open",
 		"e2e": "ng e2e",
 		"dist-test": "ng build && cd ../server && mvn -DskipTests prepare-package",

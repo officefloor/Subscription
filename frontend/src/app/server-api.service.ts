@@ -45,13 +45,21 @@ export class ServerApiService {
         return this.http.get<Domain[]>( `${this.serverUrl}/domains` )
     }
 
-    public getPayments( domainName: string ): Observable<DomainPayments> {
-        return this.http.get<DomainPayments>( `${this.serverUrl}/payments/${domainName}` )
+    public getDomainPayments( domainName: string ): Observable<DomainPayments> {
+        return this.http.get<DomainPayments>( `${this.serverUrl}/payments/domain/${domainName}` )
     }
 }
 
 export function parseDate( value: string ): moment.Moment {
     return moment( value, 'ddd, D MMM YYYY H:mm:ss [GMT]' )
+}
+
+export function isExpired( date: moment.Moment ): boolean {
+    return moment().isAfter( date )
+}
+
+export function isExpireSoon( date: moment.Moment ): boolean {
+    return moment().add( 1, 'month' ).isAfter( date )
 }
 
 export interface AuthenticateResponse {

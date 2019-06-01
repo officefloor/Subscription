@@ -1,7 +1,7 @@
 import { Component, OnInit } from '@angular/core'
 import { AuthenticationService } from '../authentication.service'
 import { SocialUser } from "angularx-social-login"
-import { ServerApiService, parseDate, Domain } from '../server-api.service'
+import { ServerApiService, parseDate, isExpired, isExpireSoon, Domain } from '../server-api.service'
 import * as moment from 'moment'
 import { Sort } from '@angular/material/sort'
 
@@ -33,28 +33,19 @@ export class MainComponent implements OnInit {
             // Load the domains
             this.serverApiService.getDomains().subscribe(( domains: Domain[] ) => {
 
-                // Obtain current time
-                const now: moment.Moment = moment()
-                const expireSoon: moment.Moment = moment().add( 1, 'month' )
-
                 // Load the new domains
                 this.domains = []
                 for ( let domain of domains ) {
                     const expireMoment = parseDate( domain.expiresDate )
-                    const localExpires = expireMoment.format( "D MMM YYYY" )
-                    const sortExpires = expireMoment.unix()
-                    const timeAgo = expireMoment.fromNow()
-                    const isExpired = now.isAfter( expireMoment )
-                    const isExpireSoon = expireSoon.isAfter( expireMoment )
 
                     // Create the domain row
                     const domainRow: DomainRow = {
                         ...domain,
-                        localExpires: localExpires,
-                        sortExpires: sortExpires,
-                        timeAgo: timeAgo,
-                        isExpired: isExpired,
-                        isExpireSoon: isExpireSoon,
+                        localExpires: expireMoment.format( "D MMM YYYY" ),
+                        sortExpires: expireMoment.unix(),
+                        timeAgo: expireMoment.fromNow(),
+                        isExpired: isExpired( expireMoment ),
+                        isExpireSoon: isExpireSoon( expireMoment ),
                     }
                     this.domains.push( domainRow )
                 }

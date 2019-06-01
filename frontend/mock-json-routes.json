@@ -1,0 +1,4 @@
+{
+	"/configuration/default": "/defaultConfiguration",
+	"/payments/domain/:domainName": "/domainPayments/:domainName"
+}
