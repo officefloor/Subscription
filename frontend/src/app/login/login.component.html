@@ -1,7 +1,7 @@
 <span [hidden]="user">
 	<button (click)="signIn()" class="btn btn-primary">Sign in</button>
 </span>
-<span [hidden]="!user"> <img
+<span [hidden]="!user || !isAuthenticationRequired"> <img
 	src="{{ user ? user.photoUrl : '' }}">
 	<button (click)="signOut()" class="btn">Sign out</button>
 </span>

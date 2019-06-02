@@ -1,7 +1,6 @@
 <div class="container">
 	<div class="row justify-content-end">
-		<form [class.was-validated]="isSubmitRegisterDomain"
-			[formGroup]="registerDomainForm" (submit)="registerDomain()">
+		<form [formGroup]="registerDomainForm" (submit)="registerDomain()">
 			<div class="form-row">
 				<label class="sr-only" for="domainName">Domain Name</label>
 				<div class="input-group">
@@ -9,8 +8,9 @@
 						<div class="input-group-text">Domain</div>
 					</div>
 					<input type="text" class="form-control" id="domainName"
-						placeholder="domain.com" formControlName="domainName"
-						[class.is-invalid]="registerDomainNameError" />
+						placeholder="e.g. domain.com" formControlName="domainName"
+						[class.is-invalid]="registerDomainNameError"
+						[class.is-valid]="isValidDomainName" />
 					<div class="input-group-append">
 						<button type="submit" class="btn btn-primary">Register</button>
 					</div>

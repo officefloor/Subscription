@@ -2,6 +2,8 @@ import { Component, OnInit } from '@angular/core';
 import { SocialUser } from "angularx-social-login";
 import { AuthenticationService } from '../authentication.service';
 import { GoogleLoginProvider } from "angularx-social-login";
+import { InitialiseService } from '../initialise.service'
+import { Initialisation } from '../server-api.service'
 
 @Component( {
     selector: 'app-login',
@@ -10,13 +12,21 @@ import { GoogleLoginProvider } from "angularx-social-login";
 } )
 export class LoginComponent implements OnInit {
 
-    user: SocialUser;
+    isAuthenticationRequired: boolean = true
 
-    constructor( private authenticationService: AuthenticationService ) {
-        this.authenticationService.authenticationState().subscribe(( user: SocialUser ) => this.user = user );
-    }
+    user: SocialUser
+
+    constructor(
+        private initialiseService: InitialiseService,
+        private authenticationService: AuthenticationService
+    ) { }
 
     ngOnInit() {
+        // Determine if show login
+        this.initialiseService.intialisation().then(( initialisation: Initialisation ) => this.isAuthenticationRequired = initialisation.isAuthenticationRequired )
+
+        // Monitor user
+        this.authenticationService.authenticationState().subscribe(( user: SocialUser ) => this.user = user );
     }
 
     signIn(): void {

@@ -5,6 +5,7 @@ import { ServerApiService, parseDate, isExpired, isExpireSoon, Domain } from '..
 import * as moment from 'moment'
 import { Sort } from '@angular/material/sort'
 import { FormGroup, FormControl, ValidationErrors } from '@angular/forms'
+import { Router } from '@angular/router'
 
 @Component( {
     selector: 'app-main',
@@ -17,20 +18,21 @@ export class MainComponent implements OnInit {
 
     sortedDomains: DomainRow[] = []
 
-    isSubmitRegisterDomain: boolean = false
+    isValidDomainName: boolean = false
 
-    registerDomainNameError: string = "ERROR"
+    registerDomainNameError: string = null
 
     registerDomainForm = new FormGroup( {
-        domainName: new FormControl( '', ( value ) => {
-            console.log( 'TODO REMOVE validate', value )
-            return { key: "error" }
+        domainName: new FormControl( '', ( formControl ) => {
+            this.registerDomainNameError = this.checkDomainName( formControl.value )
+            return {}
         } )
     } )
 
     constructor(
         private authentication: AuthenticationService,
-        private serverApiService: ServerApiService
+        private serverApiService: ServerApiService,
+        private router: Router,
     ) { }
 
     ngOnInit() {
@@ -92,14 +94,39 @@ export class MainComponent implements OnInit {
         return ( a < b ? -1 : 1 ) * ( isAsc ? 1 : -1 )
     }
 
+    checkDomainName( name: string ): string {
+        this.isValidDomainName = false
+        name = name.trim()
+        if ( name.length == 0 ) {
+            return null // only invalid on submitting
+        } else if ( name.match( /\s/ ) ) {
+            return 'May not contain spaces'
+        } else if ( name.startsWith( '.' ) ) {
+            return "May not start with '.'"
+        } else if ( name.endsWith( '.' ) ) {
+            return "May not end with '.'"
+        } else if ( !name.includes( '.' ) ) {
+            return "Must contain at least one '.' (e.g. domain.com)"
+        }
+        this.isValidDomainName = true
+        return null // valid domain name            
+    }
+
     registerDomain() {
-        this.isSubmitRegisterDomain = true
         const domainName: string = this.registerDomainForm.value.domainName
-        if ( !domainName ) {
+
+        // Ensure valid domain name
+        if ( domainName.trim().length === 0 ) {
+            this.registerDomainNameError = "Must provide domain name"
+            return
+        }
+        this.registerDomainNameError = this.checkDomainName( domainName )
+        if ( this.registerDomainNameError ) {
             return
         }
 
-        console.log( "TODO register domain", this.registerDomainForm.value )
+        // Route to domain
+        this.router.navigate( ["domain", domainName] )
     }
 }
 

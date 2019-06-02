@@ -29,10 +29,7 @@ export class AuthenticationService {
             if ( !initialisation.isAuthenticationRequired ) {
                 this.authService = null
                 this.ready.next( true )
-                const guest: SocialUser = new SocialUser()
-                guest.name = "Guest"
-                guest.photoUrl = "http://officefloor.net/images/OfficeFloorLogo.png"
-                this.state.next( guest )
+                this.state.next( new SocialUser() )
                 return
             }
 
