@@ -27,7 +27,7 @@ export class DomainComponent implements OnInit {
     payments: PaymentRow[] = []
 
     sortedPayments: PaymentRow[] = []
-
+    
     constructor(
         private authentication: AuthenticationService,
         private route: ActivatedRoute,

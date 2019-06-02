@@ -1,2 +1,23 @@
-<p>{{domainName}}</p>
-<div id="paypal-button"></div>
+<div class="row justify-content-center">
+	<div class="form">
+		<div class="form-row">
+			<h3>
+				Subscribe <span class="badge badge-secondary">{{domainName}}</span>
+			</h3>
+		</div>
+		<br [hidden]="!isShowReset" />
+		<div class="form-row" [hidden]="!isShowReset">
+			<div class="form-check">
+				<input type="checkbox" id="resetSubscription"
+					class="form-check-input" /> <label for="resetSubscrpition"
+					class="form-check-label">Restart subscription from today
+					(additional fee)</label>
+			</div>
+		</div>
+		<br />
+		<div class="form-row">Purchase with:</div>
+		<div class="form-row justify-content-end">
+			<div id="paypal-button"></div>
+		</div>
+	</div>
+</div>

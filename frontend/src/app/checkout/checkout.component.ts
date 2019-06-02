@@ -1,4 +1,4 @@
-import { Component, OnChanges, SimpleChanges, Input } from '@angular/core'
+import { Component, OnInit, OnChanges, SimpleChanges, Input } from '@angular/core'
 import { InitialiseService } from '../initialise.service'
 import { Initialisation } from '../server-api.service'
 
@@ -10,9 +10,11 @@ declare let paypal: any;
     templateUrl: './checkout.component.html',
     styleUrls: ['./checkout.component.css']
 } )
-export class CheckoutComponent implements OnChanges {
+export class CheckoutComponent implements OnInit, OnChanges {
 
     @Input( 'domain' ) domainName: String
+
+    @Input() isShowReset: boolean = false
 
     static scriptLoadPromises = {}
 
@@ -41,15 +43,8 @@ export class CheckoutComponent implements OnChanges {
         return scriptLoadPromise
     }
 
-    ngOnChanges( changes: SimpleChanges ) {
-
-        // Ensure have domain
-        if ( !this.domainName ) {
-            return
-        }
-
+    ngOnInit() {
         // Load PayPal for domain
-        const subscriptionDomainName = this.domainName
         this.initialiseService.intialisation().then(( initialisation: Initialisation ) => {
 
             // Load the configuration
@@ -57,11 +52,12 @@ export class CheckoutComponent implements OnChanges {
             const paypalCurrency = initialisation.paypalCurrency
 
             // Load Paypal
+            const component = this
             this.loadExternalScript( `https://www.paypal.com/sdk/js?client-id=${paypalClientId}&currency=${paypalCurrency}` ).then(() => {
                 paypal.Buttons( {
                     createOrder: function( data, actions ) {
                         // Set up the transaction
-                        console.log( 'PayPal create order for domain', subscriptionDomainName )
+                        console.log( 'PayPal create order for domain', component.domainName )
                         return actions.order.create( {
                             purchase_units: [{
                                 amount: {
