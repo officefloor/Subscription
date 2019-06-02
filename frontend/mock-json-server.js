@@ -19,12 +19,13 @@ module.exports = () => {
 	
 	// Ensure all configuration available
 	const CONFIGURATION_TEMPLATE = {
+		isAuthenticationRequired: false,
 		googleClientId: '<Client ID for Google authentication>',
 		paypalClientId: '<Client ID for PayPal>',
 		paypalCurrency: '<PayPal currency e.g. AUD>',
 	}
 	for (let item in CONFIGURATION_TEMPLATE) {
-		if (!initialiseJson[item]) {
+		if (typeof(initialiseJson[item]) === 'undefined') {
 			throw new Error('Initialise configuration file not configuring property "' + item + '"\n\nFile ' + initFileName + '\n\nExpected configuration:\n' + JSON.stringify(CONFIGURATION_TEMPLATE, null, 2))
 		}
 	}

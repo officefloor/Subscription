@@ -2,7 +2,8 @@ import { Configuration } from '../app/server-api.service'
 import { Observable, BehaviorSubject } from 'rxjs';
 
 export const environment = {
-    production: true
+    production: true,
+    serverUrl: ''
 }
 
 // No defaults for production

@@ -4,6 +4,7 @@ import { SocialUser } from "angularx-social-login"
 import { ServerApiService, parseDate, isExpired, isExpireSoon, Domain } from '../server-api.service'
 import * as moment from 'moment'
 import { Sort } from '@angular/material/sort'
+import { FormGroup, FormControl, ValidationErrors } from '@angular/forms'
 
 @Component( {
     selector: 'app-main',
@@ -16,11 +17,21 @@ export class MainComponent implements OnInit {
 
     sortedDomains: DomainRow[] = []
 
+    isSubmitRegisterDomain: boolean = false
+
+    registerDomainNameError: string = "ERROR"
+
+    registerDomainForm = new FormGroup( {
+        domainName: new FormControl( '', ( value ) => {
+            console.log( 'TODO REMOVE validate', value )
+            return { key: "error" }
+        } )
+    } )
+
     constructor(
         private authentication: AuthenticationService,
         private serverApiService: ServerApiService
-    ) {
-    }
+    ) { }
 
     ngOnInit() {
         this.authentication.authenticationState().subscribe(( user: SocialUser ) => {
@@ -79,6 +90,16 @@ export class MainComponent implements OnInit {
 
     compare( a: number | string, b: number | string, isAsc: boolean ) {
         return ( a < b ? -1 : 1 ) * ( isAsc ? 1 : -1 )
+    }
+
+    registerDomain() {
+        this.isSubmitRegisterDomain = true
+        const domainName: string = this.registerDomainForm.value.domainName
+        if ( !domainName ) {
+            return
+        }
+
+        console.log( "TODO register domain", this.registerDomainForm.value )
     }
 }
 

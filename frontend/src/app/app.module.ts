@@ -18,6 +18,9 @@ import { DomainComponent } from './domain/domain.component'
 import { InitialiseService } from './initialise.service'
 import { Initialisation } from './server-api.service'
 
+declare let Promise
+declare let Error
+
 /**
  * Override initialise to enable loading configuration form server.
  */
@@ -25,6 +28,14 @@ function setupLoginProvider( loginProvider: any, initialiseService: InitialiseSe
     const initialise = loginProvider.initialize
     loginProvider.initialize = () => new Promise(( resolve, reject ) => {
         initialiseService.intialisation().then(( initialisation: Initialisation ) => {
+
+            // Determine if authentication required
+            if ( !initialisation.isAuthenticationRequired ) {
+                reject( new Error( "No authentication required" ) )
+                return
+            }
+
+            // Authentication required (so setup)
             loginProvider.clientId = initialisation.googleClientId
             initialise.call( loginProvider ).then(( result ) => resolve( result ) ).catch( reject )
         } ).catch( reject )
@@ -33,12 +44,10 @@ function setupLoginProvider( loginProvider: any, initialiseService: InitialiseSe
 }
 
 export function provideAuthServiceConfig( initialiseService: InitialiseService ) {
-    return new AuthServiceConfig( [
-        {
-            id: GoogleLoginProvider.PROVIDER_ID,
-            provider: setupLoginProvider( new GoogleLoginProvider( "TO BE SETUP" ), initialiseService )
-        }
-    ] )
+    return new AuthServiceConfig( [{
+        id: GoogleLoginProvider.PROVIDER_ID,
+        provider: setupLoginProvider( new GoogleLoginProvider( "TO BE SETUP" ), initialiseService )
+    }] )
 }
 
 @NgModule( {

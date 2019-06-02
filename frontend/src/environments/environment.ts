@@ -8,7 +8,8 @@ import 'zone.js/dist/zone-error' // easier development debugging
 // The list of file replacements can be found in `angular.json`.
 
 export const environment = {
-    production: false
+    production: false,
+    serverUrl: window.location.href.startsWith( 'http://localhost:4200' ) ? 'http://localhost:8080' : ''
 }
 
 // Load default configuration for development

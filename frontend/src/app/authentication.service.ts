@@ -1,9 +1,10 @@
-import { Injectable } from '@angular/core';
-import { AuthService, SocialUser } from "angularx-social-login";
-import { GoogleLoginProvider } from "angularx-social-login";
-import { ServerApiService, AuthenticateResponse, AccessTokenResponse } from './server-api.service';
-import { Observable, BehaviorSubject, of } from 'rxjs';
-import { map } from 'rxjs/operators';
+import { Injectable } from '@angular/core'
+import { AuthService, SocialUser } from "angularx-social-login"
+import { GoogleLoginProvider } from "angularx-social-login"
+import { ServerApiService, AuthenticateResponse, AccessTokenResponse, Initialisation } from './server-api.service'
+import { Observable, BehaviorSubject, of } from 'rxjs'
+import { map } from 'rxjs/operators'
+import { InitialiseService } from './initialise.service'
 
 @Injectable( {
     providedIn: 'root'
@@ -17,43 +18,59 @@ export class AuthenticationService {
     private ready: BehaviorSubject<boolean> = new BehaviorSubject<boolean>( false );
 
     constructor(
+        private initialiseService: InitialiseService,
         private authService: AuthService,
         private serverApiService: ServerApiService
     ) {
-        // Determine when ready
-        this.authService.readyState.subscribe(( ready ) => {
-            if ( ready[0] && ( ready[0] == 'GOOGLE' ) ) {
+        // Load once initialised
+        this.initialiseService.intialisation().then(( initialisation: Initialisation ) => {
+
+            // Determine if initialisation required
+            if ( !initialisation.isAuthenticationRequired ) {
+                this.authService = null
                 this.ready.next( true )
+                const guest: SocialUser = new SocialUser()
+                guest.name = "Guest"
+                guest.photoUrl = "http://officefloor.net/images/OfficeFloorLogo.png"
+                this.state.next( guest )
+                return
             }
-        } )
 
-        // Initiate login
-        this.authService.authState.subscribe(( user: SocialUser ) => {
+            // Determine when ready
+            this.authService.readyState.subscribe(( ready ) => {
+                if ( ready[0] && ( ready[0] == 'GOOGLE' ) ) {
+                    this.ready.next( true )
+                }
+            } )
 
-            // Notify auth token
-            if ( user != null ) {
+            // Initiate login
+            this.authService.authState.subscribe(( user: SocialUser ) => {
 
-                // Inform server of login
-                this.serverApiService.authenticate( user.idToken ).subscribe(( response: AuthenticateResponse ) => {
+                // Notify auth token
+                if ( user != null ) {
 
-                    // Capture the tokens
-                    const refreshToken: string = response.refreshToken
-                    const accessToken: string = response.accessToken
+                    // Inform server of login
+                    this.serverApiService.authenticate( user.idToken ).subscribe(( response: AuthenticateResponse ) => {
 
-                    // Store the tokens
-                    localStorage.setItem( 'refreshToken', refreshToken )
-                    localStorage.setItem( 'accessToken', accessToken )
+                        // Capture the tokens
+                        const refreshToken: string = response.refreshToken
+                        const accessToken: string = response.accessToken
 
-                    // Notify logged in
-                    this.state.next( user )
-                }, ( error: any ) => {
-                    console.log( 'TODO handle login error: ' + error )
-                } )
+                        // Store the tokens
+                        localStorage.setItem( 'refreshToken', refreshToken )
+                        localStorage.setItem( 'accessToken', accessToken )
 
-            } else {
-                // Notify of logout
-                this.state.next( null )
-            }
+                        // Notify logged in
+                        this.state.next( user )
+                    }, ( error: any ) => {
+                        console.log( 'TODO handle login error: ' + error )
+                    } )
+
+                } else {
+                    // Notify of logout
+                    this.state.next( null )
+                }
+            } )
         } )
     }
 

@@ -1,9 +1,9 @@
-import { Component, OnInit } from '@angular/core';
-import { FormGroup, FormControl } from '@angular/forms';
-import { ServerApiService, Configuration } from '../server-api.service';
-import { getDefaultConfiguration } from '../../environments/environment';
-import { SocialUser } from "angularx-social-login";
-import { AuthenticationService } from '../authentication.service';
+import { Component, OnInit } from '@angular/core'
+import { FormGroup, FormControl } from '@angular/forms'
+import { ServerApiService, Configuration } from '../server-api.service'
+import { getDefaultConfiguration } from '../../environments/environment'
+import { SocialUser } from "angularx-social-login"
+import { AuthenticationService } from '../authentication.service'
 
 declare let JSON: any
 

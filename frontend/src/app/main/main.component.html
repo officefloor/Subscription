@@ -1,27 +1,50 @@
 <div class="container">
-	<table matSort (matSortChange)="sortDomains($event)"
-		class="table table-striped table-borderless table-hover">
-		<thead class="table-primary">
-			<th scope="col" mat-sort-header="domain">Domain</th>
-			<th scope="col" mat-sort-header="expireDate">Expire Date</th>
-			<th scope="col" mat-sort-header="expire">Expire</th>
-			<th></th>
-		</thead>
-		<tbody>
-			<tr *ngFor="let domain of sortedDomains">
-				<td>{{domain.domainName}}</td>
-				<td [class.table-danger]="domain.isExpired"
-					[class.table-success]="!domain.isExpired">{{domain.localExpires}}</td>
-				<td [class.table-danger]="domain.isExpired"
-					[class.table-warning]="domain.isExpireSoon">{{domain.timeAgo}}</td>
-				<td [class.table-danger]="domain.isExpired"
-					[class.table-warning]="domain.isExpireSoon"><a
-					[routerLink]="['/domain/', domain.domainName]" class="btn"
-					[class.btn-danger]="domain.isExpired"
-					[class.btn-warning]="domain.isExpireSoon && !domain.isExpired"
-					[class.btn-primary]="!domain.isExpireSoon && !domain.isExpired">{{domain.isExpired
-						? 'Renew' : 'Extend'}}</a></td>
-			</tr>
-		</tbody>
-	</table>
+	<div class="row justify-content-end">
+		<form [class.was-validated]="isSubmitRegisterDomain"
+			[formGroup]="registerDomainForm" (submit)="registerDomain()">
+			<div class="form-row">
+				<label class="sr-only" for="domainName">Domain Name</label>
+				<div class="input-group">
+					<div class="input-group-prepend">
+						<div class="input-group-text">Domain</div>
+					</div>
+					<input type="text" class="form-control" id="domainName"
+						placeholder="domain.com" formControlName="domainName"
+						[class.is-invalid]="registerDomainNameError" />
+					<div class="input-group-append">
+						<button type="submit" class="btn btn-primary">Register</button>
+					</div>
+					<div class="invalid-feedback">{{registerDomainNameError}}</div>
+				</div>
+			</div>
+		</form>
+	</div>
+	<br />
+	<div class="row">
+		<table matSort (matSortChange)="sortDomains($event)"
+			class="table table-striped table-borderless table-hover">
+			<thead class="table-primary">
+				<th scope="col" mat-sort-header="domain">Domain</th>
+				<th scope="col" mat-sort-header="expireDate">Expire Date</th>
+				<th scope="col" mat-sort-header="expire">Expire</th>
+				<th></th>
+			</thead>
+			<tbody>
+				<tr *ngFor="let domain of sortedDomains">
+					<td>{{domain.domainName}}</td>
+					<td [class.table-danger]="domain.isExpired"
+						[class.table-success]="!domain.isExpired">{{domain.localExpires}}</td>
+					<td [class.table-danger]="domain.isExpired"
+						[class.table-warning]="domain.isExpireSoon">{{domain.timeAgo}}</td>
+					<td [class.table-danger]="domain.isExpired"
+						[class.table-warning]="domain.isExpireSoon"><a
+						[routerLink]="['/domain/', domain.domainName]" class="btn"
+						[class.btn-danger]="domain.isExpired"
+						[class.btn-warning]="domain.isExpireSoon && !domain.isExpired"
+						[class.btn-primary]="!domain.isExpireSoon && !domain.isExpired">{{domain.isExpired
+							? 'Renew' : 'Extend'}}</a></td>
+				</tr>
+			</tbody>
+		</table>
+	</div>
 </div>
