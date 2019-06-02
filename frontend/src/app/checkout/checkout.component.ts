@@ -16,6 +16,8 @@ export class CheckoutComponent implements OnInit, OnChanges {
 
     @Input() isShowReset: boolean = false
 
+    isResetSubscription: boolean = false
+
     static scriptLoadPromises = {}
 
     constructor(
@@ -56,8 +58,11 @@ export class CheckoutComponent implements OnInit, OnChanges {
             this.loadExternalScript( `https://www.paypal.com/sdk/js?client-id=${paypalClientId}&currency=${paypalCurrency}` ).then(() => {
                 paypal.Buttons( {
                     createOrder: function( data, actions ) {
+
+                        // Indicate order
+                        console.log( 'PayPal create order for domain', component.domainName, 'with reset', component.isResetSubscription )
+
                         // Set up the transaction
-                        console.log( 'PayPal create order for domain', component.domainName )
                         return actions.order.create( {
                             purchase_units: [{
                                 amount: {

@@ -9,9 +9,10 @@
 		<div class="form-row" [hidden]="!isShowReset">
 			<div class="form-check">
 				<input type="checkbox" id="resetSubscription"
-					class="form-check-input" /> <label for="resetSubscrpition"
-					class="form-check-label">Restart subscription from today
-					(additional fee)</label>
+					class="form-check-input" [checked]="isResetSubscription"
+					(change)="isResetSubscription = !isResetSubscription" /> <label
+					for="resetSubscrpition" class="form-check-label">Restart
+					subscription from today (additional fee)</label>
 			</div>
 		</div>
 		<br />
