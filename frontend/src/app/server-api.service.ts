@@ -29,6 +29,10 @@ export class ServerApiService {
         } )
     }
 
+    public getInitialisation(): Observable<Initialisation> {
+        return this.http.get<Initialisation>( `${this.serverUrl}/initialise` )
+    }
+
     public getConfiguration(): Observable<Configuration> {
         return this.http.get<Configuration>( `${this.serverUrl}/configuration` )
     }
@@ -69,6 +73,11 @@ export interface AuthenticateResponse {
 
 export interface AccessTokenResponse {
     accessToken: string
+}
+
+export interface Initialisation {
+    googleClientId: string
+    paypalClientId: string
 }
 
 export interface Configuration {

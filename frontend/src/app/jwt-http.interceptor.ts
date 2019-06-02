@@ -33,7 +33,7 @@ export class JwtHttpInterceptor implements HttpInterceptor {
         }
 
         // Undertake the request
-        return next.handle( jwtRequest( req, this.authenticationService.getAccessToken() ) ).pipe(
+        return next.handle( jwtRequest( req, this.authenticationService ? this.authenticationService.getAccessToken() : null ) ).pipe(
 
             // Handle failures
             catchError(( error ) => {

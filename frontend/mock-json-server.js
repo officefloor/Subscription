@@ -75,6 +75,11 @@ module.exports = () => {
 	
 	// Create data template
 	const data = {
+		initialise: {
+			// TODO load from user home directory
+			googleClientId: '443132781504-19vekci7r4t2qvqpbg9q1s32kjnp1c7t.apps.googleusercontent.com',
+			paypalClientId: 'AZVitvHU3nWyNt8rTdndNq8MP_CDd-xShU6iO1kMPYrN8ZfGj0d9hAk29MrXZD0WpaAFPO0B1DP4rvLL'
+		},
 		configuration: {},
 		defaultConfiguration: {
 			paypalEnvironment: 'sandbox',

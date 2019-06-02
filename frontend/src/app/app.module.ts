@@ -1,11 +1,11 @@
 import { BrowserModule } from '@angular/platform-browser'
-import { NgModule } from '@angular/core'
+import { NgModule, APP_INITIALIZER } from '@angular/core'
 import { HttpClientModule, HTTP_INTERCEPTORS } from '@angular/common/http'
 import { JwtHttpInterceptor } from './jwt-http.interceptor'
 import { AppRoutingModule } from './app-routing.module'
 import { AppComponent } from './app.component'
 import { SocialLoginModule, AuthServiceConfig } from "angularx-social-login"
-import { GoogleLoginProvider, FacebookLoginProvider, LinkedInLoginProvider } from "angularx-social-login"
+import { GoogleLoginProvider } from "angularx-social-login"
 import { LoginComponent } from './login/login.component'
 import { CheckoutComponent } from './checkout/checkout.component'
 import { ConfigureComponent } from './configure/configure.component'
@@ -15,16 +15,30 @@ import { ReactiveFormsModule } from '@angular/forms'
 import { BrowserAnimationsModule } from '@angular/platform-browser/animations'
 import { MatSortModule } from '@angular/material';
 import { DomainComponent } from './domain/domain.component'
+import { InitialiseService } from './initialise.service'
+import { Initialisation } from './server-api.service'
 
-let config = new AuthServiceConfig( [
-    {
-        id: GoogleLoginProvider.PROVIDER_ID,
-        provider: new GoogleLoginProvider( "443132781504-19vekci7r4t2qvqpbg9q1s32kjnp1c7t.apps.googleusercontent.com" )
-    }
-] );
+/**
+ * Override initialise to enable loading configuration form server.
+ */
+function setupLoginProvider( loginProvider: any, initialiseService: InitialiseService ) {
+    const initialise = loginProvider.initialize
+    loginProvider.initialize = () => new Promise(( resolve, reject ) => {
+        initialiseService.intialisation().then(( initialisation: Initialisation ) => {
+            loginProvider.clientId = initialisation.googleClientId
+            initialise.call( loginProvider ).then(( result ) => resolve( result ) ).catch( reject )
+        } ).catch( reject )
+    } )
+    return loginProvider
+}
 
-export function provideConfig() {
-    return config;
+export function provideAuthServiceConfig( initialiseService: InitialiseService ) {
+    return new AuthServiceConfig( [
+        {
+            id: GoogleLoginProvider.PROVIDER_ID,
+            provider: setupLoginProvider( new GoogleLoginProvider( "TO BE SETUP" ), initialiseService )
+        }
+    ] )
 }
 
 @NgModule( {
@@ -48,7 +62,8 @@ export function provideConfig() {
     ],
     providers: [{
         provide: AuthServiceConfig,
-        useFactory: provideConfig
+        useFactory: provideAuthServiceConfig,
+        deps: [InitialiseService]
     }, {
         provide: HTTP_INTERCEPTORS,
         useClass: JwtHttpInterceptor,
