@@ -78,6 +78,7 @@ export interface AccessTokenResponse {
 export interface Initialisation {
     googleClientId: string
     paypalClientId: string
+    paypalCurrency: string
 }
 
 export interface Configuration {

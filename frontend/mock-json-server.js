@@ -4,6 +4,31 @@ const moment = require('moment')
 
 module.exports = () => {
 	
+	// Load subscription initialisation
+	const initFileName = os.homedir() + '/subscription.init'
+	if (!fs.existsSync(initFileName)) {
+		throw new Error('Must provide initialise configuration file ' + initFileName)
+	}
+	let initialiseJson
+	try {
+		const initFileContent = fs.readFileSync(initFileName, 'utf8')
+		initialiseJson = JSON.parse(initFileContent)
+	} catch (error) {
+		throw new Error('Failed to parse JSON from initialise configuration file ' + initFileName + " (" + error.message + ")")
+	}
+	
+	// Ensure all configuration available
+	const CONFIGURATION_TEMPLATE = {
+		googleClientId: '<Client ID for Google authentication>',
+		paypalClientId: '<Client ID for PayPal>',
+		paypalCurrency: '<PayPal currency e.g. AUD>',
+	}
+	for (let item in CONFIGURATION_TEMPLATE) {
+		if (!initialiseJson[item]) {
+			throw new Error('Initialise configuration file not configuring property "' + item + '"\n\nFile ' + initFileName + '\n\nExpected configuration:\n' + JSON.stringify(CONFIGURATION_TEMPLATE, null, 2))
+		}
+	}
+	
 	// Default date format
 	const DATE_FORMAT = 'ddd, D MMM YYYY H:mm:ss [GMT]'
 	
@@ -75,16 +100,13 @@ module.exports = () => {
 	
 	// Create data template
 	const data = {
-		initialise: {
-			// TODO load from user home directory
-			googleClientId: '443132781504-19vekci7r4t2qvqpbg9q1s32kjnp1c7t.apps.googleusercontent.com',
-			paypalClientId: 'AZVitvHU3nWyNt8rTdndNq8MP_CDd-xShU6iO1kMPYrN8ZfGj0d9hAk29MrXZD0WpaAFPO0B1DP4rvLL'
-		},
+		initialise: initialiseJson,
 		configuration: {},
 		defaultConfiguration: {
 			paypalEnvironment: 'sandbox',
 			paypalClientId: 'DEFAULT_CLIENT_ID',
-			paypalClientSecret: 'DEFAULT_CLIENT_SECRET'
+			paypalClientSecret: 'DEFAULT_CLIENT_SECRET',
+			paypalCurrency: 'AUD',
 		},
 		domains: [{
 			domainName: 'sagenschneider.net',

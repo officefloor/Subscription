@@ -1,55 +1,71 @@
-import { Component, OnChanges, SimpleChanges, AfterViewInit, Input } from '@angular/core'
+import { Component, OnChanges, SimpleChanges, Input } from '@angular/core'
 import { InitialiseService } from '../initialise.service'
 import { Initialisation } from '../server-api.service'
 
 // Loaded via PayPal script
 declare let paypal: any;
 
-
 @Component( {
     selector: 'app-checkout',
     templateUrl: './checkout.component.html',
     styleUrls: ['./checkout.component.css']
 } )
-export class CheckoutComponent implements OnChanges, AfterViewInit {
+export class CheckoutComponent implements OnChanges {
 
     @Input( 'domain' ) domainName: String
+
+    static scriptLoadPromises = {}
 
     constructor(
         private initialiseService: InitialiseService
     ) { }
 
-    ngOnChanges( changes: SimpleChanges ) {
-        console.log( 'TODO CHANGE: ', this.domainName )
-    }
-
     private loadExternalScript( scriptUrl: string ) {
-        return new Promise(( resolve, reject ) => {
+
+        // Determine if already loaded
+        let scriptLoadPromise = CheckoutComponent.scriptLoadPromises[scriptUrl]
+        if ( scriptLoadPromise ) {
+            return scriptLoadPromise
+        }
+
+        // Load the script
+        scriptLoadPromise = new Promise(( resolve, reject ) => {
             const scriptElement = document.createElement( 'script' )
             scriptElement.src = scriptUrl
             scriptElement.onload = resolve
             document.body.appendChild( scriptElement )
         } )
+        CheckoutComponent.scriptLoadPromises[scriptUrl] = scriptLoadPromise
+
+        // Return promise on loading script
+        return scriptLoadPromise
     }
 
-    ngAfterViewInit(): void {
+    ngOnChanges( changes: SimpleChanges ) {
+
+        // Ensure have domain
+        if ( !this.domainName ) {
+            return
+        }
+
+        // Load PayPal for domain
+        const subscriptionDomainName = this.domainName
         this.initialiseService.intialisation().then(( initialisation: Initialisation ) => {
 
-
-            // TODO load configuration
-            const CLIENT_ID = initialisation.paypalClientId
-            const ENVIRONMENT = 'sandbox'
-            const CURRENCY = 'AUD'
+            // Load the configuration
+            const paypalClientId = initialisation.paypalClientId
+            const paypalCurrency = initialisation.paypalCurrency
 
             // Load Paypal
-            this.loadExternalScript( `https://www.paypal.com/sdk/js?client-id=${CLIENT_ID}&currency=${CURRENCY}` ).then(() => {
+            this.loadExternalScript( `https://www.paypal.com/sdk/js?client-id=${paypalClientId}&currency=${paypalCurrency}` ).then(() => {
                 paypal.Buttons( {
                     createOrder: function( data, actions ) {
                         // Set up the transaction
+                        console.log( 'PayPal create order for domain', subscriptionDomainName )
                         return actions.order.create( {
                             purchase_units: [{
                                 amount: {
-                                    value: '5.00', currency: CURRENCY
+                                    value: '5.00', currency: paypalCurrency
                                 }
                             }]
                         } );
