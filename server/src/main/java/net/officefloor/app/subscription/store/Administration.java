@@ -40,6 +40,9 @@ public class Administration {
 	private Long id;
 
 	@NonNull
+	private String googleClientId;
+
+	@NonNull
 	private String paypalEnvironment;
 
 	@NonNull
@@ -47,5 +50,8 @@ public class Administration {
 
 	@NonNull
 	private String paypalClientSecret;
+
+	@NonNull
+	private String paypalCurrency;
 
 }

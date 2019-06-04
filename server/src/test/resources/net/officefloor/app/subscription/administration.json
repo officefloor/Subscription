@@ -1,0 +1,7 @@
+{
+	"googleClientId": "MOCK_GOOGLE_CLIENT_ID",
+	"paypalEnvironment": "sandbox",
+	"paypalClientId": "MOCK_PAYPAL_CLIENT_ID",
+	"paypalClientSecret": "MOCK_PAYPAL_CLIENT_SECRET",
+	"paypalCurrency": "MOCK_PAYPAL_CURRENCY"
+}

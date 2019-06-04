@@ -1,4 +1,4 @@
-import { Component, OnInit, OnChanges, SimpleChanges, Input } from '@angular/core'
+import { Component, OnInit, SimpleChanges, Input } from '@angular/core'
 import { InitialiseService } from '../initialise.service'
 import { Initialisation } from '../server-api.service'
 
@@ -10,7 +10,7 @@ declare let paypal: any;
     templateUrl: './checkout.component.html',
     styleUrls: ['./checkout.component.css']
 } )
-export class CheckoutComponent implements OnInit, OnChanges {
+export class CheckoutComponent implements OnInit {
 
     @Input( 'domain' ) domainName: String
 

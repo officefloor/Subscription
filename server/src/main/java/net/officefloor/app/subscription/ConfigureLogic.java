@@ -42,9 +42,11 @@ public class ConfigureLogic {
 	@Value
 	@HttpObject
 	public static class Configuration {
+		private String googleClientId;
 		private String paypalEnvironment;
 		private String paypalClientId;
 		private String paypalClientSecret;
+		private String paypalCurrency;
 	}
 
 	@Value
@@ -72,17 +74,20 @@ public class ConfigureLogic {
 			adminUser.setRoles(new String[] { ROLE_ADMIN });
 
 			// Create the administration
-			administration = new Administration(configuration.getPaypalEnvironment(), configuration.getPaypalClientId(),
-					configuration.getPaypalClientSecret());
+			administration = new Administration(configuration.getGoogleClientId(), configuration.getPaypalEnvironment(),
+					configuration.getPaypalClientId(), configuration.getPaypalClientSecret(),
+					configuration.getPaypalCurrency());
 
 			// Store the details
 			objectify.save().entities(adminUser, administration).now();
 
 		} else if (Arrays.asList(user.getRoles()).contains(ROLE_ADMIN)) {
 			// Admin, so allow updating configuration
+			administration.setGoogleClientId(configuration.getGoogleClientId());
 			administration.setPaypalEnvironment(configuration.getPaypalEnvironment());
 			administration.setPaypalClientId(configuration.getPaypalClientId());
 			administration.setPaypalClientSecret(configuration.getPaypalClientSecret());
+			administration.setPaypalCurrency(configuration.getPaypalCurrency());
 			objectify.save().entity(administration).now();
 
 		} else {

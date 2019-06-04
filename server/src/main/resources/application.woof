@@ -1,5 +1,8 @@
 <woof>
   <http-continuations>
+    <http-continuation path="/initialise" secure="false" x="174" y="600">
+      <section name="Initialise" input="getInitialisation"/>
+    </http-continuation>
   </http-continuations>
   <http-inputs>
     <http-input path="{path}" method="OPTIONS" secure="false" x="172" y="92">
@@ -37,6 +40,9 @@
     <section name="Domain" source="net.officefloor.plugin.section.clazz.ClassSectionSource" location="net.officefloor.app.subscription.DomainLogic" x="424" y="353">
       <input name="captureOrder" parameter-type=""/>
       <input name="createOrder" parameter-type=""/>
+    </section>
+    <section name="Initialise" source="net.officefloor.plugin.section.clazz.ClassSectionSource" location="net.officefloor.app.subscription.InitialiseLogic" x="416" y="586">
+      <input name="getInitialisation" parameter-type=""/>
     </section>
     <section name="JwtChallenge" source="net.officefloor.web.jwt.DefaultJwtChallengeSectionSource" location="" x="1035" y="75">
       <input name="EXPIRED_JWT" parameter-type=""/>

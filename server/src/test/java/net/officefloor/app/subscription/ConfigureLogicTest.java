@@ -63,15 +63,18 @@ public class ConfigureLogicTest {
 		// Configure system
 		User user = AuthenticateLogicTest.setupUser(this.objectify, "Daniel");
 		MockHttpResponse response = this.server.send(this.jwt.authorize(user, MockWoofServer.mockRequest("/configure"))
-				.method(HttpMethod.POST).header("content-type", "application/json").entity(mapper
-						.writeValueAsString(new Configuration("sandbox", "MOCK_CLIENT_ID", "MOCK_CLIENT_SECRET"))));
+				.method(HttpMethod.POST).header("content-type", "application/json")
+				.entity(mapper.writeValueAsString(new Configuration("MOCK_GOOGLE_CLIENT_ID", "sandbox",
+						"MOCK_CLIENT_PAYPAL_ID", "MOCK_CLIENT_PAYPAL_SECRET", "MOCK_CURRENCY"))));
 		response.assertResponse(200, mapper.writeValueAsString(new Configured(true)));
 
 		// Ensure configured
 		Administration admin = this.objectify.get(Administration.class);
+		assertEquals("MOCK_GOOGLE_CLIENT_ID", admin.getGoogleClientId());
 		assertEquals("sandbox", admin.getPaypalEnvironment());
-		assertEquals("MOCK_CLIENT_ID", admin.getPaypalClientId());
-		assertEquals("MOCK_CLIENT_SECRET", admin.getPaypalClientSecret());
+		assertEquals("MOCK_CLIENT_PAYPAL_ID", admin.getPaypalClientId());
+		assertEquals("MOCK_CLIENT_PAYPAL_SECRET", admin.getPaypalClientSecret());
+		assertEquals("MOCK_CURRENCY", admin.getPaypalCurrency());
 
 		// User should be flagged as administrator
 		User adminUser = this.objectify.get(User.class, user.getId());
@@ -86,44 +89,53 @@ public class ConfigureLogicTest {
 		User user = AuthenticateLogicTest.setupUser(this.objectify, "Daniel", "admin");
 
 		// Configure administration
-		Administration existing = new Administration("override", "MOCK_OVERRIDE_ID", "MOCK_OVERRIDE_SECRET");
+		Administration existing = new Administration("MOCK_OVERRIDE_GOOGLE_ID", "override", "MOCK_OVERRIDE_PAYPAL_ID",
+				"MOCK_OVERRIDE_PAYPAL_SECRET", "MOCK_OVERRIDE_CURRENCY");
 		this.objectify.store(existing);
 
 		// Configure system
 		MockHttpResponse response = this.server.send(this.jwt.authorize(user, MockWoofServer.mockRequest("/configure"))
-				.method(HttpMethod.POST).header("content-type", "application/json").entity(mapper
-						.writeValueAsString(new Configuration("sandbox", "MOCK_CLIENT_ID", "MOCK_CLIENT_SECRET"))));
+				.method(HttpMethod.POST).header("content-type", "application/json")
+				.entity(mapper.writeValueAsString(new Configuration("MOCK_GOOGLE_CLIENT_ID", "sandbox",
+						"MOCK_CLIENT_PAYPAL_ID", "MOCK_CLIENT_PAYPAL_SECRET", "MOCK_CURRENCY"))));
 		response.assertResponse(200, mapper.writeValueAsString(new Configured(true)));
 
 		// Ensure configured
-		Administration admin = this.objectify.get(Administration.class);
+		Administration admin = this.objectify.consistent(() -> this.objectify.get(Administration.class),
+				(administration) -> "MOCK_GOOGLE_CLIENT_ID".equals(administration.getGoogleClientId()));
 		assertEquals("Should only be one entry", existing.getId(), admin.getId());
+		assertEquals("MOCK_GOOGLE_CLIENT_ID", admin.getGoogleClientId());
 		assertEquals("sandbox", admin.getPaypalEnvironment());
-		assertEquals("MOCK_CLIENT_ID", admin.getPaypalClientId());
-		assertEquals("MOCK_CLIENT_SECRET", admin.getPaypalClientSecret());
+		assertEquals("MOCK_CLIENT_PAYPAL_ID", admin.getPaypalClientId());
+		assertEquals("MOCK_CLIENT_PAYPAL_SECRET", admin.getPaypalClientSecret());
+		assertEquals("MOCK_CURRENCY", admin.getPaypalCurrency());
 	}
 
 	@Test
 	public void onlyAdministratorConfigures() throws Exception {
 
 		// Configure administration
-		Administration administration = new Administration("sandbox", "MOCK_CLIENT_ID", "MOCK_CLIENT_SECRET");
+		Administration administration = new Administration("MOCK_GOOGLE_CLIENT_ID", "sandbox", "MOCK_CLIENT_PAYPAL_ID",
+				"MOCK_CLIENT_PAYPAL_SECRET", "MOCK_CURRENCY");
 		this.objectify.store(administration);
 
 		// Non-admin attempt to configure
 		User user = AuthenticateLogicTest.setupUser(this.objectify, "Daniel");
 		MockHttpResponse response = this.server.send(this.jwt.authorize(user, MockWoofServer.mockRequest("/configure"))
 				.method(HttpMethod.POST).header("content-type", "application/json")
-				.entity(mapper.writeValueAsString(new Configuration("changed", "CHANGE_ID", "CHANGE_SECRET"))));
+				.entity(mapper.writeValueAsString(new Configuration("CHANGE_GOOGLE_ID", "changed", "CHANGE_PAYPAL_ID",
+						"CHANGE_PAYPAL_SECRET", "CHANGE_CURRENCY"))));
 		response.assertResponse(403, JacksonHttpObjectResponderFactory
 				.getEntity(new HttpException(HttpStatus.FORBIDDEN, "Must have 'admin' role"), mapper));
 
 		// Ensure not changed
 		Administration admin = this.objectify.get(Administration.class);
 		assertEquals("Should only be one entry", administration.getId(), admin.getId());
+		assertEquals("MOCK_GOOGLE_CLIENT_ID", admin.getGoogleClientId());
 		assertEquals("sandbox", admin.getPaypalEnvironment());
-		assertEquals("MOCK_CLIENT_ID", admin.getPaypalClientId());
-		assertEquals("MOCK_CLIENT_SECRET", admin.getPaypalClientSecret());
+		assertEquals("MOCK_CLIENT_PAYPAL_ID", admin.getPaypalClientId());
+		assertEquals("MOCK_CLIENT_PAYPAL_SECRET", admin.getPaypalClientSecret());
+		assertEquals("MOCK_CURRENCY", admin.getPaypalCurrency());
 	}
 
 }
