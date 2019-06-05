@@ -92,10 +92,6 @@ export class ServerApiService {
         return this.http.get<Configuration>( `${this.serverUrl}/configuration` )
     }
 
-    public getDefaultConfiguration(): Observable<Configuration> {
-        return this.http.get<Configuration>( `${this.serverUrl}/configuration/default` )
-    }
-
     public updateConfiguration( configuration: Configuration ): Observable<void> {
         return this.http.post<void>( `${this.serverUrl}/configuration`, configuration )
     }

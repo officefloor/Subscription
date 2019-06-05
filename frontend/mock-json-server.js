@@ -102,13 +102,7 @@ module.exports = () => {
 	// Create data template
 	const data = {
 		initialise: initialiseJson,
-		configuration: {},
-		defaultConfiguration: {
-			paypalEnvironment: 'sandbox',
-			paypalClientId: 'DEFAULT_CLIENT_ID',
-			paypalClientSecret: 'DEFAULT_CLIENT_SECRET',
-			paypalCurrency: 'AUD',
-		},
+		configuration: initialiseJson,
 		domains: [{
 			domainName: 'sagenschneider.net',
 			expiresDate: lastYear

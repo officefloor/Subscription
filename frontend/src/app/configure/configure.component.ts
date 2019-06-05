@@ -1,7 +1,6 @@
 import { Component, OnInit } from '@angular/core'
 import { FormGroup, FormControl } from '@angular/forms'
 import { ServerApiService, Configuration } from '../server-api.service'
-import { getDefaultConfiguration } from '../../environments/environment'
 import { SocialUser } from "angularx-social-login"
 import { AuthenticationService } from '../authentication.service'
 
@@ -41,24 +40,11 @@ export class ConfigureComponent implements OnInit {
             this.serverApiService.getConfiguration().subscribe(( configuration: Configuration ) => {
 
                 // Function to load values
-                const setFormValues = ( config: Configuration ) => {
-                    this.configurationForm.patchValue( {
-                        paypalEnvironment: config.paypalEnvironment,
-                        paypalClientId: config.paypalClientId,
-                        paypalClientSecret: config.paypalClientSecret,
-                    } )
-                }
-
-                // Determine if have saved values
-                if ( configuration.paypalEnvironment ) {
-                    setFormValues( configuration )
-
-                } else {
-                    // Use configured defaults
-                    getDefaultConfiguration( this.serverApiService ).subscribe(( defaults: Configuration ) => {
-                        setFormValues( defaults )
-                    } )
-                }
+                this.configurationForm.patchValue( {
+                    paypalEnvironment: configuration.paypalEnvironment,
+                    paypalClientId: configuration.paypalClientId,
+                    paypalClientSecret: configuration.paypalClientSecret,
+                } )
 
             }, this.handleError() )
         } )
