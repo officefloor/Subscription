@@ -17,10 +17,10 @@
  */
 package net.officefloor.app.subscription;
 
+import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
 
 import java.nio.file.Files;
-import java.nio.file.Path;
 import java.nio.file.Paths;
 
 import org.junit.Rule;
@@ -79,16 +79,26 @@ public class InitialiseLogicTest {
 	}
 
 	@Test
-	public void startupInitialisation() throws Exception {
+	public void startupInitialisationFromFileSystem() throws Exception {
+		String initialiseFilePath = "./src/test/resources/" + this.getClass().getPackage().getName().replace('.', '/')
+				+ "/administration.json";
+		assertTrue("INVALID TEST: can not find intialisation file", Files.exists(Paths.get(initialiseFilePath)));
+		this.startupInitialisation(initialiseFilePath);
+	}
 
-		// Specify location of configuration file
-		Path path = Paths.get(".", "src/test/resources", this.getClass().getPackage().getName().replace('.', '/'),
-				"administration.json");
-		assertTrue("INVALID TEST: can not find intialisation file", Files.exists(path));
+	@Test
+	public void startupInitialisationFromClasspath() throws Exception {
+		String initialiseFilePath = this.getClass().getPackage().getName().replace('.', '/') + "/administration.json";
+		assertNotNull("INVALID TEST: Can not find initialisation file",
+				this.getClass().getClassLoader().getResourceAsStream(initialiseFilePath));
+		this.startupInitialisation("classpath://" + initialiseFilePath);
+	}
+
+	private void startupInitialisation(String initialiseFilePath) throws Exception {
 
 		// Ensure reset property
-		String initialiseFilePath = System.getProperty(InitialiseLogic.PROPERTY_INITIALISE_FILE_PATH);
-		System.setProperty(InitialiseLogic.PROPERTY_INITIALISE_FILE_PATH, path.toAbsolutePath().toString());
+		String resetFilePath = System.getProperty(InitialiseLogic.PROPERTY_INITIALISE_FILE_PATH);
+		System.setProperty(InitialiseLogic.PROPERTY_INITIALISE_FILE_PATH, initialiseFilePath);
 		try {
 
 			// Ensure initialise from file
@@ -98,10 +108,10 @@ public class InitialiseLogicTest {
 					"MOCK_PAYPAL_CLIENT_ID", "MOCK_PAYPAL_CURRENCY")));
 
 		} finally {
-			if (initialiseFilePath == null) {
+			if (resetFilePath == null) {
 				System.clearProperty(InitialiseLogic.PROPERTY_INITIALISE_FILE_PATH);
 			} else {
-				System.setProperty(InitialiseLogic.PROPERTY_INITIALISE_FILE_PATH, initialiseFilePath);
+				System.setProperty(InitialiseLogic.PROPERTY_INITIALISE_FILE_PATH, resetFilePath);
 			}
 		}
 	}

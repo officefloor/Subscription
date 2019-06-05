@@ -18,6 +18,7 @@
 package net.officefloor.app.subscription;
 
 import java.io.IOException;
+import java.io.InputStream;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
@@ -66,14 +67,27 @@ public class InitialiseLogic {
 				initialiseFilePath = System.getenv(PROPERTY_INITIALISE_FILE_PATH.replace('.', '_'));
 			}
 			if (initialiseFilePath != null) {
-				// Attempt to load initialisation from file
-				Path initialiseFile = Paths.get(initialiseFilePath);
-				if (Files.exists(initialiseFile)) {
+
+				// Determine if class path or file system
+				InputStream initialiseInputStream;
+				final String CLASSPATH_PREFIX = "classpath://";
+				if (initialiseFilePath.startsWith(CLASSPATH_PREFIX)) {
+					// Load from class path
+					String resourcePath = initialiseFilePath.substring(CLASSPATH_PREFIX.length());
+					initialiseInputStream = this.getClass().getClassLoader().getResourceAsStream(resourcePath);
+
+				} else {
+					// Load from file system
+					Path initialiseFile = Paths.get(initialiseFilePath);
+					initialiseInputStream = Files.exists(initialiseFile) ? Files.newInputStream(initialiseFile) : null;
+				}
+				if (initialiseInputStream != null) {
+					// Load the input
 					ObjectMapper mapper = new ObjectMapper();
 					mapper.disable(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES);
-					administration = mapper.readValue(Files.newInputStream(initialiseFile), Administration.class);
+					administration = mapper.readValue(initialiseInputStream, Administration.class);
 
-					// Save administration from file
+					// Save initialised administration
 					objectify.save().entities(administration).now();
 				}
 			}
