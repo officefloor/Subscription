@@ -52,7 +52,23 @@ public class ConfigureLogic {
 	}
 
 	@HttpAccess(ifRole = User.ROLE_ADMIN)
-	public static void configure(User user, Configuration configuration, Objectify objectify,
+	public static void getConfiguration(Objectify objectify, ObjectResponse<Configuration> response) {
+
+		// Obtain the administration
+		Administration admin = objectify.load().type(Administration.class).first().now();
+		if (admin == null) {
+			admin = new Administration();
+		}
+
+		// Load and return the configuration
+		Configuration configuration = new Configuration(admin.getGoogleClientId(), admin.getGoogleAdministratorIds(),
+				admin.getPaypalEnvironment(), admin.getPaypalClientId(), admin.getPaypalClientSecret(),
+				admin.getPaypalCurrency());
+		response.send(configuration);
+	}
+
+	@HttpAccess(ifRole = User.ROLE_ADMIN)
+	public static void updateConfiguration(User user, Configuration configuration, Objectify objectify,
 			ObjectResponse<Configured> response) {
 
 		// Obtain the administration (ensuring only one entry)

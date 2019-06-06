@@ -59,9 +59,27 @@ public class ConfigureLogicTest {
 	public RuleChain chain = RuleChain.outerRule(this.jwt).around(this.objectify).around(this.server);
 
 	@Test
-	public void configure() throws Exception {
+	public void getConfiguration() throws Exception {
 
-		User user = AuthenticateLogicTest.setupUser(this.objectify, "Daniel", "admin");
+		User user = AuthenticateLogicTest.newUser("Daniel", User.ROLE_ADMIN);
+
+		// Configure administration
+		Administration existing = new Administration("MOCK_GOOGLE_ID", new String[] { "MOCK_GOOGLE_ADMIN" }, "sandbox",
+				"MOCK_PAYPAL_ID", "MOCK_PAYPAL_SECRET", "MOCK_CURRENCY");
+		this.objectify.store(existing);
+
+		// Ensure can obtain configuration
+		MockHttpResponse response = this.server.send(this.jwt
+				.authorize(user, MockWoofServer.mockRequest("/configuration")).header("Accept", "application/json"));
+		response.assertResponse(200,
+				mapper.writeValueAsString(new Configuration("MOCK_GOOGLE_ID", new String[] { "MOCK_GOOGLE_ADMIN" },
+						"sandbox", "MOCK_PAYPAL_ID", "MOCK_PAYPAL_SECRET", "MOCK_CURRENCY")));
+	}
+
+	@Test
+	public void updateConfiguration() throws Exception {
+
+		User user = AuthenticateLogicTest.newUser("Daniel", User.ROLE_ADMIN);
 
 		// Configure administration
 		Administration existing = new Administration("MOCK_OVERRIDE_GOOGLE_ID", new String[] { "MOCK_OVERRIDE_ADMIN" },
@@ -70,7 +88,7 @@ public class ConfigureLogicTest {
 
 		// Configure system
 		MockHttpResponse response = this.server
-				.send(this.jwt.authorize(user, MockWoofServer.mockRequest("/configure")).method(HttpMethod.POST)
+				.send(this.jwt.authorize(user, MockWoofServer.mockRequest("/configuration")).method(HttpMethod.POST)
 						.header("content-type", "application/json")
 						.entity(mapper.writeValueAsString(new Configuration("MOCK_GOOGLE_CLIENT_ID",
 								new String[] { "MOCK_ADMIN_1", "MOCK_ADMIN_2" }, "sandbox", "MOCK_CLIENT_PAYPAL_ID",
@@ -90,7 +108,23 @@ public class ConfigureLogicTest {
 	}
 
 	@Test
-	public void onlyAdministratorConfigures() throws Exception {
+	public void onlyAdministratorGetsConfiguration() throws Exception {
+
+		// Configure administration
+		Administration administration = new Administration("MOCK_GOOGLE_CLIENT_ID", new String[] { "MOCK_ADMIN" },
+				"sandbox", "MOCK_CLIENT_PAYPAL_ID", "MOCK_CLIENT_PAYPAL_SECRET", "MOCK_CURRENCY");
+		this.objectify.store(administration);
+
+		// Non-admin attempt to get configuration
+		User user = AuthenticateLogicTest.newUser("Daniel");
+		MockHttpResponse response = this.server.send(this.jwt
+				.authorize(user, MockWoofServer.mockRequest("/configuration")).header("Accept", "application/json"));
+		response.assertResponse(403, JacksonHttpObjectResponderFactory
+				.getEntity(new HttpException(HttpStatus.FORBIDDEN, "Forbidden"), mapper));
+	}
+
+	@Test
+	public void onlyAdministratorUpdatesConfiguration() throws Exception {
 
 		// Configure administration
 		Administration administration = new Administration("MOCK_GOOGLE_CLIENT_ID", new String[] { "MOCK_ADMIN" },
@@ -98,9 +132,9 @@ public class ConfigureLogicTest {
 		this.objectify.store(administration);
 
 		// Non-admin attempt to configure
-		User user = AuthenticateLogicTest.setupUser(this.objectify, "Daniel");
+		User user = AuthenticateLogicTest.newUser("Daniel");
 		MockHttpResponse response = this.server
-				.send(this.jwt.authorize(user, MockWoofServer.mockRequest("/configure")).method(HttpMethod.POST)
+				.send(this.jwt.authorize(user, MockWoofServer.mockRequest("/configuration")).method(HttpMethod.POST)
 						.header("content-type", "application/json")
 						.entity(mapper.writeValueAsString(new Configuration("CHANGE_GOOGLE_ID",
 								new String[] { "CHANGE_ADMIN_1", "CHANGE_ADMIN_2" }, "changed", "CHANGE_PAYPAL_ID",
