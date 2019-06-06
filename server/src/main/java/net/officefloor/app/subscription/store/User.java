@@ -20,6 +20,8 @@ import lombok.RequiredArgsConstructor;
 @RequiredArgsConstructor
 public class User {
 
+	public static final String ROLE_ADMIN = "admin";
+
 	@Id
 	private Long id;
 

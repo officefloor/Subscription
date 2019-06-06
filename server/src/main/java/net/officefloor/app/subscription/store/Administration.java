@@ -43,6 +43,9 @@ public class Administration {
 	private String googleClientId;
 
 	@NonNull
+	private String[] googleAdministratorIds;
+
+	@NonNull
 	private String paypalEnvironment;
 
 	@NonNull

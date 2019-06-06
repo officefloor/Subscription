@@ -1,5 +1,9 @@
 {
 	"googleClientId": "MOCK_GOOGLE_CLIENT_ID",
+	"googleAdministratorIds": [
+		"MOCK_ADMIN_1",
+		"MOCK_ADMIN_2"
+	],
 	"paypalEnvironment": "sandbox",
 	"paypalClientId": "MOCK_PAYPAL_CLIENT_ID",
 	"paypalClientSecret": "MOCK_PAYPAL_CLIENT_SECRET",

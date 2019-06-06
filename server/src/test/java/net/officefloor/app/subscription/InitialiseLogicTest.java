@@ -17,6 +17,8 @@
  */
 package net.officefloor.app.subscription;
 
+import static org.junit.Assert.assertArrayEquals;
+import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
 
@@ -59,8 +61,9 @@ public class InitialiseLogicTest {
 	public void retrieveInitialisation() throws Exception {
 
 		// Store configuration
-		Administration administration = new Administration("MOCK_GOOGLE_CLIENT_ID", "MOCK_PAYPAL_ENVIRONMENT",
-				"MOCK_PAYPAL_CLIENT_ID", "MOCK_PAYPAL_CLIENT_SECRET", "MOCK_PAYPAL_CURRENCY");
+		Administration administration = new Administration("MOCK_GOOGLE_CLIENT_ID",
+				new String[] { "MOCK_ADMIN_1", "MOCK_ADMIN_2" }, "MOCK_PAYPAL_ENVIRONMENT", "MOCK_PAYPAL_CLIENT_ID",
+				"MOCK_PAYPAL_CLIENT_SECRET", "MOCK_PAYPAL_CURRENCY");
 		this.obectify.store(administration);
 
 		// Ensure able to obtain initialisation from configuration
@@ -114,6 +117,15 @@ public class InitialiseLogicTest {
 				System.setProperty(InitialiseLogic.PROPERTY_INITIALISE_FILE_PATH, resetFilePath);
 			}
 		}
+
+		// Ensure the configuration loaded to database
+		Administration admin = this.obectify.get(Administration.class);
+		assertEquals("MOCK_GOOGLE_CLIENT_ID", admin.getGoogleClientId());
+		assertArrayEquals(new String[] { "MOCK_ADMIN_1", "MOCK_ADMIN_2" }, admin.getGoogleAdministratorIds());
+		assertEquals("sandbox", admin.getPaypalEnvironment());
+		assertEquals("MOCK_PAYPAL_CLIENT_ID", admin.getPaypalClientId());
+		assertEquals("MOCK_PAYPAL_CLIENT_SECRET", admin.getPaypalClientSecret());
+		assertEquals("MOCK_PAYPAL_CURRENCY", admin.getPaypalCurrency());
 	}
 
 }

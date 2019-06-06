@@ -17,7 +17,6 @@
  */
 package net.officefloor.app.subscription;
 
-import java.util.Arrays;
 import java.util.Iterator;
 
 import com.googlecode.objectify.Objectify;
@@ -25,10 +24,9 @@ import com.googlecode.objectify.Objectify;
 import lombok.Value;
 import net.officefloor.app.subscription.store.Administration;
 import net.officefloor.app.subscription.store.User;
-import net.officefloor.server.http.HttpException;
-import net.officefloor.server.http.HttpStatus;
 import net.officefloor.web.HttpObject;
 import net.officefloor.web.ObjectResponse;
+import net.officefloor.web.security.HttpAccess;
 
 /**
  * Enables configuring the application.
@@ -37,12 +35,11 @@ import net.officefloor.web.ObjectResponse;
  */
 public class ConfigureLogic {
 
-	public static final String ROLE_ADMIN = "admin";
-
 	@Value
 	@HttpObject
 	public static class Configuration {
 		private String googleClientId;
+		private String[] googleAdministratorIds;
 		private String paypalEnvironment;
 		private String paypalClientId;
 		private String paypalClientSecret;
@@ -54,10 +51,11 @@ public class ConfigureLogic {
 		private boolean successful;
 	}
 
+	@HttpAccess(ifRole = User.ROLE_ADMIN)
 	public static void configure(User user, Configuration configuration, Objectify objectify,
 			ObjectResponse<Configured> response) {
 
-		// Obtain the administration
+		// Obtain the administration (ensuring only one entry)
 		Administration administration = null;
 		Iterator<Administration> iterator = objectify.load().type(Administration.class).iterator();
 		if (iterator.hasNext()) {
@@ -65,35 +63,14 @@ public class ConfigureLogic {
 		}
 		iterator.forEachRemaining((extra) -> objectify.delete().entity(extra).now());
 
-		// Determine if configuring for first time
-		if (administration == null) {
-			// No configuration, so admin
-
-			// Obtain the user to flag as administrator
-			User adminUser = objectify.load().type(User.class).id(user.getId()).now();
-			adminUser.setRoles(new String[] { ROLE_ADMIN });
-
-			// Create the administration
-			administration = new Administration(configuration.getGoogleClientId(), configuration.getPaypalEnvironment(),
-					configuration.getPaypalClientId(), configuration.getPaypalClientSecret(),
-					configuration.getPaypalCurrency());
-
-			// Store the details
-			objectify.save().entities(adminUser, administration).now();
-
-		} else if (Arrays.asList(user.getRoles()).contains(ROLE_ADMIN)) {
-			// Admin, so allow updating configuration
-			administration.setGoogleClientId(configuration.getGoogleClientId());
-			administration.setPaypalEnvironment(configuration.getPaypalEnvironment());
-			administration.setPaypalClientId(configuration.getPaypalClientId());
-			administration.setPaypalClientSecret(configuration.getPaypalClientSecret());
-			administration.setPaypalCurrency(configuration.getPaypalCurrency());
-			objectify.save().entity(administration).now();
-
-		} else {
-			// Disallowed to change
-			throw new HttpException(HttpStatus.FORBIDDEN, "Must have '" + ROLE_ADMIN + "' role");
-		}
+		// Updating configuration
+		administration.setGoogleClientId(configuration.getGoogleClientId());
+		administration.setGoogleAdministratorIds(configuration.getGoogleAdministratorIds());
+		administration.setPaypalEnvironment(configuration.getPaypalEnvironment());
+		administration.setPaypalClientId(configuration.getPaypalClientId());
+		administration.setPaypalClientSecret(configuration.getPaypalClientSecret());
+		administration.setPaypalCurrency(configuration.getPaypalCurrency());
+		objectify.save().entity(administration).now();
 
 		// Successfully configured
 		response.send(new Configured(true));
