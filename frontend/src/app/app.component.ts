@@ -1,4 +1,4 @@
-import { Component } from '@angular/core';
+import { Component, OnInit } from '@angular/core';
 import { SocialUser } from "angularx-social-login";
 import { AuthenticationService } from './authentication.service';
 
@@ -7,19 +7,25 @@ import { AuthenticationService } from './authentication.service';
     templateUrl: './app.component.html',
     styleUrls: ['./app.component.css']
 } )
-export class AppComponent {
+export class AppComponent implements OnInit {
 
     isInitialised: boolean = false
 
     user: SocialUser
 
-    constructor( private authenticationService: AuthenticationService ) {
+    constructor(
+        private authenticationService: AuthenticationService
+    ) { }
 
+    ngOnInit(): void {
         // Determine when ready
         this.authenticationService.readyState().subscribe(( isReady: boolean ) => this.isInitialised = isReady )
 
         // Keep track of logged in user
         this.authenticationService.authenticationState().subscribe(( user: SocialUser ) => this.user = user )
+
+        // Initialise authentication
+        this.authenticationService.initialise()
     }
 
 }

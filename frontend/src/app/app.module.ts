@@ -1,5 +1,5 @@
 import { BrowserModule } from '@angular/platform-browser'
-import { NgModule, APP_INITIALIZER } from '@angular/core'
+import { NgModule, Injector } from '@angular/core'
 import { HttpClientModule, HTTP_INTERCEPTORS } from '@angular/common/http'
 import { JwtHttpInterceptor } from './jwt-http.interceptor'
 import { AppRoutingModule } from './app-routing.module'
@@ -17,6 +17,7 @@ import { MatSortModule } from '@angular/material';
 import { DomainComponent } from './domain/domain.component'
 import { InitialiseService } from './initialise.service'
 import { Initialisation } from './server-api.service'
+import { AuthenticationService } from './authentication.service'
 
 declare let Promise
 declare let Error
@@ -76,7 +77,8 @@ export function provideAuthServiceConfig( initialiseService: InitialiseService )
     }, {
         provide: HTTP_INTERCEPTORS,
         useClass: JwtHttpInterceptor,
-        multi: true
+        multi: true,
+        deps: [Injector]
     }],
     bootstrap: [AppComponent]
 } )

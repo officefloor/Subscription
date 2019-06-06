@@ -86,7 +86,7 @@ public class InitialiseLogic {
 					ObjectMapper mapper = new ObjectMapper();
 					mapper.disable(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES);
 					administration = mapper.readValue(initialiseInputStream, Administration.class);
-
+					
 					// Save initialised administration
 					objectify.save().entities(administration).now();
 				}

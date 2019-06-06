@@ -11,6 +11,10 @@ import { InitialiseService } from './initialise.service'
 } )
 export class AuthenticationService {
 
+    private static readonly REFRESH_TOKEN = "refreshToken"
+
+    private static readonly ACCESS_TOKEN = "accessToken"
+
     // Login state
     private state: BehaviorSubject<SocialUser> = new BehaviorSubject<SocialUser>( null );
 
@@ -21,7 +25,9 @@ export class AuthenticationService {
         private initialiseService: InitialiseService,
         private authService: AuthService,
         private serverApiService: ServerApiService
-    ) {
+    ) { }
+
+    initialise() {
         // Load once initialised
         this.initialiseService.intialisation().then(( initialisation: Initialisation ) => {
 
@@ -54,8 +60,8 @@ export class AuthenticationService {
                         const accessToken: string = response.accessToken
 
                         // Store the tokens
-                        localStorage.setItem( 'refreshToken', refreshToken )
-                        localStorage.setItem( 'accessToken', accessToken )
+                        localStorage.setItem( AuthenticationService.REFRESH_TOKEN, refreshToken )
+                        localStorage.setItem( AuthenticationService.ACCESS_TOKEN, accessToken )
 
                         // Notify logged in
                         this.state.next( user )
@@ -78,8 +84,8 @@ export class AuthenticationService {
     public signOut(): void {
 
         // Clear the tokens
-        localStorage.removeItem( 'refreshToken' )
-        localStorage.removeItem( 'accessToken' )
+        localStorage.removeItem( AuthenticationService.REFRESH_TOKEN )
+        localStorage.removeItem( AuthenticationService.ACCESS_TOKEN )
 
         // Google sign-out
         this.authService.signOut()
@@ -88,7 +94,7 @@ export class AuthenticationService {
     public refreshAccessToken(): Observable<AccessTokenResponse> {
 
         // Obtain the refresh token
-        const refreshToken: string = localStorage.getItem( 'refreshToken' )
+        const refreshToken: string = localStorage.getItem( AuthenticationService.REFRESH_TOKEN )
         if ( !refreshToken ) {
             return of( null ) // no refresh token so no access token
         }
@@ -97,7 +103,7 @@ export class AuthenticationService {
         return this.serverApiService.refreshAccessToken( refreshToken ).pipe( map(( response: AccessTokenResponse ) => {
 
             // Capture the new access token
-            localStorage.setItem( 'accessToken', response.accessToken )
+            localStorage.setItem( AuthenticationService.ACCESS_TOKEN, response.accessToken )
 
             // Return the response
             return response
@@ -105,7 +111,7 @@ export class AuthenticationService {
     }
 
     public getAccessToken(): string {
-        return localStorage.getItem( 'accessToken' )
+        return localStorage.getItem( AuthenticationService.ACCESS_TOKEN )
     }
 
     public authenticationState(): Observable<SocialUser> {
