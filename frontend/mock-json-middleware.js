@@ -16,7 +16,7 @@ module.exports = (req, res, next) => {
 		break
 	case '/configuration':
 		configurationCount++;		
-		if (configurationCount % 3 === 0) {
+		if (configurationCount % 5 === 0) {
 			res.sendStatus(403)
 			return
 		}

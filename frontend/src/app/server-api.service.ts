@@ -34,10 +34,18 @@ export interface Initialisation {
     paypalCurrency: string
 }
 
+export interface Administrator {
+    googleId: string
+    notes: string
+}
+
 export interface Configuration {
+    googleClientId: string
+    administrators: [Administrator]
     paypalEnvironment: string
     paypalClientId: string
     paypalClientSecret: string
+    paypalCurrency: string
 }
 
 export interface Domain {

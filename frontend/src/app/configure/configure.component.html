@@ -3,46 +3,67 @@
 </div>
 <div [hidden]="errorMessage" class="container">
 	<form [formGroup]="configurationForm" (submit)="updateConfiguration()">
-		<h1>PayPal</h1>
-		<fieldset class="form-group">
-			<div class="row">
-				<legend class="col-form-label col-sm-2">Environment</legend>
-				<div class="col-sm-10">
-					<div class="form-check-inline">
-						<input class="form-check-input" type="radio"
-							id="paypalEnvironmentSandbox" formControlName="paypalEnvironment"
-							value="sandbox"> <label class="form-check-label"
-							for="paypalEnvironmentSandbox">Sandbox</label>
-					</div>
-					<div class="form-check-inline">
-						<input class="form-check-input" type="radio"
-							id="paypalEnvironmentProduction"
-							formControlName="paypalEnvironment" value="production"> <label
-							class="form-check-label" for="paypalEnvironmentSandbox">Production</label>
+		<h1>Google</h1>
+		<div class="form-group">
+			<label for="googleClientId" class="col-form-label">Client ID</label>
+			<input type="text" class="form-control"
+				formControlName="googleClientId" id="googleClientId">
+		</div>
+		<div class="form-group">
+			<label for="administrators" class="col-form-label">Administrators</label>
+			<div formArrayName="administrators" id="administrators"
+				*ngFor="let administrator of configurationForm.get('administrators').controls; let i = index">
+				<div [formGroupName]="i">
+					<div class="input-group">
+						<input type="text" class="form-control" placeholder="Google Id"
+							formControlName="googleId"> <input type="text"
+							class="form-control" placeholder="Notes" formControlName="notes">
+						<div class="input-group-append">
+							<button class="btn btn-secondary" type="button"
+								(click)="removeAdministrator(i)">remove</button>
+						</div>
 					</div>
 				</div>
 			</div>
+		</div>
+		<div class="form-group">
+			<button class="btn btn-secondary" type="button"
+				(click)="addAdministrator()">add</button>
+		</div>
+		<br />
+		<h1>PayPal</h1>
+		<fieldset class="form-group">
+			<legend class="col-form-label">Environment</legend>
+			<div class="form-check-inline">
+				<input class="form-check-input" type="radio"
+					id="paypalEnvironmentSandbox" formControlName="paypalEnvironment"
+					value="sandbox"> <label class="form-check-label"
+					for="paypalEnvironmentSandbox">Sandbox</label>
+			</div>
+			<div class="form-check-inline">
+				<input class="form-check-input" type="radio"
+					id="paypalEnvironmentProduction"
+					formControlName="paypalEnvironment" value="production"> <label
+					class="form-check-label" for="paypalEnvironmentSandbox">Production</label>
+			</div>
 		</fieldset>
-		<div class="form-group row">
-			<label for="paypalClientId" class="col-form-label col-sm-2">Client
-				ID</label>
-			<div class="col-sm-10">
-				<input type="text" class="form-control"
-					formControlName="paypalClientId" id="paypalClientId">
-			</div>
+		<div class="form-group">
+			<label for="paypalClientId" class="col-form-label">Client ID</label>
+			<input type="text" class="form-control"
+				formControlName="paypalClientId" id="paypalClientId">
 		</div>
-		<div class="form-group row">
-			<label for="paypalClientSecret" class="col-form-label col-sm-2">Client
-				Secret</label>
-			<div class="col-sm-10">
-				<input type="text" class="form-control"
-					formControlName="paypalClientSecret" id="paypalClientSecret">
-			</div>
+		<div class="form-group">
+			<label for="paypalClientSecret" class="col-form-label">Client
+				Secret</label> <input type="text" class="form-control"
+				formControlName="paypalClientSecret" id="paypalClientSecret">
 		</div>
-		<div class="row">
-			<div class="col-sm-2">
-				<button class="btn btn-primary" [disabled]="isSaving">Save</button>
-			</div>
+		<div class="form-group">
+			<label for="paypalCurrency" class="col-form-label">Currency</label> <input
+				type="text" class="form-control" formControlName="paypalCurrency"
+				id="paypalCurrency">
 		</div>
+		<br />
+		<button class="btn btn-primary" [disabled]="isSaving">Save</button>
 	</form>
+	<br />
 </div>

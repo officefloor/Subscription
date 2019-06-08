@@ -1,6 +1,6 @@
 import { Component, OnInit } from '@angular/core'
-import { FormGroup, FormControl } from '@angular/forms'
-import { ServerApiService, Configuration } from '../server-api.service'
+import { FormGroup, FormControl, FormArray, FormBuilder } from '@angular/forms'
+import { ServerApiService, Configuration, Administrator } from '../server-api.service'
 import { SocialUser } from "angularx-social-login"
 import { AuthenticationService } from '../authentication.service'
 
@@ -15,18 +15,24 @@ export class ConfigureComponent implements OnInit {
 
     isSaving: boolean = false
 
-    configurationForm = new FormGroup( {
-        paypalEnvironment: new FormControl( '' ),
-        paypalClientId: new FormControl( '' ),
-        paypalClientSecret: new FormControl( '' )
-    } )
+    configurationForm: FormGroup
 
     errorMessage: string = null
 
     constructor(
         private serverApiService: ServerApiService,
         private authenticationService: AuthenticationService,
-    ) { }
+        private formBuilder: FormBuilder,
+    ) {
+        this.configurationForm = this.formBuilder.group( {
+            googleClientId: '',
+            administrators: this.formBuilder.array( [] ),
+            paypalEnvironment: '',
+            paypalClientId: '',
+            paypalClientSecret: '',
+            paypalCurrency: '',
+        } )
+    }
 
     ngOnInit() {
         this.authenticationService.authenticationState().subscribe(( user: SocialUser ) => {
@@ -41,13 +47,36 @@ export class ConfigureComponent implements OnInit {
 
                 // Function to load values
                 this.configurationForm.patchValue( {
+                    googleClientId: configuration.googleClientId,
                     paypalEnvironment: configuration.paypalEnvironment,
                     paypalClientId: configuration.paypalClientId,
                     paypalClientSecret: configuration.paypalClientSecret,
+                    paypalCurrency: configuration.paypalCurrency
                 } )
+
+                // Load the google administrator Ids
+                configuration.administrators.forEach(( admin: Administrator ) => {
+                    this.addAdministrator( admin.googleId, admin.notes )
+                } )
+
+                // TODO REMOVE
+                console.log( 'TODO REMOVE form: ' + JSON.stringify( this.configurationForm.value ) )
 
             }, this.handleError() )
         } )
+    }
+
+    addAdministrator( googleId: string = '', notes: string = '' ) {
+        const administrators = this.configurationForm.controls.administrators as FormArray
+        administrators.push( this.formBuilder.group( {
+            googleId: googleId,
+            notes: notes
+        } ) )
+    }
+
+    removeAdministrator( index: number ) {
+        const administrators = this.configurationForm.controls.administrators as FormArray
+        administrators.removeAt( index )
     }
 
     updateConfiguration() {
@@ -55,9 +84,12 @@ export class ConfigureComponent implements OnInit {
         this.isSaving = true
         const form = this.configurationForm.value
         this.serverApiService.updateConfiguration( {
+            googleClientId: form.googleClientId,
+            administrators: form.administrators,
             paypalEnvironment: form.paypalEnvironment,
             paypalClientId: form.paypalClientId,
-            paypalClientSecret: form.paypalClientSecret
+            paypalClientSecret: form.paypalClientSecret,
+            paypalCurrency: form.paypalCurrency,
         } ).subscribe(() => {
             this.isSaving = false
             console.log( 'Successfully updated configuration' )
