@@ -17,7 +17,6 @@
  */
 package net.officefloor.app.subscription;
 
-import static org.junit.Assert.assertArrayEquals;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
@@ -33,6 +32,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 
 import net.officefloor.app.subscription.InitialiseLogic.Initialisation;
 import net.officefloor.app.subscription.store.Administration;
+import net.officefloor.app.subscription.store.Administration.Administrator;
 import net.officefloor.nosql.objectify.mock.ObjectifyRule;
 import net.officefloor.server.http.HttpException;
 import net.officefloor.server.http.HttpStatus;
@@ -62,8 +62,10 @@ public class InitialiseLogicTest {
 
 		// Store configuration
 		Administration administration = new Administration("MOCK_GOOGLE_CLIENT_ID",
-				new String[] { "MOCK_ADMIN_1", "MOCK_ADMIN_2" }, "MOCK_PAYPAL_ENVIRONMENT", "MOCK_PAYPAL_CLIENT_ID",
-				"MOCK_PAYPAL_CLIENT_SECRET", "MOCK_PAYPAL_CURRENCY");
+				new Administrator[] { new Administrator("MOCK_ADMIN_1", "NOTES_1"),
+						new Administrator("MOCK_ADMIN_2", "NOTES_2") },
+				"MOCK_PAYPAL_ENVIRONMENT", "MOCK_PAYPAL_CLIENT_ID", "MOCK_PAYPAL_CLIENT_SECRET",
+				"MOCK_PAYPAL_CURRENCY");
 		this.obectify.store(administration);
 
 		// Ensure able to obtain initialisation from configuration
@@ -121,7 +123,14 @@ public class InitialiseLogicTest {
 		// Ensure the configuration loaded to database
 		Administration admin = this.obectify.get(Administration.class);
 		assertEquals("MOCK_GOOGLE_CLIENT_ID", admin.getGoogleClientId());
-		assertArrayEquals(new String[] { "MOCK_ADMIN_1", "MOCK_ADMIN_2" }, admin.getGoogleAdministratorIds());
+		Administrator[] expectedAdministrators = new Administrator[] {
+				new Administrator("MOCK_ADMIN_1", "MOCK_NOTES_1"), new Administrator("MOCK_ADMIN_2", "MOCK_NOTES_2") };
+		Administrator[] administrators = admin.getAdministrators();
+		assertEquals("Incorrect number of administrators", expectedAdministrators.length, administrators.length);
+		for (int i = 0; i < expectedAdministrators.length; i++) {
+			assertEquals(expectedAdministrators[i].getGoogleId(), administrators[i].getGoogleId());
+			assertEquals(expectedAdministrators[i].getNotes(), administrators[i].getNotes());
+		}
 		assertEquals("sandbox", admin.getPaypalEnvironment());
 		assertEquals("MOCK_PAYPAL_CLIENT_ID", admin.getPaypalClientId());
 		assertEquals("MOCK_PAYPAL_CLIENT_SECRET", admin.getPaypalClientSecret());

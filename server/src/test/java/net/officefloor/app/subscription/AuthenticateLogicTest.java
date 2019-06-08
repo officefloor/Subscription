@@ -16,6 +16,7 @@ import net.officefloor.app.subscription.AuthenticateLogic.AuthenticateResponse;
 import net.officefloor.app.subscription.AuthenticateLogic.RefreshRequest;
 import net.officefloor.app.subscription.AuthenticateLogic.RefreshResponse;
 import net.officefloor.app.subscription.store.Administration;
+import net.officefloor.app.subscription.store.Administration.Administrator;
 import net.officefloor.app.subscription.store.GoogleSignin;
 import net.officefloor.app.subscription.store.User;
 import net.officefloor.identity.google.mock.GoogleIdTokenRule;
@@ -173,7 +174,7 @@ public class AuthenticateLogicTest {
 
 		// Initialise the server
 		Administration administration = new Administration();
-		administration.setGoogleAdministratorIds(new String[] { googleAdminId });
+		administration.setAdministrators(new Administrator[] { new Administrator(googleAdminId, "Notes") });
 		this.objectify.store(administration);
 
 		// Undertake authentication

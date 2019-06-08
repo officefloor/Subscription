@@ -18,11 +18,14 @@
 package net.officefloor.app.subscription;
 
 import java.util.Iterator;
+import java.util.Optional;
+import java.util.stream.Stream;
 
 import com.googlecode.objectify.Objectify;
 
 import lombok.Value;
 import net.officefloor.app.subscription.store.Administration;
+import net.officefloor.app.subscription.store.Administration.Administrator;
 import net.officefloor.app.subscription.store.User;
 import net.officefloor.web.HttpObject;
 import net.officefloor.web.ObjectResponse;
@@ -39,11 +42,17 @@ public class ConfigureLogic {
 	@HttpObject
 	public static class Configuration {
 		private String googleClientId;
-		private String[] googleAdministratorIds;
+		private ConfigurationAdministrator[] administrators;
 		private String paypalEnvironment;
 		private String paypalClientId;
 		private String paypalClientSecret;
 		private String paypalCurrency;
+	}
+
+	@Value
+	public static class ConfigurationAdministrator {
+		private String googleId;
+		private String notes;
 	}
 
 	@Value
@@ -61,7 +70,12 @@ public class ConfigureLogic {
 		}
 
 		// Load and return the configuration
-		Configuration configuration = new Configuration(admin.getGoogleClientId(), admin.getGoogleAdministratorIds(),
+		ConfigurationAdministrator[] configurationAdministrators = Stream
+				.of(Optional.ofNullable(admin.getAdministrators()).orElse(new Administrator[0]))
+				.map((administrator) -> new ConfigurationAdministrator(administrator.getGoogleId(),
+						administrator.getNotes()))
+				.toArray(ConfigurationAdministrator[]::new);
+		Configuration configuration = new Configuration(admin.getGoogleClientId(), configurationAdministrators,
 				admin.getPaypalEnvironment(), admin.getPaypalClientId(), admin.getPaypalClientSecret(),
 				admin.getPaypalCurrency());
 		response.send(configuration);
@@ -81,7 +95,10 @@ public class ConfigureLogic {
 
 		// Updating configuration
 		administration.setGoogleClientId(configuration.getGoogleClientId());
-		administration.setGoogleAdministratorIds(configuration.getGoogleAdministratorIds());
+		administration.setAdministrators(Stream
+				.of(Optional.ofNullable(configuration.getAdministrators()).orElse(new ConfigurationAdministrator[0]))
+				.map((admin) -> new Administrator(admin.getGoogleId(), admin.getNotes()))
+				.toArray(Administrator[]::new));
 		administration.setPaypalEnvironment(configuration.getPaypalEnvironment());
 		administration.setPaypalClientId(configuration.getPaypalClientId());
 		administration.setPaypalClientSecret(configuration.getPaypalClientSecret());

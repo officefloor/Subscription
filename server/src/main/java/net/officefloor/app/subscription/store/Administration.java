@@ -20,6 +20,7 @@ package net.officefloor.app.subscription.store;
 import com.googlecode.objectify.annotation.Entity;
 import com.googlecode.objectify.annotation.Id;
 
+import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 import lombok.NonNull;
@@ -43,7 +44,7 @@ public class Administration {
 	private String googleClientId;
 
 	@NonNull
-	private String[] googleAdministratorIds;
+	private Administrator[] administrators;
 
 	@NonNull
 	private String paypalEnvironment;
@@ -57,4 +58,14 @@ public class Administration {
 	@NonNull
 	private String paypalCurrency;
 
+	@Data
+	@NoArgsConstructor
+	@AllArgsConstructor
+	public static class Administrator {
+
+		@NonNull
+		private String googleId;
+
+		private String notes;
+	}
 }

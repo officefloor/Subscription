@@ -1,5 +1,5 @@
 import { Component, OnInit } from '@angular/core'
-import { FormGroup, FormControl, FormArray, FormBuilder } from '@angular/forms'
+import { FormGroup, FormControl, FormArray, FormBuilder, AbstractControl } from '@angular/forms'
 import { ServerApiService, Configuration, Administrator } from '../server-api.service'
 import { SocialUser } from "angularx-social-login"
 import { AuthenticationService } from '../authentication.service'
@@ -54,16 +54,17 @@ export class ConfigureComponent implements OnInit {
                     paypalCurrency: configuration.paypalCurrency
                 } )
 
-                // Load the google administrator Ids
+                // Load the administrators
                 configuration.administrators.forEach(( admin: Administrator ) => {
                     this.addAdministrator( admin.googleId, admin.notes )
                 } )
 
-                // TODO REMOVE
-                console.log( 'TODO REMOVE form: ' + JSON.stringify( this.configurationForm.value ) )
-
             }, this.handleError() )
         } )
+    }
+
+    getAdministrators(): AbstractControl[] {
+        return ( this.configurationForm.get( 'administrators' ) as FormArray ).controls
     }
 
     addAdministrator( googleId: string = '', notes: string = '' ) {

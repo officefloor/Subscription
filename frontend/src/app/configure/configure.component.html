@@ -12,7 +12,7 @@
 		<div class="form-group">
 			<label for="administrators" class="col-form-label">Administrators</label>
 			<div formArrayName="administrators" id="administrators"
-				*ngFor="let administrator of configurationForm.get('administrators').controls; let i = index">
+				*ngFor="let administrator of getAdministrators(); let i = index">
 				<div [formGroupName]="i">
 					<div class="input-group">
 						<input type="text" class="form-control" placeholder="Google Id"

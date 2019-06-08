@@ -1,7 +1,8 @@
 package net.officefloor.app.subscription;
 
-import java.util.Arrays;
 import java.util.List;
+import java.util.Optional;
+import java.util.stream.Stream;
 
 import com.google.api.client.googleapis.auth.oauth2.GoogleIdToken;
 import com.google.api.client.googleapis.auth.oauth2.GoogleIdToken.Payload;
@@ -11,6 +12,7 @@ import com.googlecode.objectify.Ref;
 
 import lombok.Value;
 import net.officefloor.app.subscription.store.Administration;
+import net.officefloor.app.subscription.store.Administration.Administrator;
 import net.officefloor.app.subscription.store.GoogleSignin;
 import net.officefloor.app.subscription.store.User;
 import net.officefloor.server.http.HttpException;
@@ -70,9 +72,9 @@ public class AuthenticateLogic {
 		}
 
 		// Determines roles
-		String[] googleAdministratorIds = administration.getGoogleAdministratorIds();
-		boolean isAdministrator = Arrays.asList(googleAdministratorIds != null ? googleAdministratorIds : new String[0])
-				.stream().anyMatch((adminId) -> googleId.equals(adminId));
+		Administrator[] administrators = administration.getAdministrators();
+		boolean isAdministrator = Stream.of(Optional.ofNullable(administrators).orElse(new Administrator[0]))
+				.anyMatch((admin) -> googleId.equals(admin.getGoogleId()));
 		String[] roles = isAdministrator ? new String[] { User.ROLE_ADMIN } : new String[0];
 
 		// Update or create the user

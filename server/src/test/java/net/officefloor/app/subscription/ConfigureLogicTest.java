@@ -17,7 +17,6 @@
  */
 package net.officefloor.app.subscription;
 
-import static org.junit.Assert.assertArrayEquals;
 import static org.junit.Assert.assertEquals;
 
 import org.junit.Rule;
@@ -25,10 +24,13 @@ import org.junit.Test;
 import org.junit.rules.RuleChain;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.google.common.base.Function;
 
 import net.officefloor.app.subscription.ConfigureLogic.Configuration;
+import net.officefloor.app.subscription.ConfigureLogic.ConfigurationAdministrator;
 import net.officefloor.app.subscription.ConfigureLogic.Configured;
 import net.officefloor.app.subscription.store.Administration;
+import net.officefloor.app.subscription.store.Administration.Administrator;
 import net.officefloor.app.subscription.store.User;
 import net.officefloor.nosql.objectify.mock.ObjectifyRule;
 import net.officefloor.server.http.HttpException;
@@ -64,16 +66,17 @@ public class ConfigureLogicTest {
 		User user = AuthenticateLogicTest.newUser("Daniel", User.ROLE_ADMIN);
 
 		// Configure administration
-		Administration existing = new Administration("MOCK_GOOGLE_ID", new String[] { "MOCK_GOOGLE_ADMIN" }, "sandbox",
+		Administration existing = new Administration("MOCK_GOOGLE_ID",
+				new Administrator[] { new Administrator("MOCK_GOOGLE_ADMIN", "MOCK_NOTES") }, "sandbox",
 				"MOCK_PAYPAL_ID", "MOCK_PAYPAL_SECRET", "MOCK_CURRENCY");
 		this.objectify.store(existing);
 
 		// Ensure can obtain configuration
 		MockHttpResponse response = this.server.send(this.jwt
 				.authorize(user, MockWoofServer.mockRequest("/configuration")).header("Accept", "application/json"));
-		response.assertResponse(200,
-				mapper.writeValueAsString(new Configuration("MOCK_GOOGLE_ID", new String[] { "MOCK_GOOGLE_ADMIN" },
-						"sandbox", "MOCK_PAYPAL_ID", "MOCK_PAYPAL_SECRET", "MOCK_CURRENCY")));
+		response.assertResponse(200, mapper.writeValueAsString(new Configuration("MOCK_GOOGLE_ID",
+				new ConfigurationAdministrator[] { new ConfigurationAdministrator("MOCK_GOOGLE_ADMIN", "MOCK_NOTES") },
+				"sandbox", "MOCK_PAYPAL_ID", "MOCK_PAYPAL_SECRET", "MOCK_CURRENCY")));
 	}
 
 	@Test
@@ -82,17 +85,21 @@ public class ConfigureLogicTest {
 		User user = AuthenticateLogicTest.newUser("Daniel", User.ROLE_ADMIN);
 
 		// Configure administration
-		Administration existing = new Administration("MOCK_OVERRIDE_GOOGLE_ID", new String[] { "MOCK_OVERRIDE_ADMIN" },
-				"override", "MOCK_OVERRIDE_PAYPAL_ID", "MOCK_OVERRIDE_PAYPAL_SECRET", "MOCK_OVERRIDE_CURRENCY");
+		Administration existing = new Administration("MOCK_OVERRIDE_GOOGLE_ID",
+				new Administrator[] { new Administrator("MOCK_OVERRIDE_ADMIN", "MOCK_NOTES") }, "override",
+				"MOCK_OVERRIDE_PAYPAL_ID", "MOCK_OVERRIDE_PAYPAL_SECRET", "MOCK_OVERRIDE_CURRENCY");
 		this.objectify.store(existing);
 
 		// Configure system
+		ConfigurationAdministrator[] configurationAdministrators = new ConfigurationAdministrator[] {
+				new ConfigurationAdministrator("MOCK_ADMIN_1", "MOCK_NOTES_1"),
+				new ConfigurationAdministrator("MOCK_ADMIN_2", "MOCK_NOTES_2") };
 		MockHttpResponse response = this.server
 				.send(this.jwt.authorize(user, MockWoofServer.mockRequest("/configuration")).method(HttpMethod.POST)
 						.header("content-type", "application/json")
-						.entity(mapper.writeValueAsString(new Configuration("MOCK_GOOGLE_CLIENT_ID",
-								new String[] { "MOCK_ADMIN_1", "MOCK_ADMIN_2" }, "sandbox", "MOCK_CLIENT_PAYPAL_ID",
-								"MOCK_CLIENT_PAYPAL_SECRET", "MOCK_CURRENCY"))));
+						.entity(mapper.writeValueAsString(
+								new Configuration("MOCK_GOOGLE_CLIENT_ID", configurationAdministrators, "sandbox",
+										"MOCK_CLIENT_PAYPAL_ID", "MOCK_CLIENT_PAYPAL_SECRET", "MOCK_CURRENCY"))));
 		response.assertResponse(200, mapper.writeValueAsString(new Configured(true)));
 
 		// Ensure configured
@@ -100,7 +107,7 @@ public class ConfigureLogicTest {
 				(administration) -> "MOCK_GOOGLE_CLIENT_ID".equals(administration.getGoogleClientId()));
 		assertEquals("Should only be one entry", existing.getId(), admin.getId());
 		assertEquals("MOCK_GOOGLE_CLIENT_ID", admin.getGoogleClientId());
-		assertArrayEquals(new String[] { "MOCK_ADMIN_1", "MOCK_ADMIN_2" }, admin.getGoogleAdministratorIds());
+		assertAdministrators(configurationAdministrators, (a) -> a, admin.getAdministrators());
 		assertEquals("sandbox", admin.getPaypalEnvironment());
 		assertEquals("MOCK_CLIENT_PAYPAL_ID", admin.getPaypalClientId());
 		assertEquals("MOCK_CLIENT_PAYPAL_SECRET", admin.getPaypalClientSecret());
@@ -111,8 +118,9 @@ public class ConfigureLogicTest {
 	public void onlyAdministratorGetsConfiguration() throws Exception {
 
 		// Configure administration
-		Administration administration = new Administration("MOCK_GOOGLE_CLIENT_ID", new String[] { "MOCK_ADMIN" },
-				"sandbox", "MOCK_CLIENT_PAYPAL_ID", "MOCK_CLIENT_PAYPAL_SECRET", "MOCK_CURRENCY");
+		Administration administration = new Administration("MOCK_GOOGLE_CLIENT_ID",
+				new Administrator[] { new Administrator("MOCK_ADMIN", "MOCK_NOTES") }, "sandbox",
+				"MOCK_CLIENT_PAYPAL_ID", "MOCK_CLIENT_PAYPAL_SECRET", "MOCK_CURRENCY");
 		this.objectify.store(administration);
 
 		// Non-admin attempt to get configuration
@@ -127,18 +135,22 @@ public class ConfigureLogicTest {
 	public void onlyAdministratorUpdatesConfiguration() throws Exception {
 
 		// Configure administration
-		Administration administration = new Administration("MOCK_GOOGLE_CLIENT_ID", new String[] { "MOCK_ADMIN" },
-				"sandbox", "MOCK_CLIENT_PAYPAL_ID", "MOCK_CLIENT_PAYPAL_SECRET", "MOCK_CURRENCY");
+		Administrator[] administrators = new Administrator[] { new Administrator("MOCK_ADMIN", "MOCK_NOTES") };
+		Administration administration = new Administration("MOCK_GOOGLE_CLIENT_ID", administrators, "sandbox",
+				"MOCK_CLIENT_PAYPAL_ID", "MOCK_CLIENT_PAYPAL_SECRET", "MOCK_CURRENCY");
 		this.objectify.store(administration);
 
 		// Non-admin attempt to configure
 		User user = AuthenticateLogicTest.newUser("Daniel");
+		ConfigurationAdministrator[] configurationAdministrators = new ConfigurationAdministrator[] {
+				new ConfigurationAdministrator("CHANGE_ADMIN_1", "CHANGE_NOTES_1"),
+				new ConfigurationAdministrator("CHANGE_ADMIN_2", "CHANGE_NOTES_2") };
 		MockHttpResponse response = this.server
 				.send(this.jwt.authorize(user, MockWoofServer.mockRequest("/configuration")).method(HttpMethod.POST)
 						.header("content-type", "application/json")
-						.entity(mapper.writeValueAsString(new Configuration("CHANGE_GOOGLE_ID",
-								new String[] { "CHANGE_ADMIN_1", "CHANGE_ADMIN_2" }, "changed", "CHANGE_PAYPAL_ID",
-								"CHANGE_PAYPAL_SECRET", "CHANGE_CURRENCY"))));
+						.entity(mapper
+								.writeValueAsString(new Configuration("CHANGE_GOOGLE_ID", configurationAdministrators,
+										"changed", "CHANGE_PAYPAL_ID", "CHANGE_PAYPAL_SECRET", "CHANGE_CURRENCY"))));
 		response.assertResponse(403, JacksonHttpObjectResponderFactory
 				.getEntity(new HttpException(HttpStatus.FORBIDDEN, "Forbidden"), mapper));
 
@@ -146,11 +158,23 @@ public class ConfigureLogicTest {
 		Administration admin = this.objectify.get(Administration.class);
 		assertEquals("Should only be one entry", administration.getId(), admin.getId());
 		assertEquals("MOCK_GOOGLE_CLIENT_ID", admin.getGoogleClientId());
-		assertArrayEquals(new String[] { "MOCK_ADMIN" }, admin.getGoogleAdministratorIds());
+		assertAdministrators(administrators, (a) -> new ConfigurationAdministrator(a.getGoogleId(), a.getNotes()),
+				admin.getAdministrators());
 		assertEquals("sandbox", admin.getPaypalEnvironment());
 		assertEquals("MOCK_CLIENT_PAYPAL_ID", admin.getPaypalClientId());
 		assertEquals("MOCK_CLIENT_PAYPAL_SECRET", admin.getPaypalClientSecret());
 		assertEquals("MOCK_CURRENCY", admin.getPaypalCurrency());
+	}
+
+	private static <T> void assertAdministrators(T[] configurationAdministrators,
+			Function<T, ConfigurationAdministrator> getConfigurationAdministrator, Administrator[] administrators) {
+		assertEquals("Incorrect number of administrators", configurationAdministrators.length, administrators.length);
+		for (int i = 0; i < configurationAdministrators.length; i++) {
+			ConfigurationAdministrator configurationAdministrator = getConfigurationAdministrator
+					.apply(configurationAdministrators[i]);
+			assertEquals(configurationAdministrator.getGoogleId(), administrators[i].getGoogleId());
+			assertEquals(configurationAdministrator.getNotes(), administrators[i].getNotes());
+		}
 	}
 
 }

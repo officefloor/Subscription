@@ -1,8 +1,14 @@
 {
 	"googleClientId": "MOCK_GOOGLE_CLIENT_ID",
-	"googleAdministratorIds": [
-		"MOCK_ADMIN_1",
-		"MOCK_ADMIN_2"
+	"administrators": [
+		{
+			"googleId": "MOCK_ADMIN_1",
+			"notes": "MOCK_NOTES_1"
+		},
+		{
+			"googleId": "MOCK_ADMIN_2",
+			"notes": "MOCK_NOTES_2"
+		}
 	],
 	"paypalEnvironment": "sandbox",
 	"paypalClientId": "MOCK_PAYPAL_CLIENT_ID",
