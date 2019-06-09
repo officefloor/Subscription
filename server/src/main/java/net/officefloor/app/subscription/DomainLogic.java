@@ -19,13 +19,14 @@ import com.paypal.orders.OrdersCreateRequest;
 import com.paypal.orders.PurchaseUnitRequest;
 
 import lombok.Value;
+import net.officefloor.app.subscription.store.Administration;
 import net.officefloor.app.subscription.store.Domain;
 import net.officefloor.app.subscription.store.Invoice;
 import net.officefloor.app.subscription.store.Payment;
 import net.officefloor.app.subscription.store.User;
 import net.officefloor.server.http.HttpException;
 import net.officefloor.server.http.HttpStatus;
-import net.officefloor.web.HttpObject;
+import net.officefloor.web.HttpPathParameter;
 import net.officefloor.web.ObjectResponse;
 
 /**
@@ -38,14 +39,6 @@ public class DomainLogic {
 	private static final String SUBSCRIPTION_VALUE = "4.54";
 	private static final String SUBSCRIPTION_TAX = "0.46";
 	private static final String SUBSCRIPTION_TOTAL = "5.00";
-	private static final String CURRENCY = "AUD";
-
-	@Value
-	@HttpObject
-	@Deprecated
-	public static class DomainOrderRequest {
-		private String domain;
-	}
 
 	@Value
 	public static class DomainCreatedOrder {
@@ -54,13 +47,21 @@ public class DomainLogic {
 		private String invoiceId;
 	}
 
-	public static void createOrder(User user, DomainOrderRequest request, Objectify objectify, PayPalHttpClient paypal,
-			ObjectResponse<DomainCreatedOrder> response) throws IOException {
+	public static void createOrder(User user, @HttpPathParameter("domain") String domainName, Objectify objectify,
+			PayPalHttpClient paypal, ObjectResponse<DomainCreatedOrder> response) throws IOException {
 
-		// TODO validate the domain
+		// TODO validate the domain name
+
+		// Obtain the administration
+		Administration administration = objectify.load().type(Administration.class).first().now();
+		if (administration == null) {
+			throw new HttpException(HttpStatus.SERVICE_UNAVAILABLE, "Server not initialised");
+		}
+
+		// Obtain the currency
+		String currency = administration.getPaypalCurrency();
 
 		// Create the invoice entry
-		String domainName = request.getDomain();
 		Invoice invoice = new Invoice(Ref.create(user), Invoice.PRODUCT_TYPE_DOMAIN, domainName);
 		objectify.save().entities(invoice).now();
 		String invoiceId = String.valueOf(invoice.getId());
@@ -72,14 +73,14 @@ public class DomainLogic {
 				.purchaseUnits(Arrays
 						.asList(new PurchaseUnitRequest().description("OfficeFloor domain subscription " + domainName)
 								.softDescriptor("OfficeFloor domain").invoiceId(invoiceId)
-								.amount(new AmountWithBreakdown().value(SUBSCRIPTION_TOTAL).currencyCode(CURRENCY)
+								.amount(new AmountWithBreakdown().value(SUBSCRIPTION_TOTAL).currencyCode(currency)
 										.breakdown(new AmountBreakdown()
-												.itemTotal(new Money().value(SUBSCRIPTION_VALUE).currencyCode(CURRENCY))
-												.taxTotal(new Money().value(SUBSCRIPTION_TAX).currencyCode(CURRENCY))))
+												.itemTotal(new Money().value(SUBSCRIPTION_VALUE).currencyCode(currency))
+												.taxTotal(new Money().value(SUBSCRIPTION_TAX).currencyCode(currency))))
 								.items(Arrays.asList(new Item().name("Subscription")
 										.description("Domain subscription " + domainName)
-										.unitAmount(new Money().value(SUBSCRIPTION_VALUE).currencyCode(CURRENCY))
-										.tax(new Money().value(SUBSCRIPTION_TAX).currencyCode(CURRENCY)).quantity("1")
+										.unitAmount(new Money().value(SUBSCRIPTION_VALUE).currencyCode(currency))
+										.tax(new Money().value(SUBSCRIPTION_TAX).currencyCode(currency)).quantity("1")
 										.category("DIGITAL_GOODS").url("http://" + domainName)))))));
 		Order order = orderResponse.result();
 
@@ -93,23 +94,14 @@ public class DomainLogic {
 	}
 
 	@Value
-	@HttpObject
-	public static class DomainCaptureRequest {
-		private String orderId;
-	}
-
-	@Value
 	public static class DomainCapturedOrder {
 		private String orderId;
 		private String status;
 		private String domain;
 	}
 
-	public static void captureOrder(User user, DomainCaptureRequest request, Objectify objectify,
+	public static void captureOrder(User user, @HttpPathParameter("orderId") String orderId, Objectify objectify,
 			PayPalHttpClient paypal, ObjectResponse<DomainCapturedOrder> response) throws IOException {
-
-		// Obtain the order id
-		String orderId = request.getOrderId();
 
 		// Obtain the invoice
 		Invoice invoice = objectify.load().type(Invoice.class).filter("paymentOrderId", orderId).first().now();

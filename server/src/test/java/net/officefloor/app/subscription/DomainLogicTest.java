@@ -17,10 +17,10 @@ import com.paypal.orders.Order;
 import com.paypal.orders.OrderRequest;
 import com.paypal.orders.PurchaseUnitRequest;
 
-import net.officefloor.app.subscription.DomainLogic.DomainCaptureRequest;
 import net.officefloor.app.subscription.DomainLogic.DomainCapturedOrder;
 import net.officefloor.app.subscription.DomainLogic.DomainCreatedOrder;
-import net.officefloor.app.subscription.DomainLogic.DomainOrderRequest;
+import net.officefloor.app.subscription.store.Administration;
+import net.officefloor.app.subscription.store.Administration.Administrator;
 import net.officefloor.app.subscription.store.Domain;
 import net.officefloor.app.subscription.store.Invoice;
 import net.officefloor.app.subscription.store.Payment;
@@ -31,8 +31,8 @@ import net.officefloor.server.http.HttpException;
 import net.officefloor.server.http.HttpMethod;
 import net.officefloor.server.http.HttpStatus;
 import net.officefloor.server.http.mock.MockHttpResponse;
-import net.officefloor.web.json.JacksonHttpObjectResponderFactory;
 import net.officefloor.web.jwt.mock.MockJwtAccessTokenRule;
+import net.officefloor.woof.mock.MockWoofResponse;
 import net.officefloor.woof.mock.MockWoofServer;
 import net.officefloor.woof.mock.MockWoofServerRule;
 
@@ -62,15 +62,19 @@ public class DomainLogicTest {
 
 		// Attempt to create order
 		User user = AuthenticateLogicTest.setupUser(this.objectify, "Daniel");
-		MockHttpResponse response = this.server
+		MockWoofResponse response = this.server
 				.send(this.jwt.authorize(user, MockWoofServer.mockRequest("/payments/domain/officefloor.org"))
 						.method(HttpMethod.POST).header("Accept", "application/json"));
-		response.assertResponse(503, JacksonHttpObjectResponderFactory
-				.getEntity(new HttpException(HttpStatus.SERVICE_UNAVAILABLE, "Server not initialised"), mapper));
+		response.assertJsonError(new HttpException(HttpStatus.SERVICE_UNAVAILABLE, "Server not initialised"));
 	}
 
 	@Test
 	public void createDomainOrder() throws Exception {
+
+		// Initialise
+		String CURRENCY = "MOCK_AUD";
+		this.objectify.store(new Administration("MOCK_GOOGLE_ID", new Administrator[0], "sandbox", "MOCK_PAYPAL_ID",
+				"MOCK_PAYPAL_SECRET", CURRENCY));
 
 		// Record
 		this.payPal.addOrdersCreateResponse(new Order().id("MOCK_ORDER_ID").status("CREATED")).validate((request) -> {
@@ -86,19 +90,19 @@ public class DomainLogicTest {
 			assertEquals("OfficeFloor domain", purchase.softDescriptor());
 			assertNotNull(purchase.invoiceId());
 			assertEquals("5.00", purchase.amount().value());
-			assertEquals("AUD", purchase.amount().currencyCode());
+			assertEquals(CURRENCY, purchase.amount().currencyCode());
 			assertEquals("4.54", purchase.amount().breakdown().itemTotal().value());
-			assertEquals("AUD", purchase.amount().breakdown().itemTotal().currencyCode());
+			assertEquals(CURRENCY, purchase.amount().breakdown().itemTotal().currencyCode());
 			assertEquals("0.46", purchase.amount().breakdown().taxTotal().value());
-			assertEquals("AUD", purchase.amount().breakdown().taxTotal().currencyCode());
+			assertEquals(CURRENCY, purchase.amount().breakdown().taxTotal().currencyCode());
 			assertEquals("Should only be one item", 1, purchase.items().size());
 			Item item = purchase.items().get(0);
 			assertEquals("Subscription", item.name());
 			assertEquals("Domain subscription officefloor.org", item.description());
 			assertEquals("4.54", item.unitAmount().value());
-			assertEquals("AUD", item.unitAmount().currencyCode());
+			assertEquals(CURRENCY, item.unitAmount().currencyCode());
 			assertEquals("0.46", item.tax().value());
-			assertEquals("AUD", item.tax().currencyCode());
+			assertEquals(CURRENCY, item.tax().currencyCode());
 			assertEquals("1", item.quantity());
 			assertEquals("DIGITAL_GOODS", item.category());
 			assertEquals("http://officefloor.org", item.url());
@@ -108,8 +112,7 @@ public class DomainLogicTest {
 		User user = AuthenticateLogicTest.setupUser(this.objectify, "Daniel");
 		MockHttpResponse response = this.server
 				.send(this.jwt.authorize(user, MockWoofServer.mockRequest("/payments/domain/officefloor.org"))
-						.method(HttpMethod.POST).header("content-type", "application/json")
-						.entity(mapper.writeValueAsString(new DomainOrderRequest("officefloor.org"))));
+						.method(HttpMethod.POST));
 
 		// Ensure correct response
 		String entity = response.getEntity(null);
@@ -144,10 +147,8 @@ public class DomainLogicTest {
 		this.objectify.store(invoice);
 
 		// Send request
-		MockHttpResponse response = this.server
-				.send(this.jwt.authorize(user, MockWoofServer.mockRequest("/captureDomainOrder"))
-						.method(HttpMethod.POST).header("content-type", "application/json")
-						.entity(mapper.writeValueAsString(new DomainCaptureRequest("MOCK_ORDER_ID"))));
+		MockHttpResponse response = this.server.send(this.jwt
+				.authorize(user, MockWoofServer.mockRequest("/payments/domain/MOCK_ORDER_ID")).method(HttpMethod.PUT));
 
 		// Ensure correct response
 		String entity = response.getEntity(null);
