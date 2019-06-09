@@ -28,16 +28,13 @@ import org.junit.Rule;
 import org.junit.Test;
 import org.junit.rules.RuleChain;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
-
 import net.officefloor.app.subscription.InitialiseLogic.Initialisation;
 import net.officefloor.app.subscription.store.Administration;
 import net.officefloor.app.subscription.store.Administration.Administrator;
 import net.officefloor.nosql.objectify.mock.ObjectifyRule;
 import net.officefloor.server.http.HttpException;
 import net.officefloor.server.http.HttpStatus;
-import net.officefloor.server.http.mock.MockHttpResponse;
-import net.officefloor.web.json.JacksonHttpObjectResponderFactory;
+import net.officefloor.woof.mock.MockWoofResponse;
 import net.officefloor.woof.mock.MockWoofServer;
 import net.officefloor.woof.mock.MockWoofServerRule;
 
@@ -55,8 +52,6 @@ public class InitialiseLogicTest {
 	@Rule
 	public RuleChain chain = RuleChain.outerRule(this.obectify).around(this.server);
 
-	private final ObjectMapper mapper = new ObjectMapper();
-
 	@Test
 	public void retrieveInitialisation() throws Exception {
 
@@ -69,18 +64,17 @@ public class InitialiseLogicTest {
 		this.obectify.store(administration);
 
 		// Ensure able to obtain initialisation from configuration
-		MockHttpResponse response = this.server
+		MockWoofResponse response = this.server
 				.send(MockWoofServer.mockRequest("/initialise").header("Accept", "application/json"));
-		response.assertResponse(200, mapper.writeValueAsString(
-				new Initialisation(true, "MOCK_GOOGLE_CLIENT_ID", "MOCK_PAYPAL_CLIENT_ID", "MOCK_PAYPAL_CURRENCY")));
+		response.assertJson(200,
+				new Initialisation(true, "MOCK_GOOGLE_CLIENT_ID", "MOCK_PAYPAL_CLIENT_ID", "MOCK_PAYPAL_CURRENCY"));
 	}
 
 	@Test
 	public void notYetInitialised() throws Exception {
-		MockHttpResponse response = this.server
+		MockWoofResponse response = this.server
 				.send(MockWoofServer.mockRequest("/initialise").header("Accept", "application/json"));
-		response.assertResponse(404, JacksonHttpObjectResponderFactory
-				.getEntity(new HttpException(HttpStatus.NOT_FOUND, "Application not configured"), mapper));
+		response.assertJsonError(new HttpException(HttpStatus.NOT_FOUND, "Application not configured"));
 	}
 
 	@Test
@@ -107,10 +101,10 @@ public class InitialiseLogicTest {
 		try {
 
 			// Ensure initialise from file
-			MockHttpResponse response = this.server
+			MockWoofResponse response = this.server
 					.send(MockWoofServer.mockRequest("/initialise").header("Accept", "application/json"));
-			response.assertResponse(200, mapper.writeValueAsString(new Initialisation(true, "MOCK_GOOGLE_CLIENT_ID",
-					"MOCK_PAYPAL_CLIENT_ID", "MOCK_PAYPAL_CURRENCY")));
+			response.assertJson(200,
+					new Initialisation(true, "MOCK_GOOGLE_CLIENT_ID", "MOCK_PAYPAL_CLIENT_ID", "MOCK_PAYPAL_CURRENCY"));
 
 		} finally {
 			if (resetFilePath == null) {

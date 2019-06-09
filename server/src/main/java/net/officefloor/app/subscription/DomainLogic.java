@@ -42,6 +42,7 @@ public class DomainLogic {
 
 	@Value
 	@HttpObject
+	@Deprecated
 	public static class DomainOrderRequest {
 		private String domain;
 	}

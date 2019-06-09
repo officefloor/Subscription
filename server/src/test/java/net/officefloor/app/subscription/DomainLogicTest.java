@@ -17,9 +17,9 @@ import com.paypal.orders.Order;
 import com.paypal.orders.OrderRequest;
 import com.paypal.orders.PurchaseUnitRequest;
 
-import net.officefloor.app.subscription.DomainLogic.DomainCreatedOrder;
 import net.officefloor.app.subscription.DomainLogic.DomainCaptureRequest;
 import net.officefloor.app.subscription.DomainLogic.DomainCapturedOrder;
+import net.officefloor.app.subscription.DomainLogic.DomainCreatedOrder;
 import net.officefloor.app.subscription.DomainLogic.DomainOrderRequest;
 import net.officefloor.app.subscription.store.Domain;
 import net.officefloor.app.subscription.store.Invoice;
@@ -27,8 +27,11 @@ import net.officefloor.app.subscription.store.Payment;
 import net.officefloor.app.subscription.store.User;
 import net.officefloor.nosql.objectify.mock.ObjectifyRule;
 import net.officefloor.pay.paypal.mock.PayPalRule;
+import net.officefloor.server.http.HttpException;
 import net.officefloor.server.http.HttpMethod;
+import net.officefloor.server.http.HttpStatus;
 import net.officefloor.server.http.mock.MockHttpResponse;
+import net.officefloor.web.json.JacksonHttpObjectResponderFactory;
 import net.officefloor.web.jwt.mock.MockJwtAccessTokenRule;
 import net.officefloor.woof.mock.MockWoofServer;
 import net.officefloor.woof.mock.MockWoofServerRule;
@@ -38,7 +41,7 @@ import net.officefloor.woof.mock.MockWoofServerRule;
  * 
  * @author Daniel Sagenschneider
  */
-public class DomainOrderTest {
+public class DomainLogicTest {
 
 	private static final ObjectMapper mapper = new ObjectMapper();
 
@@ -53,6 +56,18 @@ public class DomainOrderTest {
 	@Rule
 	public RuleChain chain = RuleChain.outerRule(this.jwt).around(this.payPal).around(this.objectify)
 			.around(this.server);
+
+	@Test
+	public void notInitialised() throws Exception {
+
+		// Attempt to create order
+		User user = AuthenticateLogicTest.setupUser(this.objectify, "Daniel");
+		MockHttpResponse response = this.server
+				.send(this.jwt.authorize(user, MockWoofServer.mockRequest("/payments/domain/officefloor.org"))
+						.method(HttpMethod.POST).header("Accept", "application/json"));
+		response.assertResponse(503, JacksonHttpObjectResponderFactory
+				.getEntity(new HttpException(HttpStatus.SERVICE_UNAVAILABLE, "Server not initialised"), mapper));
+	}
 
 	@Test
 	public void createDomainOrder() throws Exception {
@@ -92,8 +107,8 @@ public class DomainOrderTest {
 		// Send request
 		User user = AuthenticateLogicTest.setupUser(this.objectify, "Daniel");
 		MockHttpResponse response = this.server
-				.send(this.jwt.authorize(user, MockWoofServer.mockRequest("/createDomainOrder")).method(HttpMethod.POST)
-						.header("content-type", "application/json")
+				.send(this.jwt.authorize(user, MockWoofServer.mockRequest("/payments/domain/officefloor.org"))
+						.method(HttpMethod.POST).header("content-type", "application/json")
 						.entity(mapper.writeValueAsString(new DomainOrderRequest("officefloor.org"))));
 
 		// Ensure correct response

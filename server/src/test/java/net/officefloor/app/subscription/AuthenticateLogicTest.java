@@ -25,8 +25,8 @@ import net.officefloor.server.http.HttpException;
 import net.officefloor.server.http.HttpMethod;
 import net.officefloor.server.http.HttpStatus;
 import net.officefloor.server.http.mock.MockHttpResponse;
-import net.officefloor.server.http.mock.MockHttpServer;
-import net.officefloor.web.json.JacksonHttpObjectResponderFactory;
+import net.officefloor.woof.mock.MockWoofResponse;
+import net.officefloor.woof.mock.MockWoofServer;
 import net.officefloor.woof.mock.MockWoofServerRule;
 
 /**
@@ -83,11 +83,9 @@ public class AuthenticateLogicTest {
 	@Test
 	public void notInitialised() throws Exception {
 		String token = this.getMockIdToken("Not Initialised");
-		MockHttpResponse response = this.server.send(MockHttpServer.mockRequest("/authenticate").secure(true)
-				.method(HttpMethod.POST).header("Content-Type", "application/json")
-				.entity(this.mapper.writeValueAsString(new AuthenticateRequest(token))));
-		response.assertResponse(503, JacksonHttpObjectResponderFactory
-				.getEntity(new HttpException(HttpStatus.SERVICE_UNAVAILABLE, "Server not initialised"), mapper));
+		MockWoofResponse response = this.server.send(MockWoofServer
+				.mockJsonRequest(HttpMethod.POST, "/authenticate", new AuthenticateRequest(token)).secure(true));
+		response.assertJsonError(new HttpException(HttpStatus.SERVICE_UNAVAILABLE, "Server not initialised"));
 	}
 
 	@Test
@@ -98,9 +96,8 @@ public class AuthenticateLogicTest {
 
 		// Undertake authentication
 		String token = this.getMockIdToken("Guest User");
-		MockHttpResponse response = this.server.send(MockHttpServer.mockRequest("/authenticate").secure(true)
-				.method(HttpMethod.POST).header("Content-Type", "application/json")
-				.entity(this.mapper.writeValueAsString(new AuthenticateRequest(token))));
+		MockHttpResponse response = this.server.send(MockWoofServer
+				.mockJsonRequest(HttpMethod.POST, "/authenticate", new AuthenticateRequest(token)).secure(true));
 		String entity = response.getEntity(null);
 		assertEquals("Should be successful: " + entity, 200, response.getStatus().getStatusCode());
 
@@ -144,12 +141,11 @@ public class AuthenticateLogicTest {
 
 		// Undertake authentication (to update user)
 		String token = this.getMockIdToken(updatedName);
-		MockHttpResponse response = this.server.send(MockHttpServer.mockRequest("/authenticate").secure(true)
-				.method(HttpMethod.POST).header("Content-Type", "application/json")
-				.entity(this.mapper.writeValueAsString(new AuthenticateRequest(token))));
+		MockHttpResponse response = this.server.send(MockWoofServer
+				.mockJsonRequest(HttpMethod.POST, "/authenticate", new AuthenticateRequest(token)).secure(true));
 		assertEquals("Should be successful", 200, response.getStatus().getStatusCode());
 
-		// Validate signin (ensuring consistent state)
+		// Validate sign-in (ensuring consistent state)
 		GoogleSignin updatedSignin = this.objectify.consistent(
 				() -> this.objectify.get(GoogleSignin.class, originalSignin.getId()),
 				(checkSignin) -> "updated.user@officefloor.org".equals(checkSignin.getEmail()));
@@ -179,9 +175,8 @@ public class AuthenticateLogicTest {
 
 		// Undertake authentication
 		String token = this.getMockIdToken(name);
-		MockHttpResponse response = this.server.send(MockHttpServer.mockRequest("/authenticate").secure(true)
-				.method(HttpMethod.POST).header("Content-Type", "application/json")
-				.entity(this.mapper.writeValueAsString(new AuthenticateRequest(token))));
+		MockHttpResponse response = this.server.send(MockWoofServer
+				.mockJsonRequest(HttpMethod.POST, "/authenticate", new AuthenticateRequest(token)).secure(true));
 		assertEquals("Should be successful", 200, response.getStatus().getStatusCode());
 
 		// Ensure user created in store
@@ -198,9 +193,9 @@ public class AuthenticateLogicTest {
 		String refreshToken = this.authenticateResponse.getRefreshToken();
 
 		// Refresh the token
-		MockHttpResponse response = this.server.send(MockHttpServer.mockRequest("/refreshAccessToken").secure(true)
-				.method(HttpMethod.POST).header("Content-Type", "application/json")
-				.entity(this.mapper.writeValueAsString(new RefreshRequest(refreshToken))));
+		MockHttpResponse response = this.server.send(
+				MockWoofServer.mockJsonRequest(HttpMethod.POST, "/refreshAccessToken", new RefreshRequest(refreshToken))
+						.secure(true));
 		assertEquals("Should be successful", 200, response.getStatus().getStatusCode());
 		RefreshResponse refreshResponse = mapper.readValue(response.getEntity(null), RefreshResponse.class);
 
