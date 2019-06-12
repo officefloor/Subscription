@@ -87,18 +87,19 @@ public class ConfigureLogicTest {
 		this.objectify.store(existing);
 
 		// Configure system
+		final String UPDATED_GOOGLE_ID = "MOCK_GOOGLE_CLIENT_ID";
 		ConfigurationAdministrator[] configurationAdministrators = new ConfigurationAdministrator[] {
 				new ConfigurationAdministrator("MOCK_ADMIN_1", "MOCK_NOTES_1"),
 				new ConfigurationAdministrator("MOCK_ADMIN_2", "MOCK_NOTES_2") };
 		MockWoofResponse response = this.server.send(this.jwt.authorize(user,
 				MockWoofServer.mockJsonRequest(HttpMethod.POST, "/configuration",
-						new Configuration("MOCK_GOOGLE_CLIENT_ID", configurationAdministrators, "sandbox",
+						new Configuration(UPDATED_GOOGLE_ID, configurationAdministrators, "sandbox",
 								"MOCK_CLIENT_PAYPAL_ID", "MOCK_CLIENT_PAYPAL_SECRET", "MOCK_CURRENCY"))));
 		response.assertJson(200, new Configured(true));
 
 		// Ensure configured
 		Administration admin = this.objectify.consistent(() -> this.objectify.get(Administration.class),
-				(administration) -> "MOCK_GOOGLE_CLIENT_ID".equals(administration.getGoogleClientId()));
+				(administration) -> UPDATED_GOOGLE_ID.equals(administration.getGoogleClientId()));
 		assertEquals("Should only be one entry", existing.getId(), admin.getId());
 		assertEquals("MOCK_GOOGLE_CLIENT_ID", admin.getGoogleClientId());
 		assertAdministrators(configurationAdministrators, (a) -> a, admin.getAdministrators());

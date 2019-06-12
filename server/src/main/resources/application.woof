@@ -1,6 +1,6 @@
 <woof>
   <http-continuations>
-    <http-continuation path="/configuration" secure="false" x="831" y="561">
+    <http-continuation path="/configuration" secure="false" x="916" y="645">
       <section name="Configure" input="getConfiguration"/>
     </http-continuation>
     <http-continuation path="/configure" secure="false" x="989" y="482">
@@ -9,7 +9,7 @@
     <http-continuation path="/domains" secure="false" x="185" y="390">
       <section name="Domain" input="getDomains"/>
     </http-continuation>
-    <http-continuation path="/initialise" secure="false" x="845" y="709">
+    <http-continuation path="/initialise" secure="false" x="930" y="793">
       <section name="Initialise" input="getInitialisation"/>
     </http-continuation>
     <http-continuation path="/payments/domain/{domainName}" secure="false" x="84" y="478">
@@ -23,7 +23,7 @@
     <http-input path="/authenticate" method="POST" secure="false" x="127" y="67">
       <section name="Authenticate" input="authenticate"/>
     </http-input>
-    <http-input path="/configuration" method="POST" secure="false" x="811" y="607">
+    <http-input path="/configuration" method="POST" secure="false" x="896" y="691">
       <section name="Configure" input="updateConfiguration"/>
     </http-input>
     <http-input path="/invoices/domain/{domain}" method="POST" secure="false" x="81" y="216">
@@ -43,7 +43,7 @@
       <input name="authenticate" parameter-type=""/>
       <input name="refreshAccessToken" parameter-type=""/>
     </section>
-    <section name="Configure" source="net.officefloor.plugin.section.clazz.ClassSectionSource" location="net.officefloor.app.subscription.ConfigureLogic" x="1085" y="562">
+    <section name="Configure" source="net.officefloor.plugin.section.clazz.ClassSectionSource" location="net.officefloor.app.subscription.ConfigureLogic" x="1170" y="646">
       <input name="getConfiguration" parameter-type=""/>
       <input name="updateConfiguration" parameter-type=""/>
     </section>
@@ -55,8 +55,18 @@
     </section>
     <section name="DomainPayment" source="net.officefloor.plugin.section.clazz.ClassSectionSource" location="net.officefloor.app.subscription.DomainPaymentLogic" x="455" y="456">
       <input name="getDomainPayments" parameter-type=""/>
+      <input name="sendDomainPayments" parameter-type="[Lnet.officefloor.app.subscription.SubscriptionCalculator$Subscription;"/>
+      <output name="UsePayments" argument-type="java.util.List">
+        <section name="DomainPaymentCalculcator" input="calculateSubscriptions"/>
+      </output>
     </section>
-    <section name="Initialise" source="net.officefloor.plugin.section.clazz.ClassSectionSource" location="net.officefloor.app.subscription.InitialiseLogic" x="1087" y="695">
+    <section name="DomainPaymentCalculcator" source="net.officefloor.plugin.section.clazz.ClassSectionSource" location="net.officefloor.app.subscription.SubscriptionCalculator" x="522" y="542">
+      <input name="calculateSubscriptions" parameter-type="java.util.List"/>
+      <output name="Subscription" argument-type="[Lnet.officefloor.app.subscription.SubscriptionCalculator$Subscription;">
+        <section name="DomainPayment" input="sendDomainPayments"/>
+      </output>
+    </section>
+    <section name="Initialise" source="net.officefloor.plugin.section.clazz.ClassSectionSource" location="net.officefloor.app.subscription.InitialiseLogic" x="1172" y="779">
       <input name="getInitialisation" parameter-type=""/>
     </section>
     <section name="Invoice" source="net.officefloor.plugin.section.clazz.ClassSectionSource" location="net.officefloor.app.subscription.InvoiceLogic" x="450" y="194">
