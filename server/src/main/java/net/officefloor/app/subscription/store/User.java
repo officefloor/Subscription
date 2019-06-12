@@ -1,5 +1,7 @@
 package net.officefloor.app.subscription.store;
 
+import java.util.Date;
+
 import com.googlecode.objectify.annotation.Entity;
 import com.googlecode.objectify.annotation.Id;
 import com.googlecode.objectify.annotation.Index;
@@ -34,5 +36,7 @@ public class User {
 	private String photoUrl;
 
 	private String[] roles = new String[0];
+
+	private Date timestamp = ObjectifyEntities.getCreationTimestamp();
 
 }

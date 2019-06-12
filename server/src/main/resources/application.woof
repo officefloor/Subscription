@@ -1,13 +1,19 @@
 <woof>
   <http-continuations>
-    <http-continuation path="/configuration" secure="false" x="167" y="469">
+    <http-continuation path="/configuration" secure="false" x="167" y="528">
       <section name="Configure" input="getConfiguration"/>
     </http-continuation>
     <http-continuation path="/configure" secure="false" x="687" y="409">
       <resource path="/index.html"/>
     </http-continuation>
-    <http-continuation path="/initialise" secure="false" x="174" y="600">
+    <http-continuation path="/domains" secure="false" x="185" y="390">
+      <section name="Domain" input="getDomains"/>
+    </http-continuation>
+    <http-continuation path="/initialise" secure="false" x="174" y="659">
       <section name="Initialise" input="getInitialisation"/>
+    </http-continuation>
+    <http-continuation path="/payments/domain/{domainName}" secure="false" x="101" y="433">
+      <section name="Domain" input="getDomainPayments"/>
     </http-continuation>
   </http-continuations>
   <http-inputs>
@@ -17,17 +23,17 @@
     <http-input path="/authenticate" method="POST" secure="false" x="153" y="197">
       <section name="Authenticate" input="authenticate"/>
     </http-input>
-    <http-input path="/configuration" method="POST" secure="false" x="147" y="515">
+    <http-input path="/configuration" method="POST" secure="false" x="147" y="574">
       <section name="Configure" input="updateConfiguration"/>
     </http-input>
-    <http-input path="/payments/domain/{domain}" method="POST" secure="false" x="86" y="344">
+    <http-input path="/invoices/domain/{domain}" method="POST" secure="false" x="94" y="308">
       <section name="Domain" input="createOrder"/>
+    </http-input>
+    <http-input path="/payments/domain/{orderId}" method="POST" secure="false" x="91" y="346">
+      <section name="Domain" input="captureOrder"/>
     </http-input>
     <http-input path="/refreshAccessToken" method="POST" secure="false" x="133" y="254">
       <section name="Authenticate" input="refreshAccessToken"/>
-    </http-input>
-    <http-input path="/payments/domain/{orderId}" method="PUT" secure="false" x="91" y="387">
-      <section name="Domain" input="captureOrder"/>
     </http-input>
   </http-inputs>
   <templates>
@@ -37,18 +43,20 @@
       <input name="authenticate" parameter-type=""/>
       <input name="refreshAccessToken" parameter-type=""/>
     </section>
-    <section name="Configure" source="net.officefloor.plugin.section.clazz.ClassSectionSource" location="net.officefloor.app.subscription.ConfigureLogic" x="421" y="470">
+    <section name="Configure" source="net.officefloor.plugin.section.clazz.ClassSectionSource" location="net.officefloor.app.subscription.ConfigureLogic" x="421" y="529">
       <input name="getConfiguration" parameter-type=""/>
       <input name="updateConfiguration" parameter-type=""/>
     </section>
     <section name="Cors" source="net.officefloor.plugin.section.clazz.ClassSectionSource" location="net.officefloor.app.subscription.cors.Cors" x="426" y="84">
       <input name="options" parameter-type=""/>
     </section>
-    <section name="Domain" source="net.officefloor.plugin.section.clazz.ClassSectionSource" location="net.officefloor.app.subscription.DomainLogic" x="424" y="353">
+    <section name="Domain" source="net.officefloor.plugin.section.clazz.ClassSectionSource" location="net.officefloor.app.subscription.DomainLogic" x="455" y="312">
       <input name="captureOrder" parameter-type=""/>
       <input name="createOrder" parameter-type=""/>
+      <input name="getDomainPayments" parameter-type=""/>
+      <input name="getDomains" parameter-type=""/>
     </section>
-    <section name="Initialise" source="net.officefloor.plugin.section.clazz.ClassSectionSource" location="net.officefloor.app.subscription.InitialiseLogic" x="416" y="586">
+    <section name="Initialise" source="net.officefloor.plugin.section.clazz.ClassSectionSource" location="net.officefloor.app.subscription.InitialiseLogic" x="416" y="645">
       <input name="getInitialisation" parameter-type=""/>
     </section>
     <section name="JwtChallenge" source="net.officefloor.web.jwt.DefaultJwtChallengeSectionSource" location="" x="1035" y="75">

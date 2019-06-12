@@ -27,5 +27,5 @@ public class Refund {
 	@NonNull
 	private String reason;
 
-	private Date timestamp = new Date(System.currentTimeMillis());
+	private Date timestamp = ObjectifyEntities.getCreationTimestamp();
 }
