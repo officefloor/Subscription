@@ -27,7 +27,7 @@ import org.junit.rules.RuleChain;
 import com.googlecode.objectify.Ref;
 import com.paypal.orders.Order;
 
-import net.officefloor.app.subscription.PaymentLogic.CreatedPayment;
+import net.officefloor.app.subscription.PaymentService.CreatedPayment;
 import net.officefloor.app.subscription.store.Domain;
 import net.officefloor.app.subscription.store.Invoice;
 import net.officefloor.app.subscription.store.Payment;
@@ -45,7 +45,7 @@ import net.officefloor.woof.mock.MockWoofServerRule;
  * 
  * @author Daniel Sagenschneider
  */
-public class PaymentLogicTest {
+public class PaymentServiceTest {
 
 	private final MockJwtAccessTokenRule jwt = new MockJwtAccessTokenRule();
 
@@ -69,7 +69,7 @@ public class PaymentLogicTest {
 				});
 
 		// Setup the invoice
-		User user = AuthenticateLogicTest.setupUser(this.objectify, "Daniel");
+		User user = AuthenticateServiceTest.setupUser(this.objectify, "Daniel");
 		Invoice invoice = new Invoice(Ref.create(user), Domain.PRODUCT_TYPE, "officefloor.org");
 		invoice.setPaymentOrderId("MOCK_ORDER_ID");
 		this.objectify.store(invoice);

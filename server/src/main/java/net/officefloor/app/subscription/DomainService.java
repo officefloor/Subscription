@@ -20,7 +20,7 @@ import net.officefloor.web.ObjectResponse;
  * 
  * @author Daniel Sagenschneider
  */
-public class DomainLogic {
+public class DomainService {
 
 	@Value
 	public static class PaidDomain {

@@ -40,7 +40,7 @@ import net.officefloor.web.ObjectResponse;
  * 
  * @author Daniel Sagenschneider
  */
-public class DomainPaymentLogic {
+public class DomainPaymentService {
 
 	private static final String DOMAIN_PATH_PARAMETER = "domainName";
 

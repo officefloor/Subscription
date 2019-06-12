@@ -49,7 +49,7 @@ import net.officefloor.web.ObjectResponse;
  * 
  * @author Daniel Sagenschneider
  */
-public class InvoiceLogic {
+public class InvoiceService {
 
 	private static final String SUBSCRIPTION_VALUE = "4.54";
 	private static final String SUBSCRIPTION_TAX = "0.46";

@@ -45,7 +45,7 @@ import net.officefloor.web.ObjectResponse;
  * 
  * @author Daniel Sagenschneider
  */
-public class PaymentLogic {
+public class PaymentService {
 
 	@Value
 	public static class CreatedPayment {

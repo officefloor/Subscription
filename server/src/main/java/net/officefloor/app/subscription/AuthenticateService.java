@@ -25,7 +25,7 @@ import net.officefloor.web.jwt.authority.JwtAuthority;
 /**
  * Provides authentication.
  */
-public class AuthenticateLogic {
+public class AuthenticateService {
 
 	@Value
 	@HttpObject

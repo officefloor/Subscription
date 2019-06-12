@@ -28,7 +28,7 @@ import org.junit.Rule;
 import org.junit.Test;
 import org.junit.rules.RuleChain;
 
-import net.officefloor.app.subscription.InitialiseLogic.Initialisation;
+import net.officefloor.app.subscription.InitialiseService.Initialisation;
 import net.officefloor.app.subscription.store.Administration;
 import net.officefloor.app.subscription.store.Administration.Administrator;
 import net.officefloor.nosql.objectify.mock.ObjectifyRule;
@@ -39,11 +39,11 @@ import net.officefloor.woof.mock.MockWoofServer;
 import net.officefloor.woof.mock.MockWoofServerRule;
 
 /**
- * Tests the {@link InitialiseLogic}.
+ * Tests the {@link InitialiseService}.
  * 
  * @author Daniel Sagenschneider
  */
-public class InitialiseLogicTest {
+public class InitialiseServiceTest {
 
 	private ObjectifyRule obectify = new ObjectifyRule();
 
@@ -96,8 +96,8 @@ public class InitialiseLogicTest {
 	private void startupInitialisation(String initialiseFilePath) throws Exception {
 
 		// Ensure reset property
-		String resetFilePath = System.getProperty(InitialiseLogic.PROPERTY_INITIALISE_FILE_PATH);
-		System.setProperty(InitialiseLogic.PROPERTY_INITIALISE_FILE_PATH, initialiseFilePath);
+		String resetFilePath = System.getProperty(InitialiseService.PROPERTY_INITIALISE_FILE_PATH);
+		System.setProperty(InitialiseService.PROPERTY_INITIALISE_FILE_PATH, initialiseFilePath);
 		try {
 
 			// Ensure initialise from file
@@ -108,9 +108,9 @@ public class InitialiseLogicTest {
 
 		} finally {
 			if (resetFilePath == null) {
-				System.clearProperty(InitialiseLogic.PROPERTY_INITIALISE_FILE_PATH);
+				System.clearProperty(InitialiseService.PROPERTY_INITIALISE_FILE_PATH);
 			} else {
-				System.setProperty(InitialiseLogic.PROPERTY_INITIALISE_FILE_PATH, resetFilePath);
+				System.setProperty(InitialiseService.PROPERTY_INITIALISE_FILE_PATH, resetFilePath);
 			}
 		}
 

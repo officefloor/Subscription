@@ -9,7 +9,7 @@ import org.junit.Test;
 
 import com.googlecode.objectify.Ref;
 
-import net.officefloor.app.subscription.DomainLogic.PaidDomain;
+import net.officefloor.app.subscription.DomainService.PaidDomain;
 import net.officefloor.app.subscription.store.Domain;
 import net.officefloor.app.subscription.store.ObjectifyEntities;
 import net.officefloor.app.subscription.store.User;
@@ -21,13 +21,13 @@ import net.officefloor.woof.mock.MockWoofServer;
  * 
  * @author Daniel Sagenschneider
  */
-public class DomainLogicTest extends AbstractDomainTestCase {
+public class DomainServiceTest extends AbstractDomainTestCase {
 
 	@Test
 	public void noDomainsPaid() throws Exception {
 
 		// Setup user for payments
-		User user = AuthenticateLogicTest.setupUser(this.objectify, "Daniel");
+		User user = AuthenticateServiceTest.setupUser(this.objectify, "Daniel");
 
 		// Obtain the domains
 		MockWoofResponse response = this.server.send(this.jwt.authorize(user, MockWoofServer.mockRequest("/domains")));
@@ -38,11 +38,11 @@ public class DomainLogicTest extends AbstractDomainTestCase {
 	public void getDomains() throws Exception {
 
 		// Setup user for payments
-		User user = AuthenticateLogicTest.setupUser(this.objectify, "Daniel");
+		User user = AuthenticateServiceTest.setupUser(this.objectify, "Daniel");
 		Ref<User> userRef = Ref.create(user);
 
 		// Setup other user
-		User anotherUser = AuthenticateLogicTest.setupUser(this.objectify, "Another");
+		User anotherUser = AuthenticateServiceTest.setupUser(this.objectify, "Another");
 		Ref<User> anotherUserRef = Ref.create(anotherUser);
 
 		// Load the payments

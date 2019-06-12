@@ -39,21 +39,21 @@
   <templates>
   </templates>
   <sections>
-    <section name="Authenticate" source="net.officefloor.plugin.section.clazz.ClassSectionSource" location="net.officefloor.app.subscription.AuthenticateLogic" x="443" y="65">
+    <section name="Authenticate" source="net.officefloor.plugin.section.clazz.ClassSectionSource" location="net.officefloor.app.subscription.AuthenticateService" x="443" y="65">
       <input name="authenticate" parameter-type=""/>
       <input name="refreshAccessToken" parameter-type=""/>
     </section>
-    <section name="Configure" source="net.officefloor.plugin.section.clazz.ClassSectionSource" location="net.officefloor.app.subscription.ConfigureLogic" x="1170" y="646">
+    <section name="Configure" source="net.officefloor.plugin.section.clazz.ClassSectionSource" location="net.officefloor.app.subscription.ConfigureService" x="1170" y="646">
       <input name="getConfiguration" parameter-type=""/>
       <input name="updateConfiguration" parameter-type=""/>
     </section>
     <section name="Cors" source="net.officefloor.plugin.section.clazz.ClassSectionSource" location="net.officefloor.app.subscription.cors.Cors" x="1188" y="355">
       <input name="options" parameter-type=""/>
     </section>
-    <section name="Domain" source="net.officefloor.plugin.section.clazz.ClassSectionSource" location="net.officefloor.app.subscription.DomainLogic" x="452" y="368">
+    <section name="Domain" source="net.officefloor.plugin.section.clazz.ClassSectionSource" location="net.officefloor.app.subscription.DomainService" x="452" y="368">
       <input name="getDomains" parameter-type=""/>
     </section>
-    <section name="DomainPayment" source="net.officefloor.plugin.section.clazz.ClassSectionSource" location="net.officefloor.app.subscription.DomainPaymentLogic" x="455" y="456">
+    <section name="DomainPayment" source="net.officefloor.plugin.section.clazz.ClassSectionSource" location="net.officefloor.app.subscription.DomainPaymentService" x="455" y="456">
       <input name="getDomainPayments" parameter-type=""/>
       <input name="sendDomainPayments" parameter-type="[Lnet.officefloor.app.subscription.SubscriptionCalculator$Subscription;"/>
       <output name="UsePayments" argument-type="java.util.List">
@@ -66,10 +66,10 @@
         <section name="DomainPayment" input="sendDomainPayments"/>
       </output>
     </section>
-    <section name="Initialise" source="net.officefloor.plugin.section.clazz.ClassSectionSource" location="net.officefloor.app.subscription.InitialiseLogic" x="1172" y="779">
+    <section name="Initialise" source="net.officefloor.plugin.section.clazz.ClassSectionSource" location="net.officefloor.app.subscription.InitialiseService" x="1172" y="779">
       <input name="getInitialisation" parameter-type=""/>
     </section>
-    <section name="Invoice" source="net.officefloor.plugin.section.clazz.ClassSectionSource" location="net.officefloor.app.subscription.InvoiceLogic" x="450" y="194">
+    <section name="Invoice" source="net.officefloor.plugin.section.clazz.ClassSectionSource" location="net.officefloor.app.subscription.InvoiceService" x="450" y="194">
       <input name="createInvoice" parameter-type=""/>
     </section>
     <section name="JwtChallenge" source="net.officefloor.web.jwt.DefaultJwtChallengeSectionSource" location="" x="1180" y="34">
@@ -77,7 +77,7 @@
       <input name="INVALID_JWT" parameter-type=""/>
       <input name="NO_JWT" parameter-type=""/>
     </section>
-    <section name="Payment" source="net.officefloor.plugin.section.clazz.ClassSectionSource" location="net.officefloor.app.subscription.PaymentLogic" x="451" y="274">
+    <section name="Payment" source="net.officefloor.plugin.section.clazz.ClassSectionSource" location="net.officefloor.app.subscription.PaymentService" x="451" y="274">
       <input name="captureOrder" parameter-type=""/>
     </section>
     <section name="RetrieveKeys" source="net.officefloor.web.jwt.authority.combined.CombinedServerRetrieveValidateKeysSectionSource" location="" x="1186" y="155">

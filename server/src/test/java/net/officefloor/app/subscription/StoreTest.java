@@ -64,7 +64,7 @@ public class StoreTest {
 				e -> e.getAdministrators()[0].getNotes(), e -> e.getPaypalEnvironment(), e -> e.getPaypalClientId(),
 				e -> e.getPaypalClientSecret(), e -> e.getPaypalCurrency());
 
-		User user = this.entity(AuthenticateLogicTest.newUser("Daniel", "admin"), e -> e.getId(), e -> e.getEmail(),
+		User user = this.entity(AuthenticateServiceTest.newUser("Daniel", "admin"), e -> e.getId(), e -> e.getEmail(),
 				e -> e.getName(), e -> e.getPhotoUrl(), e -> e.getRoles()[0], e -> e.getTimestamp());
 		Ref<User> userRef = Ref.create(user);
 

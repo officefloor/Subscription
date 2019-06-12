@@ -25,7 +25,7 @@ import org.junit.Test;
 
 import com.googlecode.objectify.Ref;
 
-import net.officefloor.app.subscription.DomainPaymentLogic.DomainPayments;
+import net.officefloor.app.subscription.DomainPaymentService.DomainPayments;
 import net.officefloor.app.subscription.SubscriptionCalculator.Subscription;
 import net.officefloor.app.subscription.store.Domain;
 import net.officefloor.app.subscription.store.ObjectifyEntities;
@@ -37,16 +37,16 @@ import net.officefloor.woof.mock.MockWoofServer;
 /**
  * @author Daniel Sagenschneider
  */
-public class DomainPaymentLogicTest extends AbstractDomainTestCase {
+public class DomainPaymentServiceTest extends AbstractDomainTestCase {
 
 	@Test
 	public void noAccessToUnpaidDomain() throws Exception {
 
 		// Setup user for payments
-		User user = AuthenticateLogicTest.setupUser(this.objectify, "Daniel");
+		User user = AuthenticateServiceTest.setupUser(this.objectify, "Daniel");
 
 		// Setup another user
-		User anotherUser = AuthenticateLogicTest.setupUser(this.objectify, "Another");
+		User anotherUser = AuthenticateServiceTest.setupUser(this.objectify, "Another");
 
 		// Load the domain and payments for another user
 		this.setupPayment(Ref.create(anotherUser), "officefloor.org", false, ZonedDateTime.now(ObjectifyEntities.ZONE));
@@ -63,7 +63,7 @@ public class DomainPaymentLogicTest extends AbstractDomainTestCase {
 	public void getDomainPayments() throws Exception {
 
 		// Setup user for payments
-		User user = AuthenticateLogicTest.setupUser(this.objectify, "Daniel");
+		User user = AuthenticateServiceTest.setupUser(this.objectify, "Daniel");
 		Ref<User> userRef = Ref.create(user);
 
 		// Load the payments
@@ -92,7 +92,7 @@ public class DomainPaymentLogicTest extends AbstractDomainTestCase {
 	public void getOverlappingDomainPayments() throws Exception {
 
 		// Setup user for payments
-		User user = AuthenticateLogicTest.setupUser(this.objectify, "Daniel");
+		User user = AuthenticateServiceTest.setupUser(this.objectify, "Daniel");
 		Ref<User> userRef = Ref.create(user);
 
 		// Load the payments

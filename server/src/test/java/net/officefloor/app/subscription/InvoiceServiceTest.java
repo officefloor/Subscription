@@ -32,7 +32,7 @@ import com.paypal.orders.Order;
 import com.paypal.orders.OrderRequest;
 import com.paypal.orders.PurchaseUnitRequest;
 
-import net.officefloor.app.subscription.InvoiceLogic.CreatedInvoice;
+import net.officefloor.app.subscription.InvoiceService.CreatedInvoice;
 import net.officefloor.app.subscription.store.Administration;
 import net.officefloor.app.subscription.store.Administration.Administrator;
 import net.officefloor.app.subscription.store.Domain;
@@ -53,7 +53,7 @@ import net.officefloor.woof.mock.MockWoofServerRule;
  * 
  * @author Daniel Sagenschneider
  */
-public class InvoiceLogicTest {
+public class InvoiceServiceTest {
 
 	private final MockJwtAccessTokenRule jwt = new MockJwtAccessTokenRule();
 
@@ -71,7 +71,7 @@ public class InvoiceLogicTest {
 	public void notInitialised() throws Exception {
 
 		// Attempt to create order
-		User user = AuthenticateLogicTest.setupUser(this.objectify, "Daniel");
+		User user = AuthenticateServiceTest.setupUser(this.objectify, "Daniel");
 		MockWoofResponse response = this.server
 				.send(this.jwt.authorize(user, MockWoofServer.mockRequest("/invoices/domain/officefloor.org"))
 						.method(HttpMethod.POST));
@@ -119,7 +119,7 @@ public class InvoiceLogicTest {
 		});
 
 		// Send request
-		User user = AuthenticateLogicTest.setupUser(this.objectify, "Daniel");
+		User user = AuthenticateServiceTest.setupUser(this.objectify, "Daniel");
 		MockWoofResponse response = this.server
 				.send(this.jwt.authorize(user, MockWoofServer.mockRequest("/invoices/domain/officefloor.org"))
 						.method(HttpMethod.POST));

@@ -11,10 +11,10 @@ import org.junit.rules.RuleChain;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.googlecode.objectify.Ref;
 
-import net.officefloor.app.subscription.AuthenticateLogic.AuthenticateRequest;
-import net.officefloor.app.subscription.AuthenticateLogic.AuthenticateResponse;
-import net.officefloor.app.subscription.AuthenticateLogic.RefreshRequest;
-import net.officefloor.app.subscription.AuthenticateLogic.RefreshResponse;
+import net.officefloor.app.subscription.AuthenticateService.AuthenticateRequest;
+import net.officefloor.app.subscription.AuthenticateService.AuthenticateResponse;
+import net.officefloor.app.subscription.AuthenticateService.RefreshRequest;
+import net.officefloor.app.subscription.AuthenticateService.RefreshResponse;
 import net.officefloor.app.subscription.store.Administration;
 import net.officefloor.app.subscription.store.Administration.Administrator;
 import net.officefloor.app.subscription.store.GoogleSignin;
@@ -34,7 +34,7 @@ import net.officefloor.woof.mock.MockWoofServerRule;
  * 
  * @author Daniel Sagenschneider
  */
-public class AuthenticateLogicTest {
+public class AuthenticateServiceTest {
 
 	/**
 	 * Creates a new {@link User} without storing in database.

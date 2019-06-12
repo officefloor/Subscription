@@ -25,9 +25,9 @@ import org.junit.rules.RuleChain;
 
 import com.google.common.base.Function;
 
-import net.officefloor.app.subscription.ConfigureLogic.Configuration;
-import net.officefloor.app.subscription.ConfigureLogic.ConfigurationAdministrator;
-import net.officefloor.app.subscription.ConfigureLogic.Configured;
+import net.officefloor.app.subscription.ConfigureService.Configuration;
+import net.officefloor.app.subscription.ConfigureService.ConfigurationAdministrator;
+import net.officefloor.app.subscription.ConfigureService.Configured;
 import net.officefloor.app.subscription.store.Administration;
 import net.officefloor.app.subscription.store.Administration.Administrator;
 import net.officefloor.app.subscription.store.User;
@@ -45,7 +45,7 @@ import net.officefloor.woof.mock.MockWoofServerRule;
  * 
  * @author Daniel Sagenschneider
  */
-public class ConfigureLogicTest {
+public class ConfigureServiceTest {
 
 	private final MockJwtAccessTokenRule jwt = new MockJwtAccessTokenRule();
 
@@ -59,7 +59,7 @@ public class ConfigureLogicTest {
 	@Test
 	public void getConfiguration() throws Exception {
 
-		User user = AuthenticateLogicTest.newUser("Daniel", User.ROLE_ADMIN);
+		User user = AuthenticateServiceTest.newUser("Daniel", User.ROLE_ADMIN);
 
 		// Configure administration
 		Administration existing = new Administration("MOCK_GOOGLE_ID",
@@ -78,7 +78,7 @@ public class ConfigureLogicTest {
 	@Test
 	public void updateConfiguration() throws Exception {
 
-		User user = AuthenticateLogicTest.newUser("Daniel", User.ROLE_ADMIN);
+		User user = AuthenticateServiceTest.newUser("Daniel", User.ROLE_ADMIN);
 
 		// Configure administration
 		Administration existing = new Administration("MOCK_OVERRIDE_GOOGLE_ID",
@@ -119,7 +119,7 @@ public class ConfigureLogicTest {
 		this.objectify.store(administration);
 
 		// Non-admin attempt to get configuration
-		User user = AuthenticateLogicTest.newUser("Daniel");
+		User user = AuthenticateServiceTest.newUser("Daniel");
 		MockWoofResponse response = this.server.send(this.jwt
 				.authorize(user, MockWoofServer.mockRequest("/configuration")).header("Accept", "application/json"));
 		response.assertJsonError(new HttpException(HttpStatus.FORBIDDEN, "Forbidden"));
@@ -135,7 +135,7 @@ public class ConfigureLogicTest {
 		this.objectify.store(administration);
 
 		// Non-admin attempt to configure
-		User user = AuthenticateLogicTest.newUser("Daniel");
+		User user = AuthenticateServiceTest.newUser("Daniel");
 		ConfigurationAdministrator[] configurationAdministrators = new ConfigurationAdministrator[] {
 				new ConfigurationAdministrator("CHANGE_ADMIN_1", "CHANGE_NOTES_1"),
 				new ConfigurationAdministrator("CHANGE_ADMIN_2", "CHANGE_NOTES_2") };

@@ -27,7 +27,7 @@ import java.util.stream.Stream;
 import lombok.Data;
 import lombok.RequiredArgsConstructor;
 import lombok.Value;
-import net.officefloor.app.subscription.DomainPaymentLogic.DomainPayments;
+import net.officefloor.app.subscription.DomainPaymentService.DomainPayments;
 import net.officefloor.app.subscription.store.ObjectifyEntities;
 import net.officefloor.app.subscription.store.Payment;
 import net.officefloor.app.subscription.store.User;

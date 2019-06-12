@@ -40,7 +40,7 @@ import net.officefloor.web.ObjectResponse;
  * 
  * @author Daniel Sagenschneider
  */
-public class InitialiseLogic {
+public class InitialiseService {
 
 	public static final String PROPERTY_INITIALISE_FILE_PATH = "initialise.file.path";
 

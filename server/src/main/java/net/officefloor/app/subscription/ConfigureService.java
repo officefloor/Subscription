@@ -36,7 +36,7 @@ import net.officefloor.web.security.HttpAccess;
  * 
  * @author Daniel Sagenschneider
  */
-public class ConfigureLogic {
+public class ConfigureService {
 
 	@Value
 	@HttpObject
