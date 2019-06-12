@@ -79,7 +79,7 @@ public class InvoiceServiceTest {
 	}
 
 	@Test
-	public void createDomainOrder() throws Exception {
+	public void createInvoice() throws Exception {
 
 		// Initialise
 		String CURRENCY = "MOCK_AUD";

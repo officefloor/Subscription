@@ -17,9 +17,13 @@
  */
 package net.officefloor.app.subscription;
 
+import static net.officefloor.app.subscription.ResponseUtil.toText;
+
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.function.Function;
+import java.util.stream.Stream;
 
 import com.googlecode.objectify.Objectify;
 
@@ -48,12 +52,22 @@ public class DomainPaymentService {
 	public static class DomainPayments {
 		private String domainName;
 		private String expiresDate;
-		private Subscription[] payments;
+		private DomainPayment[] payments;
+	}
+
+	@Value
+	public static class DomainPayment {
+		private String paymentDate;
+		private String extendsToDate;
+		private boolean isRestartSubscription;
+		private String paidByName;
+		private String paidByEmail;
+		private String paymentOrderId;
 	}
 
 	@Next("UsePayments")
-	public static List<Payment> getDomainPayments(User user,
-			@HttpPathParameter(DOMAIN_PATH_PARAMETER) String domainName, Objectify objectify) throws IOException {
+	public static Payment[] getDomainPayments(User user, @HttpPathParameter(DOMAIN_PATH_PARAMETER) String domainName,
+			Objectify objectify) throws IOException {
 
 		/*
 		 * Note: too many payments is good problem to have. Means will have funds to
@@ -83,11 +97,24 @@ public class DomainPaymentService {
 		}
 
 		// Return the payments
-		return payments;
+		return payments.toArray(new Payment[payments.size()]);
 	}
 
-	public static void sendDomainPayments(@Parameter Subscription[] domainPayments,
+	public static void sendDomainPayments(@Parameter Subscription[] subscriptions,
 			@HttpPathParameter(DOMAIN_PATH_PARAMETER) String domainName, ObjectResponse<DomainPayments> response) {
+
+		// Create domain payments from subscriptions
+		Function<Subscription, String> name = (subscription) -> subscription == null ? null
+				: subscription.getPaidBy().getName();
+		Function<Subscription, String> email = (subscription) -> subscription == null ? null
+				: subscription.getPaidBy().getEmail();
+		DomainPayment[] domainPayments = Stream.of(subscriptions).map((subscription) -> {
+			return new DomainPayment(toText(subscription.getPaymentDate()), toText(subscription.getExtendsToDate()),
+					subscription.isRestartSubscription(), name.apply(subscription), email.apply(subscription),
+					subscription.getPaymentOrderId());
+		}).toArray(DomainPayment[]::new);
+
+		// Send the response
 		response.send(new DomainPayments(domainName, domainPayments[0].getExtendsToDate(), domainPayments));
 	}
 

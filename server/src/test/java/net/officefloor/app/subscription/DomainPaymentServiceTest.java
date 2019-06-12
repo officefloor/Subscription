@@ -25,8 +25,8 @@ import org.junit.Test;
 
 import com.googlecode.objectify.Ref;
 
+import net.officefloor.app.subscription.DomainPaymentService.DomainPayment;
 import net.officefloor.app.subscription.DomainPaymentService.DomainPayments;
-import net.officefloor.app.subscription.SubscriptionCalculator.Subscription;
 import net.officefloor.app.subscription.store.Domain;
 import net.officefloor.app.subscription.store.ObjectifyEntities;
 import net.officefloor.app.subscription.store.User;
@@ -79,12 +79,12 @@ public class DomainPaymentServiceTest extends AbstractDomainTestCase {
 		MockWoofResponse response = this.server
 				.send(this.jwt.authorize(user, MockWoofServer.mockRequest("/payments/domain/officefloor.org")));
 		response.assertJson(200,
-				new DomainPayments("officefloor.org", ResponseUtil.toText(now), new Subscription[] {
-						new Subscription(toText(thirdPaymentDate), toText(now), false, "Daniel",
+				new DomainPayments("officefloor.org", ResponseUtil.toText(now), new DomainPayment[] {
+						new DomainPayment(toText(thirdPaymentDate), toText(now), false, "Daniel",
 								"daniel@officefloor.org", null),
-						new Subscription(toText(secondPaymentDate), toText(thirdPaymentDate), true, "Daniel",
+						new DomainPayment(toText(secondPaymentDate), toText(thirdPaymentDate), true, "Daniel",
 								"daniel@officefloor.org", null),
-						new Subscription(toText(firstPaymentDate), toText(firstPaymentDate.plus(1, ChronoUnit.YEARS)),
+						new DomainPayment(toText(firstPaymentDate), toText(firstPaymentDate.plus(1, ChronoUnit.YEARS)),
 								false, "Daniel", "daniel@officefloor.org", null) }));
 	}
 
@@ -103,9 +103,9 @@ public class DomainPaymentServiceTest extends AbstractDomainTestCase {
 		}
 
 		// Load the expected payment responses
-		Subscription[] payments = new Subscription[NUMBER_OF_PAYMENTS];
+		DomainPayment[] payments = new DomainPayment[NUMBER_OF_PAYMENTS];
 		for (int i = 0; i < NUMBER_OF_PAYMENTS; i++) {
-			payments[NUMBER_OF_PAYMENTS - 1 - i] = new Subscription(toText(now.plus(i, ChronoUnit.SECONDS)),
+			payments[NUMBER_OF_PAYMENTS - 1 - i] = new DomainPayment(toText(now.plus(i, ChronoUnit.SECONDS)),
 					toText(now.plus(i + 1, ChronoUnit.YEARS)), false, "Daniel", "daniel@officefloor.org", null);
 		}
 

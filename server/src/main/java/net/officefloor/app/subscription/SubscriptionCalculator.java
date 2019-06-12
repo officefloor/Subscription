@@ -17,7 +17,6 @@
  */
 package net.officefloor.app.subscription;
 
-import java.io.IOException;
 import java.time.ZonedDateTime;
 import java.time.temporal.ChronoUnit;
 import java.util.ArrayList;
@@ -43,11 +42,10 @@ public class SubscriptionCalculator {
 
 	@Value
 	public static class Subscription {
-		private String paymentDate;
-		private String extendsToDate;
+		private ZonedDateTime paymentDate;
+		private ZonedDateTime extendsToDate;
 		private boolean isRestartSubscription;
-		private String paidByName;
-		private String paidByEmail;
+		private User paidBy;
 		private String paymentOrderId;
 	}
 
@@ -56,26 +54,37 @@ public class SubscriptionCalculator {
 	private static class PaymentState {
 		private final Payment payment;
 		private final User payer;
-		private final boolean isPaidByUser;
 		private final ZonedDateTime paymentDate;
+		private final String paymentOrderId;
 		private ZonedDateTime extendsToDate = null;
 	}
 
 	@Next("Subscription")
-	public static Subscription[] calculateSubscriptions(User user, @Parameter List<Payment> payments)
-			throws IOException {
+	public static Subscription[] calculateSubscriptions(User user, @Parameter Payment... payments) {
+
+		// Ensure have payments
+		if ((payments == null) || (payments.length == 0)) {
+			return new Subscription[0];
+		}
 
 		// Obtain payments for the domain
-		List<PaymentState> paymentStates = new ArrayList<>();
+		List<PaymentState> paymentStates = new ArrayList<>(payments.length);
 		for (Payment payment : payments) {
 
-			// Determine if paid by user
+			// Obtain details of payment
+			ZonedDateTime paymentDate = payment.getTimestamp().toInstant().atZone(ObjectifyEntities.ZONE);
 			User payer = payment.getUser().get();
-			boolean isPaidByUser = (payer != null) && (user.getId().equals(payer.getId()));
+			String paymentOrderId = payment.getInvoice().get().getPaymentOrderId();
+
+			// Determine if paid by user
+			if ((payer == null) || (!user.getId().equals(payer.getId()))) {
+				// Not paid by user (so no access to details)
+				payer = null;
+				paymentOrderId = null;
+			}
 
 			// Add payment
-			paymentStates.add(new PaymentState(payment, payer, isPaidByUser,
-					payment.getTimestamp().toInstant().atZone(ObjectifyEntities.ZONE)));
+			paymentStates.add(new PaymentState(payment, payer, paymentDate, paymentOrderId));
 		}
 
 		// Sort the payment states reverse chronologically
@@ -97,13 +106,13 @@ public class SubscriptionCalculator {
 			// Determine expires to date
 			expiresToDate = expiresToDate.plus(1, ChronoUnit.YEARS);
 			state.setExtendsToDate(expiresToDate);
+
 		}
 
 		// Construct response
 		return Stream.of(states)
-				.map((state) -> new Subscription(ResponseUtil.toText(state.getPayment().getTimestamp()),
-						ResponseUtil.toText(state.getExtendsToDate()), state.getPayment().getIsRestartSubscription(),
-						state.getPayer().getName(), state.getPayer().getEmail(),
+				.map((state) -> new Subscription(state.getPaymentDate(), state.getExtendsToDate(),
+						state.getPayment().getIsRestartSubscription(), state.getPayer(),
 						state.getPayment().getInvoice().get().getPaymentOrderId()))
 				.toArray(Subscription[]::new);
 	}

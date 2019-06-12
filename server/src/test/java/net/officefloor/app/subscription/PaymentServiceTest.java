@@ -60,7 +60,7 @@ public class PaymentServiceTest {
 			.around(this.server);
 
 	@Test
-	public void captureDomainOrder() throws Exception {
+	public void createPayment() throws Exception {
 
 		// Record
 		this.payPal.addOrdersCaptureResponse(new Order().id("MOCK_ORDER_ID").status("COMPLETED"))
