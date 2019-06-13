@@ -67,11 +67,13 @@ public class InvoiceServiceTest {
 	public RuleChain chain = RuleChain.outerRule(this.jwt).around(this.payPal).around(this.objectify)
 			.around(this.server);
 
+	private final TestHelper helper = new TestHelper(this.objectify);
+
 	@Test
 	public void notInitialised() throws Exception {
 
 		// Attempt to create order
-		User user = AuthenticateServiceTest.setupUser(this.objectify, "Daniel");
+		User user = this.helper.setupUser("Daniel");
 		MockWoofResponse response = this.server
 				.send(this.jwt.authorize(user, MockWoofServer.mockRequest("/invoices/domain/officefloor.org"))
 						.method(HttpMethod.POST));
@@ -119,7 +121,7 @@ public class InvoiceServiceTest {
 		});
 
 		// Send request
-		User user = AuthenticateServiceTest.setupUser(this.objectify, "Daniel");
+		User user = this.helper.setupUser("Daniel");
 		MockWoofResponse response = this.server
 				.send(this.jwt.authorize(user, MockWoofServer.mockRequest("/invoices/domain/officefloor.org"))
 						.method(HttpMethod.POST));

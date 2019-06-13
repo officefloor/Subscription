@@ -17,11 +17,15 @@
  */
 package net.officefloor.app.subscription;
 
+import static net.officefloor.app.subscription.TestHelper.toText;
+
 import java.time.ZonedDateTime;
 import java.time.temporal.ChronoUnit;
 import java.util.Date;
 
+import org.junit.Rule;
 import org.junit.Test;
+import org.junit.rules.RuleChain;
 
 import com.googlecode.objectify.Ref;
 
@@ -30,26 +34,41 @@ import net.officefloor.app.subscription.DomainPaymentService.DomainPayments;
 import net.officefloor.app.subscription.store.Domain;
 import net.officefloor.app.subscription.store.ObjectifyEntities;
 import net.officefloor.app.subscription.store.User;
+import net.officefloor.nosql.objectify.mock.ObjectifyRule;
 import net.officefloor.server.http.HttpException;
+import net.officefloor.web.jwt.mock.MockJwtAccessTokenRule;
 import net.officefloor.woof.mock.MockWoofResponse;
 import net.officefloor.woof.mock.MockWoofServer;
+import net.officefloor.woof.mock.MockWoofServerRule;
 
 /**
  * @author Daniel Sagenschneider
  */
-public class DomainPaymentServiceTest extends AbstractDomainTestCase {
+public class DomainPaymentServiceTest {
+
+	private final MockJwtAccessTokenRule jwt = new MockJwtAccessTokenRule();
+
+	private final ObjectifyRule objectify = new ObjectifyRule();
+
+	private final MockWoofServerRule server = new MockWoofServerRule();
+
+	@Rule
+	public final RuleChain chain = RuleChain.outerRule(this.jwt).around(this.objectify).around(this.server);
+
+	private final TestHelper helper = new TestHelper(this.objectify);
 
 	@Test
 	public void noAccessToUnpaidDomain() throws Exception {
 
 		// Setup user for payments
-		User user = AuthenticateServiceTest.setupUser(this.objectify, "Daniel");
+		User user = this.helper.setupUser("Daniel");
 
 		// Setup another user
-		User anotherUser = AuthenticateServiceTest.setupUser(this.objectify, "Another");
+		User anotherUser = this.helper.setupUser("Another");
 
 		// Load the domain and payments for another user
-		this.setupPayment(Ref.create(anotherUser), "officefloor.org", false, ZonedDateTime.now(ObjectifyEntities.ZONE));
+		this.helper.setupPayment(Ref.create(anotherUser), "officefloor.org", false,
+				ZonedDateTime.now(ObjectifyEntities.ZONE));
 		this.objectify
 				.store(new Domain("officefloor.org", Date.from(ZonedDateTime.now(ObjectifyEntities.ZONE).toInstant())));
 
@@ -63,7 +82,7 @@ public class DomainPaymentServiceTest extends AbstractDomainTestCase {
 	public void getDomainPayments() throws Exception {
 
 		// Setup user for payments
-		User user = AuthenticateServiceTest.setupUser(this.objectify, "Daniel");
+		User user = this.helper.setupUser("Daniel");
 		Ref<User> userRef = Ref.create(user);
 
 		// Load the payments
@@ -71,9 +90,9 @@ public class DomainPaymentServiceTest extends AbstractDomainTestCase {
 		ZonedDateTime firstPaymentDate = now.minus(4, ChronoUnit.YEARS);
 		ZonedDateTime secondPaymentDate = now.minus(2, ChronoUnit.YEARS);
 		ZonedDateTime thirdPaymentDate = now.minus(1, ChronoUnit.YEARS);
-		this.setupPayment(userRef, "officefloor.org", false, firstPaymentDate);
-		this.setupPayment(userRef, "officefloor.org", true, secondPaymentDate);
-		this.setupPayment(userRef, "officefloor.org", false, thirdPaymentDate);
+		this.helper.setupPayment(userRef, "officefloor.org", false, firstPaymentDate);
+		this.helper.setupPayment(userRef, "officefloor.org", true, secondPaymentDate);
+		this.helper.setupPayment(userRef, "officefloor.org", false, thirdPaymentDate);
 
 		// Obtain the payments
 		MockWoofResponse response = this.server
@@ -92,14 +111,14 @@ public class DomainPaymentServiceTest extends AbstractDomainTestCase {
 	public void getOverlappingDomainPayments() throws Exception {
 
 		// Setup user for payments
-		User user = AuthenticateServiceTest.setupUser(this.objectify, "Daniel");
+		User user = this.helper.setupUser("Daniel");
 		Ref<User> userRef = Ref.create(user);
 
 		// Load the payments
 		ZonedDateTime now = ZonedDateTime.now(ObjectifyEntities.ZONE);
 		final int NUMBER_OF_PAYMENTS = 10;
 		for (int i = 0; i < NUMBER_OF_PAYMENTS; i++) {
-			this.setupPayment(userRef, "officefloor.org", false, now.plus(i, ChronoUnit.SECONDS));
+			this.helper.setupPayment(userRef, "officefloor.org", false, now.plus(i, ChronoUnit.SECONDS));
 		}
 
 		// Load the expected payment responses

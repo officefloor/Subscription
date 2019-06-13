@@ -72,7 +72,12 @@ public class SubscriptionCalculator {
 
 		// Obtain payments for the domain
 		List<PaymentState> paymentStates = new ArrayList<>(payments.length);
-		for (Payment payment : payments) {
+		NEXT_PAYMENT: for (Payment payment : payments) {
+
+			// Ignore payment if refunded
+			if ((payment.getRefund() != null) && (payment.getRefund().get() != null)) {
+				continue NEXT_PAYMENT;
+			}
 
 			// Obtain details of payment
 			ZonedDateTime paymentDate = payment.getTimestamp().toInstant().atZone(ObjectifyEntities.ZONE);

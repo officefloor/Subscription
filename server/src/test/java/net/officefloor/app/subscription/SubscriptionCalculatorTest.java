@@ -41,6 +41,7 @@ import net.officefloor.app.subscription.store.Domain;
 import net.officefloor.app.subscription.store.Invoice;
 import net.officefloor.app.subscription.store.ObjectifyEntities;
 import net.officefloor.app.subscription.store.Payment;
+import net.officefloor.app.subscription.store.Refund;
 import net.officefloor.app.subscription.store.User;
 import net.officefloor.nosql.objectify.mock.ObjectifyRule;
 
@@ -53,6 +54,8 @@ public class SubscriptionCalculatorTest {
 
 	@Rule
 	public ObjectifyRule objectify = new ObjectifyRule();
+
+	private final TestHelper helper = new TestHelper(this.objectify);
 
 	private User user;
 
@@ -114,6 +117,16 @@ public class SubscriptionCalculatorTest {
 	}
 
 	@Test
+	public void ignoreRefundedPayments() {
+		VerifiablePayment refunded = payment(now.plus(1, ChronoUnit.MONTHS), null);
+		Refund refund = new Refund("TEST");
+		this.objectify.store(refund);
+		refunded.setRefund(Ref.create(refund));
+		this.verifySubscriptionCalculation(payment(now.plus(2, ChronoUnit.MONTHS), now.plus(2, ChronoUnit.YEARS)),
+				refunded, payment(now, now.plus(1, ChronoUnit.YEARS)));
+	}
+
+	@Test
 	public void accessOwnPayments() {
 
 		// Create payments as user
@@ -135,7 +148,7 @@ public class SubscriptionCalculatorTest {
 	public void notAccessOtherUserPayments() {
 
 		// Create payments on another user
-		Ref<User> anotherRef = Ref.create(AuthenticateServiceTest.setupUser(this.objectify, "Another"));
+		Ref<User> anotherRef = Ref.create(this.helper.setupUser("Another"));
 		Subscription[] subscriptions = this.verifySubscriptionCalculation(
 				payment(anotherRef, now.plus(2, ChronoUnit.MONTHS), false, now.plus(3, ChronoUnit.YEARS)),
 				payment(anotherRef, now.plus(1, ChronoUnit.MONTHS), false, now.plus(2, ChronoUnit.YEARS)),
@@ -153,11 +166,11 @@ public class SubscriptionCalculatorTest {
 	public void adminAccessAllPayments() {
 
 		// Setup user as admin
-		this.user = AuthenticateServiceTest.setupUser(this.objectify, "Daniel", User.ROLE_ADMIN);
+		this.user = this.helper.setupUser("Daniel", User.ROLE_ADMIN);
 		this.userRef = Ref.create(this.user);
 
 		// Create payments on another user
-		Ref<User> anotherRef = Ref.create(AuthenticateServiceTest.setupUser(this.objectify, "Another"));
+		Ref<User> anotherRef = Ref.create(this.helper.setupUser("Another"));
 		Subscription[] subscriptions = this.verifySubscriptionCalculation(
 				payment(anotherRef, now.plus(2, ChronoUnit.MONTHS), false, now.plus(3, ChronoUnit.YEARS)),
 				payment(anotherRef, now.plus(1, ChronoUnit.MONTHS), false, now.plus(2, ChronoUnit.YEARS)),
@@ -176,7 +189,8 @@ public class SubscriptionCalculatorTest {
 	public void setup() {
 		ObjectifyService.register(User.class);
 		ObjectifyService.register(Invoice.class);
-		this.user = AuthenticateServiceTest.setupUser(this.objectify, "Daniel");
+		ObjectifyService.register(Refund.class);
+		this.user = this.helper.setupUser("Daniel");
 		this.userRef = Ref.create(this.user);
 		this.invoice = new Invoice(this.userRef, Domain.PRODUCT_TYPE, "officefloor.org");
 		this.invoice.setPaymentOrderId("MOCK_PAYMENT_ORDER_ID");

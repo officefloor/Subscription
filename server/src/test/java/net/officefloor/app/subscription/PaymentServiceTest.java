@@ -19,6 +19,7 @@ package net.officefloor.app.subscription;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.fail;
 
 import org.junit.Rule;
 import org.junit.Test;
@@ -27,7 +28,7 @@ import org.junit.rules.RuleChain;
 import com.googlecode.objectify.Ref;
 import com.paypal.orders.Order;
 
-import net.officefloor.app.subscription.PaymentService.CreatedPayment;
+import net.officefloor.app.subscription.PaymentService.CapturedPayment;
 import net.officefloor.app.subscription.store.Domain;
 import net.officefloor.app.subscription.store.Invoice;
 import net.officefloor.app.subscription.store.Payment;
@@ -59,6 +60,33 @@ public class PaymentServiceTest {
 	public RuleChain chain = RuleChain.outerRule(this.jwt).around(this.payPal).around(this.objectify)
 			.around(this.server);
 
+	private final TestHelper helper = new TestHelper(this.objectify);
+
+	@Test
+	public void createFirstDomainPayment() throws Exception {
+		fail("TODO test create first payment");
+	}
+
+	@Test
+	public void extendSubscription() throws Exception {
+		fail("TODO test extend payment");
+	}
+
+	@Test
+	public void extendSubscriptionOnLatePayment() throws Exception {
+		fail("TODO test extend payment on late payment");
+	}
+
+	@Test
+	public void extendSubscriptionIgnoringRestart() throws Exception {
+		fail("TODO test extend payment ignoring restart as not necessary");
+	}
+
+	@Test
+	public void restartSubscription() throws Exception {
+		fail("TODO test restart domain subscription");
+	}
+
 	@Test
 	public void createPayment() throws Exception {
 
@@ -69,7 +97,7 @@ public class PaymentServiceTest {
 				});
 
 		// Setup the invoice
-		User user = AuthenticateServiceTest.setupUser(this.objectify, "Daniel");
+		User user = this.helper.setupUser("Daniel");
 		Invoice invoice = new Invoice(Ref.create(user), Domain.PRODUCT_TYPE, "officefloor.org");
 		invoice.setPaymentOrderId("MOCK_ORDER_ID");
 		this.objectify.store(invoice);
@@ -79,7 +107,7 @@ public class PaymentServiceTest {
 				.authorize(user, MockWoofServer.mockRequest("/payments/domain/MOCK_ORDER_ID")).method(HttpMethod.POST));
 
 		// Ensure correct response
-		CreatedPayment order = response.getJson(200, CreatedPayment.class);
+		CapturedPayment order = response.getJson(200, CapturedPayment.class);
 		assertEquals("Incorrect order ID", "MOCK_ORDER_ID", order.getOrderId());
 		assertEquals("Incorrect status", "COMPLETED", order.getStatus());
 		assertEquals("Incorrect domain", "officefloor.org", order.getDomain());
@@ -88,8 +116,12 @@ public class PaymentServiceTest {
 		Payment payment = this.objectify.get(Payment.class);
 		assertEquals("Incorrect invoice", invoice.getId(), payment.getInvoice().get().getId());
 		assertEquals("Incorrect user for payment", user.getId(), payment.getUser().get().getId());
+		assertEquals("Incorrect product type", Domain.PRODUCT_TYPE, payment.getProductType());
+		assertEquals("Incorrect product reference", "officefloor.org", payment.getProductReference());
 		assertEquals("Incorrect amount", Integer.valueOf(5_00), payment.getAmount());
 		assertEquals("Incorrect receipt", "CAPTURE_ID", payment.getReceipt());
+		assertEquals("Incorrect restart subscription", Boolean.valueOf(false), payment.getIsRestartSubscription());
+		assertNotNull("Should have payment timestamp", payment.getTimestamp());
 
 		// Ensure domain capture in data store
 		Domain domain = this.objectify.get(Domain.class);

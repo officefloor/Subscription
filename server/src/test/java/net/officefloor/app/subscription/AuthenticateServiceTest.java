@@ -36,37 +36,6 @@ import net.officefloor.woof.mock.MockWoofServerRule;
  */
 public class AuthenticateServiceTest {
 
-	/**
-	 * Creates a new {@link User} without storing in database.
-	 * 
-	 * @param name  Name of {@link User}.
-	 * @param roles Roles.
-	 * @return {@link User}.
-	 */
-	public static User newUser(String name, String... roles) {
-		String dotName = name.replaceAll("\\s", ".").toLowerCase();
-		String noSpaceName = name.replaceAll("\\s", "_");
-		User user = new User(dotName + "@officefloor.org");
-		user.setName(name);
-		user.setPhotoUrl("https://google.com/" + noSpaceName + "_photo.png");
-		user.setRoles(roles);
-		return user;
-	}
-
-	/**
-	 * Sets up a {@link User} in database.
-	 * 
-	 * @param objectify {@link ObjectifyRule}.
-	 * @param name      Name of {@link User}.
-	 * @param roles     Roles.
-	 * @return {@link User}.
-	 */
-	public static User setupUser(ObjectifyRule objectify, String name, String... roles) {
-		User user = newUser(name, roles);
-		objectify.store(user);
-		return user;
-	}
-
 	private GoogleIdTokenRule verifier = new GoogleIdTokenRule();
 
 	private ObjectifyRule objectify = new ObjectifyRule();
@@ -133,7 +102,7 @@ public class AuthenticateServiceTest {
 		String name = "Existing User";
 		String updatedName = "Updated User";
 		String existingGoogleId = this.getGoogleUserId(updatedName);
-		User originalUser = newUser(name, "some_role");
+		User originalUser = TestHelper.newUser(name, "some_role");
 		this.objectify.store(originalUser);
 		GoogleSignin originalSignin = new GoogleSignin(existingGoogleId, originalUser.getEmail());
 		originalSignin.setUser(Ref.create(originalUser));
@@ -209,7 +178,7 @@ public class AuthenticateServiceTest {
 	}
 
 	private String getMockIdToken(String name) throws Exception {
-		User user = newUser(name);
+		User user = TestHelper.newUser(name);
 		return this.verifier.getMockIdToken(this.getGoogleUserId(name), user.getEmail(), "email_verified", "true",
 				"name", name, "picture", user.getPhotoUrl());
 	}

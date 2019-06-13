@@ -48,14 +48,14 @@ import net.officefloor.web.ObjectResponse;
 public class PaymentService {
 
 	@Value
-	public static class CreatedPayment {
+	public static class CapturedPayment {
 		private String orderId;
 		private String status;
 		private String domain;
 	}
 
 	public static void capturePayment(User user, @HttpPathParameter("orderId") String orderId, Objectify objectify,
-			PayPalHttpClient paypal, ObjectResponse<CreatedPayment> response) throws IOException {
+			PayPalHttpClient paypal, ObjectResponse<CapturedPayment> response) throws IOException {
 
 		// Obtain the invoice
 		Invoice invoice = objectify.load().type(Invoice.class).filter("paymentOrderId", orderId).first().now();
@@ -85,7 +85,7 @@ public class PaymentService {
 		objectify.save().entities(domain).now();
 
 		// Send the response
-		response.send(new CreatedPayment(orderId, captureStatus, domainName));
+		response.send(new CapturedPayment(orderId, captureStatus, domainName));
 	}
 
 }

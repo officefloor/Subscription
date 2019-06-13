@@ -59,7 +59,7 @@ public class ConfigureServiceTest {
 	@Test
 	public void getConfiguration() throws Exception {
 
-		User user = AuthenticateServiceTest.newUser("Daniel", User.ROLE_ADMIN);
+		User user = TestHelper.newUser("Daniel", User.ROLE_ADMIN);
 
 		// Configure administration
 		Administration existing = new Administration("MOCK_GOOGLE_ID",
@@ -78,7 +78,7 @@ public class ConfigureServiceTest {
 	@Test
 	public void updateConfiguration() throws Exception {
 
-		User user = AuthenticateServiceTest.newUser("Daniel", User.ROLE_ADMIN);
+		User user = TestHelper.newUser("Daniel", User.ROLE_ADMIN);
 
 		// Configure administration
 		Administration existing = new Administration("MOCK_OVERRIDE_GOOGLE_ID",
@@ -119,7 +119,7 @@ public class ConfigureServiceTest {
 		this.objectify.store(administration);
 
 		// Non-admin attempt to get configuration
-		User user = AuthenticateServiceTest.newUser("Daniel");
+		User user = TestHelper.newUser("Daniel");
 		MockWoofResponse response = this.server.send(this.jwt
 				.authorize(user, MockWoofServer.mockRequest("/configuration")).header("Accept", "application/json"));
 		response.assertJsonError(new HttpException(HttpStatus.FORBIDDEN, "Forbidden"));
@@ -135,7 +135,7 @@ public class ConfigureServiceTest {
 		this.objectify.store(administration);
 
 		// Non-admin attempt to configure
-		User user = AuthenticateServiceTest.newUser("Daniel");
+		User user = TestHelper.newUser("Daniel");
 		ConfigurationAdministrator[] configurationAdministrators = new ConfigurationAdministrator[] {
 				new ConfigurationAdministrator("CHANGE_ADMIN_1", "CHANGE_NOTES_1"),
 				new ConfigurationAdministrator("CHANGE_ADMIN_2", "CHANGE_NOTES_2") };
