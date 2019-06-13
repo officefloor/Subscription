@@ -30,7 +30,7 @@
       <section name="Invoice" input="createInvoice"/>
     </http-input>
     <http-input path="/payments/domain/{orderId}" method="POST" secure="false" x="78" y="295">
-      <section name="Payment" input="captureOrder"/>
+      <section name="Payment" input="capturePayment"/>
     </http-input>
     <http-input path="/refreshAccessToken" method="POST" secure="false" x="104" y="126">
       <section name="Authenticate" input="refreshAccessToken"/>
@@ -78,7 +78,7 @@
       <input name="NO_JWT" parameter-type=""/>
     </section>
     <section name="Payment" source="net.officefloor.plugin.section.clazz.ClassSectionSource" location="net.officefloor.app.subscription.PaymentService" x="451" y="274">
-      <input name="captureOrder" parameter-type=""/>
+      <input name="capturePayment" parameter-type=""/>
     </section>
     <section name="RetrieveKeys" source="net.officefloor.web.jwt.authority.combined.CombinedServerRetrieveValidateKeysSectionSource" location="" x="1186" y="155">
       <input name="retrieveKeys" parameter-type="net.officefloor.web.jwt.validate.JwtValidateKeyCollector"/>

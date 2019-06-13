@@ -91,9 +91,9 @@ public class StoreTest {
 				e -> e.getTimestamp());
 
 		Refund refund = this.entity(new Refund("Some reason"), e -> e.getId(), e -> e.getTimestamp());
-		Ref<Refund> refundRef = Ref.create(refund);
-
-		payment.setRefund(refundRef);
+		payment.setRefund(Ref.create(refund));
+		this.objectify.store(payment);
+		this.objectify.consistent(() -> this.objectify.get(Payment.class), (check) -> check.getRefund() != null);
 		payment = this.entity(payment, e -> e.getRefund(), e -> e.getTimestamp());
 	}
 

@@ -54,7 +54,7 @@ public class PaymentService {
 		private String domain;
 	}
 
-	public static void captureOrder(User user, @HttpPathParameter("orderId") String orderId, Objectify objectify,
+	public static void capturePayment(User user, @HttpPathParameter("orderId") String orderId, Objectify objectify,
 			PayPalHttpClient paypal, ObjectResponse<CreatedPayment> response) throws IOException {
 
 		// Obtain the invoice
