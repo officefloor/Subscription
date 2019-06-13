@@ -191,7 +191,7 @@ public class SubscriptionCalculatorTest {
 		ObjectifyService.register(Refund.class);
 		this.user = this.helper.setupUser("Daniel");
 		this.userRef = Ref.create(this.user);
-		this.invoice = new Invoice(this.userRef, Domain.PRODUCT_TYPE, "officefloor.org");
+		this.invoice = new Invoice(this.userRef, Domain.PRODUCT_TYPE, "officefloor.org", false);
 		this.invoice.setPaymentOrderId("MOCK_PAYMENT_ORDER_ID");
 		this.objectify.store(this.invoice);
 		this.invoiceRef = Ref.create(this.invoice);

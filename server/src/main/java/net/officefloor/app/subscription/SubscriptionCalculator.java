@@ -26,7 +26,7 @@ import java.util.stream.Stream;
 import lombok.Data;
 import lombok.RequiredArgsConstructor;
 import lombok.Value;
-import net.officefloor.app.subscription.DomainPaymentService.DomainPayments;
+import net.officefloor.app.subscription.SubscriptionService.DomainPayments;
 import net.officefloor.app.subscription.store.Payment;
 import net.officefloor.app.subscription.store.User;
 import net.officefloor.plugin.section.clazz.Next;
@@ -41,6 +41,7 @@ public class SubscriptionCalculator {
 
 	@Value
 	public static class Subscription {
+		private String productReference;
 		private ZonedDateTime paymentDate;
 		private ZonedDateTime extendsToDate;
 		private boolean isRestartSubscription;
@@ -117,8 +118,9 @@ public class SubscriptionCalculator {
 
 		// Construct response
 		return Stream.of(states)
-				.map((state) -> new Subscription(state.getPaymentDate(), state.getExtendsToDate(),
-						state.getPayment().getIsRestartSubscription(), state.getPayer(), state.getPaymentOrderId()))
+				.map((state) -> new Subscription(state.getPayment().getProductReference(), state.getPaymentDate(),
+						state.getExtendsToDate(), state.getPayment().getIsRestartSubscription(), state.getPayer(),
+						state.getPaymentOrderId()))
 				.toArray(Subscription[]::new);
 	}
 

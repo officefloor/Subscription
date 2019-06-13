@@ -18,9 +18,8 @@
 package net.officefloor.app.subscription;
 
 import java.io.IOException;
-import java.time.ZonedDateTime;
-import java.time.temporal.ChronoUnit;
-import java.util.Date;
+import java.util.ArrayList;
+import java.util.List;
 
 import com.braintreepayments.http.HttpResponse;
 import com.googlecode.objectify.Objectify;
@@ -34,6 +33,7 @@ import net.officefloor.app.subscription.store.Domain;
 import net.officefloor.app.subscription.store.Invoice;
 import net.officefloor.app.subscription.store.Payment;
 import net.officefloor.app.subscription.store.User;
+import net.officefloor.plugin.section.clazz.Next;
 import net.officefloor.server.http.HttpException;
 import net.officefloor.server.http.HttpStatus;
 import net.officefloor.web.HttpPathParameter;
@@ -53,12 +53,17 @@ public class PaymentService {
 		private String domain;
 	}
 
-	public static void capturePayment(User user, @HttpPathParameter("orderId") String orderId, Objectify objectify,
+	@Next("UpdateDomain")
+	public static Payment[] capturePayment(User user, @HttpPathParameter("orderId") String orderId, Objectify objectify,
 			PayPalHttpClient paypal, ObjectResponse<CapturedPayment> response) throws IOException {
 
 		// Obtain the invoice
 		Invoice invoice = objectify.load().type(Invoice.class).filter("paymentOrderId", orderId).first().now();
+		if (invoice == null) {
+			throw new HttpException(HttpStatus.INTERNAL_SERVER_ERROR, "No invoice for orderId " + orderId);
+		}
 		String domainName = invoice.getProductReference();
+		boolean isRestartSubscription = invoice.getIsRestartSubscription();
 
 		// Capture the funds
 		HttpResponse<Order> orderResponse = paypal.execute(new OrdersCaptureRequest(orderId));
@@ -72,19 +77,29 @@ public class PaymentService {
 		int amount = 500;
 		String receipt = "CAPTURE_ID";
 
+		// Obtain payments for the domain
+		List<Payment> payments = new ArrayList<>();
+		for (Payment payment : objectify.load().type(Payment.class).filter("productReference", domainName).iterable()) {
+			if (Domain.PRODUCT_TYPE.equals(payment.getProductType())) {
+				payments.add(payment);
+			}
+		}
+
 		// Funds captured, so create entries
 		Ref<User> userRef = Ref.create(user);
 		Ref<Invoice> invoiceRef = Ref.create(invoice);
-		Payment payment = new Payment(userRef, invoiceRef, Domain.PRODUCT_TYPE, domainName, false, amount, receipt);
+		Payment payment = new Payment(userRef, invoiceRef, Domain.PRODUCT_TYPE, domainName, isRestartSubscription,
+				amount, receipt);
 		objectify.save().entities(payment).now();
 
-		// TODO trigger service to load domain
-		ZonedDateTime expiresDate = ZonedDateTime.now(ResponseUtil.ZONE).plus(1, ChronoUnit.YEARS);
-		Domain domain = new Domain(domainName, Date.from(expiresDate.toInstant()));
-		objectify.save().entities(domain).now();
+		// Include payment
+		payments.add(payment);
 
-		// Send the response
+		// Send the captured payment
 		response.send(new CapturedPayment(orderId, captureStatus, domainName));
+
+		// Return the payments
+		return payments.toArray(new Payment[payments.size()]);
 	}
 
 }

@@ -42,6 +42,7 @@ import net.officefloor.app.subscription.store.User;
 import net.officefloor.server.http.HttpException;
 import net.officefloor.server.http.HttpStatus;
 import net.officefloor.web.HttpPathParameter;
+import net.officefloor.web.HttpQueryParameter;
 import net.officefloor.web.ObjectResponse;
 
 /**
@@ -62,10 +63,14 @@ public class InvoiceService {
 		private String invoiceId;
 	}
 
-	public static void createInvoice(User user, @HttpPathParameter("domain") String domainName, Objectify objectify,
-			PayPalHttpClient paypal, ObjectResponse<CreatedInvoice> response) throws IOException {
+	public static void createInvoice(User user, @HttpPathParameter("domain") String domainName,
+			@HttpQueryParameter("restart") String restart, Objectify objectify, PayPalHttpClient paypal,
+			ObjectResponse<CreatedInvoice> response) throws IOException {
 
 		// TODO validate the domain name
+
+		// Determine if restart subscription
+		boolean isRestart = Boolean.parseBoolean(restart);
 
 		// Obtain the administration
 		Administration administration = objectify.load().type(Administration.class).first().now();
@@ -77,7 +82,7 @@ public class InvoiceService {
 		String currency = administration.getPaypalCurrency();
 
 		// Create the invoice entry
-		Invoice invoice = new Invoice(Ref.create(user), Domain.PRODUCT_TYPE, domainName);
+		Invoice invoice = new Invoice(Ref.create(user), Domain.PRODUCT_TYPE, domainName, isRestart);
 		objectify.save().entities(invoice).now();
 		String invoiceId = String.valueOf(invoice.getId());
 

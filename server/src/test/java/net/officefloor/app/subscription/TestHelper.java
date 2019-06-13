@@ -19,6 +19,7 @@ package net.officefloor.app.subscription;
 
 import java.time.ZonedDateTime;
 import java.time.format.DateTimeFormatter;
+import java.time.temporal.ChronoUnit;
 import java.util.Date;
 
 import com.googlecode.objectify.Ref;
@@ -111,7 +112,7 @@ public class TestHelper {
 	public Payment setupPayment(Ref<User> userRef, String domain, boolean isRestart, ZonedDateTime timestamp) {
 
 		// Create the invoice
-		Invoice invoice = new Invoice(userRef, Domain.PRODUCT_TYPE, domain);
+		Invoice invoice = new Invoice(userRef, Domain.PRODUCT_TYPE, domain, isRestart);
 		this.objectify.store(invoice);
 
 		// Create the payment
@@ -122,6 +123,26 @@ public class TestHelper {
 
 		// Return the setup payment
 		return payment;
+	}
+
+	/**
+	 * Sets up a {@link Domain} from {@link Payment}.
+	 * 
+	 * @param payment {@link Payment}.
+	 * @return {@link Domain}.
+	 */
+	public Domain setupDomain(Payment payment) {
+
+		// Determine expiring from payment
+		Date expiresDate = Date
+				.from(TestHelper.toZonedDateTime(payment.getTimestamp()).plus(1, ChronoUnit.YEARS).toInstant());
+
+		// Create the domain
+		Domain domain = new Domain(payment.getProductReference(), expiresDate);
+		this.objectify.store(domain);
+
+		// Return the domain
+		return domain;
 	}
 
 }

@@ -75,10 +75,11 @@ public class StoreTest {
 		signin = this.entity(signin, e -> e.getId(), e -> e.getGoogleId(), e -> e.getEmail(), e -> e.getName(),
 				e -> e.getPhotoUrl(), e -> e.getTimestamp(), e -> e.getUser());
 
-		Invoice invoice = new Invoice(userRef, Domain.PRODUCT_TYPE, "officefloor.org");
+		Invoice invoice = new Invoice(userRef, Domain.PRODUCT_TYPE, "officefloor.org", false);
 		invoice.setPaymentOrderId("ORDER_ID");
 		invoice = this.entity(invoice, e -> e.getId(), e -> e.getUser(), e -> e.getProductType(),
-				e -> e.getProductReference(), e -> e.getPaymentOrderId(), e -> e.getTimestamp());
+				e -> e.getProductReference(), e -> e.getIsRestartSubscription(), e -> e.getPaymentOrderId(),
+				e -> e.getTimestamp());
 		Ref<Invoice> invoiceRef = Ref.create(invoice);
 
 		Payment payment = this.entity(

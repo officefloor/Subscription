@@ -30,6 +30,7 @@ public class Payment {
 	@NonNull
 	private Ref<User> user;
 
+	@Index
 	@NonNull
 	private Ref<Invoice> invoice;
 

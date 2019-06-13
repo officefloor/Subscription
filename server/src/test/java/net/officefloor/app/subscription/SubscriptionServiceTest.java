@@ -29,8 +29,8 @@ import org.junit.rules.RuleChain;
 
 import com.googlecode.objectify.Ref;
 
-import net.officefloor.app.subscription.DomainPaymentService.DomainPayment;
-import net.officefloor.app.subscription.DomainPaymentService.DomainPayments;
+import net.officefloor.app.subscription.SubscriptionService.DomainPayment;
+import net.officefloor.app.subscription.SubscriptionService.DomainPayments;
 import net.officefloor.app.subscription.store.Domain;
 import net.officefloor.app.subscription.store.User;
 import net.officefloor.nosql.objectify.mock.ObjectifyRule;
@@ -43,7 +43,7 @@ import net.officefloor.woof.mock.MockWoofServerRule;
 /**
  * @author Daniel Sagenschneider
  */
-public class DomainPaymentServiceTest {
+public class SubscriptionServiceTest {
 
 	private final MockJwtAccessTokenRule jwt = new MockJwtAccessTokenRule();
 
@@ -71,7 +71,7 @@ public class DomainPaymentServiceTest {
 
 		// Obtain the payments
 		MockWoofResponse response = this.server
-				.send(this.jwt.authorize(user, MockWoofServer.mockRequest("/payments/domain/officefloor.org")));
+				.send(this.jwt.authorize(user, MockWoofServer.mockRequest("/subscriptions/officefloor.org")));
 		response.assertJsonError(new HttpException(403, "No payment to access domain officefloor.org"));
 	}
 
@@ -93,7 +93,7 @@ public class DomainPaymentServiceTest {
 
 		// Obtain the payments
 		MockWoofResponse response = this.server
-				.send(this.jwt.authorize(user, MockWoofServer.mockRequest("/payments/domain/officefloor.org")));
+				.send(this.jwt.authorize(user, MockWoofServer.mockRequest("/subscriptions/officefloor.org")));
 		response.assertJson(200,
 				new DomainPayments("officefloor.org", ResponseUtil.toText(now), new DomainPayment[] {
 						new DomainPayment(toText(thirdPaymentDate), toText(now), false, "Daniel",
@@ -127,7 +127,7 @@ public class DomainPaymentServiceTest {
 
 		// Obtain the payments
 		MockWoofResponse response = this.server
-				.send(this.jwt.authorize(user, MockWoofServer.mockRequest("/payments/domain/officefloor.org")));
+				.send(this.jwt.authorize(user, MockWoofServer.mockRequest("/subscriptions/officefloor.org")));
 		response.assertJson(200, new DomainPayments("officefloor.org", payments[0].getExtendsToDate(), payments));
 	}
 

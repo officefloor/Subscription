@@ -6,14 +6,14 @@
     <http-continuation path="/configure" secure="false" x="989" y="482">
       <resource path="/index.html"/>
     </http-continuation>
-    <http-continuation path="/domains" secure="false" x="185" y="390">
+    <http-continuation path="/domains" secure="false" x="158" y="493">
       <section name="Domain" input="getDomains"/>
     </http-continuation>
     <http-continuation path="/initialise" secure="false" x="930" y="793">
       <section name="Initialise" input="getInitialisation"/>
     </http-continuation>
-    <http-continuation path="/payments/domain/{domainName}" secure="false" x="84" y="478">
-      <section name="DomainPayment" input="getDomainPayments"/>
+    <http-continuation path="/subscriptions/{domainName}" secure="false" x="55" y="624">
+      <section name="Subsciption" input="getDomainPayments"/>
     </http-continuation>
   </http-continuations>
   <http-inputs>
@@ -29,7 +29,7 @@
     <http-input path="/invoices/domain/{domain}" method="POST" secure="false" x="81" y="216">
       <section name="Invoice" input="createInvoice"/>
     </http-input>
-    <http-input path="/payments/domain/{orderId}" method="POST" secure="false" x="78" y="295">
+    <http-input path="/payments/domain/{orderId}" method="POST" secure="false" x="61" y="338">
       <section name="Payment" input="capturePayment"/>
     </http-input>
     <http-input path="/refreshAccessToken" method="POST" secure="false" x="104" y="126">
@@ -50,20 +50,14 @@
     <section name="Cors" source="net.officefloor.plugin.section.clazz.ClassSectionSource" location="net.officefloor.app.subscription.cors.Cors" x="1188" y="355">
       <input name="options" parameter-type=""/>
     </section>
-    <section name="Domain" source="net.officefloor.plugin.section.clazz.ClassSectionSource" location="net.officefloor.app.subscription.DomainService" x="452" y="368">
+    <section name="Domain" source="net.officefloor.plugin.section.clazz.ClassSectionSource" location="net.officefloor.app.subscription.DomainService" x="426" y="471">
       <input name="getDomains" parameter-type=""/>
+      <input name="updateDomain" parameter-type="[Lnet.officefloor.app.subscription.SubscriptionCalculator$Subscription;"/>
     </section>
-    <section name="DomainPayment" source="net.officefloor.plugin.section.clazz.ClassSectionSource" location="net.officefloor.app.subscription.DomainPaymentService" x="455" y="456">
-      <input name="getDomainPayments" parameter-type=""/>
-      <input name="sendDomainPayments" parameter-type="[Lnet.officefloor.app.subscription.SubscriptionCalculator$Subscription;"/>
-      <output name="UsePayments" argument-type="java.util.List">
-        <section name="DomainPaymentCalculcator" input="calculateSubscriptions"/>
-      </output>
-    </section>
-    <section name="DomainPaymentCalculcator" source="net.officefloor.plugin.section.clazz.ClassSectionSource" location="net.officefloor.app.subscription.SubscriptionCalculator" x="522" y="542">
-      <input name="calculateSubscriptions" parameter-type="java.util.List"/>
+    <section name="ExpiryCalculator" source="net.officefloor.plugin.section.clazz.ClassSectionSource" location="net.officefloor.app.subscription.SubscriptionCalculator" x="483" y="390">
+      <input name="calculateSubscriptions" parameter-type="[Lnet.officefloor.app.subscription.store.Payment;"/>
       <output name="Subscription" argument-type="[Lnet.officefloor.app.subscription.SubscriptionCalculator$Subscription;">
-        <section name="DomainPayment" input="sendDomainPayments"/>
+        <section name="Domain" input="updateDomain"/>
       </output>
     </section>
     <section name="Initialise" source="net.officefloor.plugin.section.clazz.ClassSectionSource" location="net.officefloor.app.subscription.InitialiseService" x="1172" y="779">
@@ -77,14 +71,30 @@
       <input name="INVALID_JWT" parameter-type=""/>
       <input name="NO_JWT" parameter-type=""/>
     </section>
-    <section name="Payment" source="net.officefloor.plugin.section.clazz.ClassSectionSource" location="net.officefloor.app.subscription.PaymentService" x="451" y="274">
+    <section name="Payment" source="net.officefloor.plugin.section.clazz.ClassSectionSource" location="net.officefloor.app.subscription.PaymentService" x="434" y="317">
       <input name="capturePayment" parameter-type=""/>
+      <output name="UpdateDomain" argument-type="[Lnet.officefloor.app.subscription.store.Payment;">
+        <section name="ExpiryCalculator" input="calculateSubscriptions"/>
+      </output>
     </section>
     <section name="RetrieveKeys" source="net.officefloor.web.jwt.authority.combined.CombinedServerRetrieveValidateKeysSectionSource" location="" x="1186" y="155">
       <input name="retrieveKeys" parameter-type="net.officefloor.web.jwt.validate.JwtValidateKeyCollector"/>
     </section>
     <section name="RetrieveRoles" source="net.officefloor.plugin.section.clazz.ClassSectionSource" location="net.officefloor.app.subscription.jwt.RetrieveRoles" x="1189" y="232">
       <input name="retrieveRoles" parameter-type="net.officefloor.web.jwt.role.JwtRoleCollector"/>
+    </section>
+    <section name="Subsciption" source="net.officefloor.plugin.section.clazz.ClassSectionSource" location="net.officefloor.app.subscription.SubscriptionService" x="426" y="602">
+      <input name="getDomainPayments" parameter-type=""/>
+      <input name="sendSbuscriptions" parameter-type="[Lnet.officefloor.app.subscription.SubscriptionCalculator$Subscription;"/>
+      <output name="UsePayments" argument-type="[Lnet.officefloor.app.subscription.store.Payment;">
+        <section name="SubscriptionCalculcator" input="calculateSubscriptions"/>
+      </output>
+    </section>
+    <section name="SubscriptionCalculcator" source="net.officefloor.plugin.section.clazz.ClassSectionSource" location="net.officefloor.app.subscription.SubscriptionCalculator" x="493" y="688">
+      <input name="calculateSubscriptions" parameter-type="[Lnet.officefloor.app.subscription.store.Payment;"/>
+      <output name="Subscription" argument-type="[Lnet.officefloor.app.subscription.SubscriptionCalculator$Subscription;">
+        <section name="Subsciption" input="sendSbuscriptions"/>
+      </output>
     </section>
   </sections>
   <securities>

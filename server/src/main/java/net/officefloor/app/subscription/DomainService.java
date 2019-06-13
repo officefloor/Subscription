@@ -2,7 +2,9 @@ package net.officefloor.app.subscription;
 
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.HashSet;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Set;
 
@@ -10,9 +12,11 @@ import com.googlecode.objectify.Objectify;
 import com.googlecode.objectify.Ref;
 
 import lombok.Value;
+import net.officefloor.app.subscription.SubscriptionCalculator.Subscription;
 import net.officefloor.app.subscription.store.Domain;
 import net.officefloor.app.subscription.store.Payment;
 import net.officefloor.app.subscription.store.User;
+import net.officefloor.plugin.section.clazz.Parameter;
 import net.officefloor.web.ObjectResponse;
 
 /**
@@ -51,6 +55,35 @@ public class DomainService {
 				.map((domain) -> new PaidDomain(domain.getDomain(), ResponseUtil.toText(domain.getExpires())))
 				.toArray(PaidDomain[]::new);
 		response.send(domainResponses);
+	}
+
+	public static void updateDomain(@Parameter Subscription[] subscriptions, Objectify objectify) {
+
+		// Determine if have subscriptions
+		if ((subscriptions == null) || (subscriptions.length == 0)) {
+			return; // no subscription, so don't update domain
+		}
+
+		// Obtain the expires date (first subscription)
+		Subscription expireSubscription = subscriptions[0];
+		String domainName = expireSubscription.getProductReference();
+		Date expiresDate = Date.from(expireSubscription.getExtendsToDate().toInstant());
+
+		// Obtain the domain (ensuring only one entry)
+		Domain domain = null;
+		Iterator<Domain> iterator = objectify.load().type(Domain.class).filter("domain", domainName).iterator();
+		if (iterator.hasNext()) {
+			domain = iterator.next();
+		}
+		iterator.forEachRemaining((extra) -> objectify.delete().entity(extra).now());
+
+		// Update domain with expire time (or create with expire time)
+		if (domain != null) {
+			domain.setExpires(expiresDate);
+		} else {
+			domain = new Domain(domainName, expiresDate);
+		}
+		objectify.save().entities(domain).now();
 	}
 
 }

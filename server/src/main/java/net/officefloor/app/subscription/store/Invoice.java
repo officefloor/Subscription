@@ -36,6 +36,9 @@ public class Invoice {
 	@NonNull
 	private String productReference;
 
+	@NonNull
+	private Boolean isRestartSubscription;
+
 	@Index
 	private String paymentOrderId;
 

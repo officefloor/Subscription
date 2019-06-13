@@ -44,7 +44,7 @@ import net.officefloor.web.ObjectResponse;
  * 
  * @author Daniel Sagenschneider
  */
-public class DomainPaymentService {
+public class SubscriptionService {
 
 	private static final String DOMAIN_PATH_PARAMETER = "domainName";
 
@@ -100,7 +100,7 @@ public class DomainPaymentService {
 		return payments.toArray(new Payment[payments.size()]);
 	}
 
-	public static void sendDomainPayments(@Parameter Subscription[] subscriptions,
+	public static void sendSbuscriptions(@Parameter Subscription[] subscriptions,
 			@HttpPathParameter(DOMAIN_PATH_PARAMETER) String domainName, ObjectResponse<DomainPayments> response) {
 
 		// Create domain payments from subscriptions
