@@ -19,11 +19,14 @@ package net.officefloor.app.subscription;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertNotSame;
 import static org.junit.Assert.assertNull;
 
 import java.sql.Date;
 import java.time.ZonedDateTime;
 import java.time.temporal.ChronoUnit;
+import java.util.Arrays;
+import java.util.Collections;
 import java.util.stream.Stream;
 
 import org.junit.Before;
@@ -61,6 +64,114 @@ public class SubscriptionCalculatorTest {
 
 	private ZonedDateTime now = ZonedDateTime.now(ObjectifyEntities.ZONE);
 
+	private boolean isReversePayments = false;
+
+	@Test
+	public void noPayments() {
+		this.verifySubscriptionCalculation();
+	}
+
+	@Test
+	public void singlePayment() {
+		this.verifySubscriptionCalculation(payment(now, now.plus(1, ChronoUnit.YEARS)));
+	}
+
+	@Test
+	public void consecutivePayments() {
+		this.verifySubscriptionCalculation(payment(now.plus(2, ChronoUnit.MONTHS), now.plus(3, ChronoUnit.YEARS)),
+				payment(now.plus(1, ChronoUnit.MONTHS), now.plus(2, ChronoUnit.YEARS)),
+				payment(now, now.plus(1, ChronoUnit.YEARS)));
+	}
+
+	@Test
+	public void consecutivePaymentsIgnoreRestart() {
+		this.verifySubscriptionCalculation(payment(now.plus(2, ChronoUnit.MONTHS), true, now.plus(3, ChronoUnit.YEARS)),
+				payment(now.plus(1, ChronoUnit.MONTHS), true, now.plus(2, ChronoUnit.YEARS)),
+				payment(now, now.plus(1, ChronoUnit.YEARS)));
+	}
+
+	@Test
+	public void irregularPaymentsWithoutRestart() {
+		this.verifySubscriptionCalculation(payment(now.plus(10, ChronoUnit.YEARS), now.plus(3, ChronoUnit.YEARS)),
+				payment(now.plus(5, ChronoUnit.YEARS), now.plus(2, ChronoUnit.YEARS)),
+				payment(now, now.plus(1, ChronoUnit.YEARS)));
+	}
+
+	@Test
+	public void irregularPaymentsWithRestart() {
+		this.verifySubscriptionCalculation(
+				payment(now.plus(10, ChronoUnit.YEARS), true, now.plus(11, ChronoUnit.YEARS)),
+				payment(now.plus(5, ChronoUnit.YEARS), true, now.plus(6, ChronoUnit.YEARS)),
+				payment(now, now.plus(1, ChronoUnit.YEARS)));
+	}
+
+	@Test
+	public void outOfOrderPayments() {
+		this.isReversePayments = true;
+		this.consecutivePayments();
+		this.irregularPaymentsWithoutRestart();
+		this.irregularPaymentsWithRestart();
+	}
+
+	@Test
+	public void accessOwnPayments() {
+
+		// Create payments as user
+		Subscription[] subscriptions = this.verifySubscriptionCalculation(
+				payment(now.plus(2, ChronoUnit.MONTHS), now.plus(3, ChronoUnit.YEARS)),
+				payment(now.plus(1, ChronoUnit.MONTHS), now.plus(2, ChronoUnit.YEARS)),
+				payment(now, now.plus(1, ChronoUnit.YEARS)));
+
+		// Ensure access to payments
+		assertEquals("Incorrect number of subscriptions", 3, subscriptions.length);
+		for (Subscription subscription : subscriptions) {
+			assertNotNull("Should have payer", subscription.getPaidBy());
+			assertEquals("Incorrect payer", this.user.getId(), subscription.getPaidBy().getId());
+			assertEquals("Incorrect payment order id", "MOCK_PAYMENT_ORDER_ID", subscription.getPaymentOrderId());
+		}
+	}
+
+	@Test
+	public void notAccessOtherUserPayments() {
+
+		// Create payments on another user
+		Ref<User> anotherRef = Ref.create(AuthenticateServiceTest.setupUser(this.objectify, "Another"));
+		Subscription[] subscriptions = this.verifySubscriptionCalculation(
+				payment(anotherRef, now.plus(2, ChronoUnit.MONTHS), false, now.plus(3, ChronoUnit.YEARS)),
+				payment(anotherRef, now.plus(1, ChronoUnit.MONTHS), false, now.plus(2, ChronoUnit.YEARS)),
+				payment(anotherRef, now, false, now.plus(1, ChronoUnit.YEARS)));
+
+		// Ensure no access to payment details
+		assertEquals("Incorrect number of subscriptions", 3, subscriptions.length);
+		for (Subscription subscription : subscriptions) {
+			assertNull("Should not have payer", subscription.getPaidBy());
+			assertNull("Should not have payment order id", subscription.getPaymentOrderId());
+		}
+	}
+
+	@Test
+	public void adminAccessAllPayments() {
+
+		// Setup user as admin
+		this.user = AuthenticateServiceTest.setupUser(this.objectify, "Daniel", User.ROLE_ADMIN);
+		this.userRef = Ref.create(this.user);
+
+		// Create payments on another user
+		Ref<User> anotherRef = Ref.create(AuthenticateServiceTest.setupUser(this.objectify, "Another"));
+		Subscription[] subscriptions = this.verifySubscriptionCalculation(
+				payment(anotherRef, now.plus(2, ChronoUnit.MONTHS), false, now.plus(3, ChronoUnit.YEARS)),
+				payment(anotherRef, now.plus(1, ChronoUnit.MONTHS), false, now.plus(2, ChronoUnit.YEARS)),
+				payment(anotherRef, now, false, now.plus(1, ChronoUnit.YEARS)));
+
+		// Verify admin has access to payment details
+		assertEquals("Incorrect number of subscriptions", 3, subscriptions.length);
+		for (Subscription subscription : subscriptions) {
+			assertNotNull("Should have payer", subscription.getPaidBy());
+			assertEquals("Incorrect payer", anotherRef.get().getId(), subscription.getPaidBy().getId());
+			assertEquals("Incorrect payment order id", "MOCK_PAYMENT_ORDER_ID", subscription.getPaymentOrderId());
+		}
+	}
+
 	@Before
 	public void setup() {
 		ObjectifyService.register(User.class);
@@ -73,17 +184,14 @@ public class SubscriptionCalculatorTest {
 		this.invoiceRef = Ref.create(this.invoice);
 	}
 
-	@Test
-	public void noPayments() {
-		this.doPaymentTest();
-	}
+	private Subscription[] verifySubscriptionCalculation(VerifiablePayment... payments) {
 
-	@Test
-	public void singlePayment() throws Exception {
-		this.doPaymentTest(payment(now, now.plus(1, ChronoUnit.YEARS)));
-	}
-
-	private void doPaymentTest(VerifiablePayment... payments) {
+		// Determine if reverse payments
+		if (this.isReversePayments) {
+			VerifiablePayment first = payments[0];
+			Collections.reverse(Arrays.asList(payments));
+			assertNotSame("INVALID TEST: should be reversed", first, payments[0]);
+		}
 
 		// Calculate subscriptions
 		Subscription[] subscriptions = SubscriptionCalculator.calculateSubscriptions(this.user, payments);
@@ -103,21 +211,23 @@ public class SubscriptionCalculatorTest {
 					a.getPaymentDate());
 			assertEquals("Incorrect extends to date", e.extendsToDate, a.getExtendsToDate());
 			assertEquals("Incorrect restart flag", e.getIsRestartSubscription(), a.isRestartSubscription());
-			if (this.user.getId().equals(e.getUser().get().getId())) {
-				// Same user (so has access to details)
-				assertNotNull("Should have payer", a.getPaidBy());
-				assertEquals("Incorrect payer", this.user.getId(), a.getPaidBy().getId());
-				assertEquals("Incorrect payment order id", "MOCK_PAYMENT_ORDER_ID", a.getPaymentOrderId());
-			} else {
-				// No access
-				assertNull("Should not provide payer", a.getPaidBy());
-				assertNull("Should not provide payment order id", a.getPaymentOrderId());
-			}
 		}
+
+		// Return the subscriptions
+		return subscriptions;
 	}
 
 	private VerifiablePayment payment(ZonedDateTime timestamp, ZonedDateTime extendsTo) {
-		return new VerifiablePayment(this.userRef, timestamp, false, extendsTo);
+		return payment(timestamp, false, extendsTo);
+	}
+
+	private VerifiablePayment payment(ZonedDateTime timestamp, boolean isRestartSubscription, ZonedDateTime extendsTo) {
+		return payment(this.userRef, timestamp, isRestartSubscription, extendsTo);
+	}
+
+	private VerifiablePayment payment(Ref<User> userRef, ZonedDateTime timestamp, boolean isRestartSubscription,
+			ZonedDateTime extendsTo) {
+		return new VerifiablePayment(userRef, timestamp, isRestartSubscription, extendsTo);
 	}
 
 	private class VerifiablePayment extends Payment {

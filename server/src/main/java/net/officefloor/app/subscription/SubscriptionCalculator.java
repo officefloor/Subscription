@@ -67,6 +67,9 @@ public class SubscriptionCalculator {
 			return new Subscription[0];
 		}
 
+		// Determine if user is admin
+		boolean isAdmin = User.isAdmin(user);
+
 		// Obtain payments for the domain
 		List<PaymentState> paymentStates = new ArrayList<>(payments.length);
 		for (Payment payment : payments) {
@@ -77,7 +80,7 @@ public class SubscriptionCalculator {
 			String paymentOrderId = payment.getInvoice().get().getPaymentOrderId();
 
 			// Determine if paid by user
-			if ((payer == null) || (!user.getId().equals(payer.getId()))) {
+			if ((!isAdmin) && ((payer == null) || (!user.getId().equals(payer.getId())))) {
 				// Not paid by user (so no access to details)
 				payer = null;
 				paymentOrderId = null;
@@ -106,14 +109,12 @@ public class SubscriptionCalculator {
 			// Determine expires to date
 			expiresToDate = expiresToDate.plus(1, ChronoUnit.YEARS);
 			state.setExtendsToDate(expiresToDate);
-
 		}
 
 		// Construct response
 		return Stream.of(states)
 				.map((state) -> new Subscription(state.getPaymentDate(), state.getExtendsToDate(),
-						state.getPayment().getIsRestartSubscription(), state.getPayer(),
-						state.getPayment().getInvoice().get().getPaymentOrderId()))
+						state.getPayment().getIsRestartSubscription(), state.getPayer(), state.getPaymentOrderId()))
 				.toArray(Subscription[]::new);
 	}
 
