@@ -116,14 +116,14 @@ module.exports = () => {
 			domainName: 'officefloor.org',
 			expiresDate: nextYear
 		}],
-		domainPayments: [
+		domainSubscriptions: [
 			createPayments('activicy.com', 10, 5, false, createDetails(2)),
 			createPayments('officefloor.org', 8, 10, true, createDetails(2)),
 			createPayments('officefloor.net', 15, 15, false, createDetails(2)),
 			{ domainName: 'sagenschneider.net' }
 		]
 	}
-	data.domainPayments.forEach((domain) => {
+	data.domainSubscriptions.forEach((domain) => {
 		domain.id = domain.domainName
 		if ('officefloor.net' === domain.domainName) {
 			domain.expiresDate = soon

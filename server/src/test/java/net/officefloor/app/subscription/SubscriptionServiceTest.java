@@ -71,7 +71,7 @@ public class SubscriptionServiceTest {
 
 		// Obtain the payments
 		MockWoofResponse response = this.server
-				.send(this.jwt.authorize(user, MockWoofServer.mockRequest("/subscriptions/officefloor.org")));
+				.send(this.jwt.authorize(user, MockWoofServer.mockRequest("/subscriptions/domain/officefloor.org")));
 		response.assertJsonError(new HttpException(403, "No payment to access domain officefloor.org"));
 	}
 
@@ -93,7 +93,7 @@ public class SubscriptionServiceTest {
 
 		// Obtain the payments
 		MockWoofResponse response = this.server
-				.send(this.jwt.authorize(user, MockWoofServer.mockRequest("/subscriptions/officefloor.org")));
+				.send(this.jwt.authorize(user, MockWoofServer.mockRequest("/subscriptions/domain/officefloor.org")));
 		response.assertJson(200,
 				new DomainPayments("officefloor.org", ResponseUtil.toText(now), new DomainPayment[] {
 						new DomainPayment(toText(thirdPaymentDate), toText(now), false, "Daniel",
@@ -127,7 +127,7 @@ public class SubscriptionServiceTest {
 
 		// Obtain the payments
 		MockWoofResponse response = this.server
-				.send(this.jwt.authorize(user, MockWoofServer.mockRequest("/subscriptions/officefloor.org")));
+				.send(this.jwt.authorize(user, MockWoofServer.mockRequest("/subscriptions/domain/officefloor.org")));
 		response.assertJson(200, new DomainPayments("officefloor.org", payments[0].getExtendsToDate(), payments));
 	}
 

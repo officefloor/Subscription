@@ -1,6 +1,7 @@
 import { Component, OnInit, SimpleChanges, Input } from '@angular/core'
 import { InitialiseService } from '../initialise.service'
-import { Initialisation } from '../server-api.service'
+import { ServerApiService, Initialisation } from '../server-api.service'
+import { environment } from '../../environments/environment'
 
 // Loaded via PayPal script
 declare let paypal: any;
@@ -12,7 +13,7 @@ declare let paypal: any;
 } )
 export class CheckoutComponent implements OnInit {
 
-    @Input( 'domain' ) domainName: String
+    @Input( 'domain' ) domainName: string
 
     @Input() isShowReset: boolean = false
 
@@ -21,7 +22,8 @@ export class CheckoutComponent implements OnInit {
     static scriptLoadPromises = {}
 
     constructor(
-        private initialiseService: InitialiseService
+        private initialiseService: InitialiseService,
+        private serverApiService: ServerApiService,
     ) { }
 
     private loadExternalScript( scriptUrl: string ) {
@@ -57,31 +59,11 @@ export class CheckoutComponent implements OnInit {
             const component = this
             this.loadExternalScript( `https://www.paypal.com/sdk/js?client-id=${paypalClientId}&currency=${paypalCurrency}` ).then(() => {
                 paypal.Buttons( {
-                    createOrder: function( data, actions ) {
-
-                        // Indicate order
-                        console.log( 'PayPal create order for domain', component.domainName, 'with reset', component.isResetSubscription )
-
-                        // Set up the transaction
-                        return actions.order.create( {
-                            purchase_units: [{
-                                amount: {
-                                    value: '5.00', currency: paypalCurrency
-                                }
-                            }]
-                        } );
-                    },
-                    onApprove: function( data, actions ) {
-
-                        // TODO call server with orderId
-                        console.log( 'Order: ' + data.orderID + " with data:\n\n" + JSON.stringify( data, null, 2 ) + "\n\n" );
-
-                        // Capture the funds from the transaction
-                        return actions.order.capture().then( function( details ) {
-                            // Show a success message to your buyer
-                            console.log( 'Transaction details: ' + JSON.stringify( details, null, 2 ) )
-                        } );
-                    }
+                    createOrder: ( data, actions ) => environment.createOrder(
+                        component.domainName, component.isResetSubscription, paypalCurrency, this.serverApiService,
+                        data, actions ),
+                    onApprove: ( data, actions ) => environment.capturePayment(
+                        data.orderID, this.serverApiService, data, actions )
                 } ).render( '#paypal-button' )
             } )
         } )

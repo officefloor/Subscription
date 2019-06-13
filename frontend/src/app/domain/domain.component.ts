@@ -1,7 +1,7 @@
 import { Component, OnInit } from '@angular/core'
 import { ActivatedRoute, ParamMap } from '@angular/router'
 import { switchMap } from 'rxjs/operators'
-import { ServerApiService, parseDate, isExpired, isExpireSoon, DomainPayments, Payment } from '../server-api.service'
+import { ServerApiService, parseDate, isExpired, isExpireSoon, DomainPayments, Subscription } from '../server-api.service'
 import { AuthenticationService } from '../authentication.service'
 import { SocialUser } from "angularx-social-login"
 import * as moment from 'moment'
@@ -27,7 +27,7 @@ export class DomainComponent implements OnInit {
     payments: PaymentRow[] = []
 
     sortedPayments: PaymentRow[] = []
-    
+
     constructor(
         private authentication: AuthenticationService,
         private route: ActivatedRoute,
@@ -48,8 +48,8 @@ export class DomainComponent implements OnInit {
             // Obtain email address to determine if logged in user
             const userEmail = user.email
 
-            // Load the domain payments for domain
-            this.serverApiService.getDomainPayments( this.domainName ).subscribe(( domainPayments: DomainPayments ) => {
+            // Load the subscriptions for domain
+            this.serverApiService.getDomainSubscriptions( this.domainName ).subscribe(( domainPayments: DomainPayments ) => {
 
                 // Determine if payments
                 if ( !domainPayments.payments || ( domainPayments.payments.length === 0 ) ) {

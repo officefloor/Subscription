@@ -67,7 +67,13 @@ export class MainComponent implements OnInit {
                 this.sortedDomains = this.domains.slice()
 
             }, ( error: any ) => {
-                console.log( 'TODO handle error', error )
+
+                // Error, so no domains
+                this.domains = []
+                this.sortedDomains = []
+
+                // No domains
+                console.error( 'Failed retrieving domains for user', error )
             } )
         } )
     }

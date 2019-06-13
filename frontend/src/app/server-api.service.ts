@@ -1,7 +1,7 @@
-import { Injectable } from '@angular/core';
-import { HttpClient } from '@angular/common/http';
-import { Observable } from 'rxjs';
-import { environment } from '../environments/environment';
+import { Injectable } from '@angular/core'
+import { HttpClient } from '@angular/common/http'
+import { Observable } from 'rxjs'
+import { environment } from '../environments/environment'
 import * as moment from 'moment'
 
 declare let window: any
@@ -56,10 +56,10 @@ export interface Domain {
 export interface DomainPayments {
     domainName: string
     expiresDate: string
-    payments: Payment[]
+    payments: Subscription[]
 }
 
-export interface Payment {
+export interface Subscription {
     paymentDate: string
     extendsToDate: string
     isRestartSubscription: boolean
@@ -108,7 +108,7 @@ export class ServerApiService {
         return this.http.get<Domain[]>( `${this.serverUrl}/domains` )
     }
 
-    public getDomainPayments( domainName: string ): Observable<DomainPayments> {
-        return this.http.get<DomainPayments>( `${this.serverUrl}/payments/domain/${domainName}` )
+    public getDomainSubscriptions( domainName: string ): Observable<DomainPayments> {
+        return this.http.get<DomainPayments>( `${this.serverUrl}/subscriptions/domain/${domainName}` )
     }
 }

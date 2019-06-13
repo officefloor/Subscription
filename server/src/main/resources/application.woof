@@ -12,7 +12,7 @@
     <http-continuation path="/initialise" secure="false" x="930" y="793">
       <section name="Initialise" input="getInitialisation"/>
     </http-continuation>
-    <http-continuation path="/subscriptions/{domainName}" secure="false" x="55" y="624">
+    <http-continuation path="/subscriptions/domain/{domainName}" secure="false" x="55" y="624">
       <section name="Subsciption" input="getDomainPayments"/>
     </http-continuation>
   </http-continuations>

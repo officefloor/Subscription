@@ -5,8 +5,47 @@
  */
 
 import 'zone.js/dist/zone-error' // easier development debugging
+import { ServerApiService } from '../app/server-api.service'
 
 export const environment = {
     production: false,
-    serverUrl: window.location.href.startsWith( 'http://localhost:4200' ) ? 'http://localhost:8080' : ''
+
+    serverUrl: window.location.href.startsWith( 'http://localhost:4200' ) ? 'http://localhost:8080' : '',
+
+    createOrder: (
+        domainName: string,
+        isRestartSubscription: boolean,
+        paypalCurrency: string,
+        serverApiService: ServerApiService,
+        data: any,
+        actions: any ) => {
+
+        // Indicate order
+        console.log( 'PayPal development environment create order for domain', domainName, 'with restart', isRestartSubscription )
+
+        // Set up the transaction
+        return actions.order.create( {
+            purchase_units: [{
+                amount: {
+                    value: '5.00', currency: paypalCurrency
+                }
+            }]
+        } )
+    },
+    capturePayment: (
+        orderId: string,
+        serverApiService: ServerApiService,
+        data: any,
+        actions: any ) => {
+
+        // Indicate order
+        console.log( 'Order: ' + orderId + " with data:\n\n" + JSON.stringify( data, null, 2 ) + "\n\n" );
+
+        // Capture the funds from the transaction
+        return actions.order.capture().then(( details ) => {
+            // Show a success message to your buyer
+            console.log( 'Transaction details: ' + JSON.stringify( details, null, 2 ) )
+        } )
+    }
+
 }
