@@ -27,7 +27,6 @@ import lombok.Data;
 import lombok.RequiredArgsConstructor;
 import lombok.Value;
 import net.officefloor.app.subscription.DomainPaymentService.DomainPayments;
-import net.officefloor.app.subscription.store.ObjectifyEntities;
 import net.officefloor.app.subscription.store.Payment;
 import net.officefloor.app.subscription.store.User;
 import net.officefloor.plugin.section.clazz.Next;
@@ -80,7 +79,7 @@ public class SubscriptionCalculator {
 			}
 
 			// Obtain details of payment
-			ZonedDateTime paymentDate = payment.getTimestamp().toInstant().atZone(ObjectifyEntities.ZONE);
+			ZonedDateTime paymentDate = payment.getTimestamp().toInstant().atZone(ResponseUtil.ZONE);
 			User payer = payment.getUser().get();
 			String paymentOrderId = payment.getInvoice().get().getPaymentOrderId();
 

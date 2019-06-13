@@ -39,7 +39,6 @@ import com.googlecode.objectify.Ref;
 import net.officefloor.app.subscription.SubscriptionCalculator.Subscription;
 import net.officefloor.app.subscription.store.Domain;
 import net.officefloor.app.subscription.store.Invoice;
-import net.officefloor.app.subscription.store.ObjectifyEntities;
 import net.officefloor.app.subscription.store.Payment;
 import net.officefloor.app.subscription.store.Refund;
 import net.officefloor.app.subscription.store.User;
@@ -65,7 +64,7 @@ public class SubscriptionCalculatorTest {
 
 	private Ref<Invoice> invoiceRef;
 
-	private ZonedDateTime now = ZonedDateTime.now(ObjectifyEntities.ZONE);
+	private ZonedDateTime now = TestHelper.now();
 
 	private boolean isReversePayments = false;
 
@@ -221,8 +220,7 @@ public class SubscriptionCalculatorTest {
 		for (int i = 0; i < expected.length; i++) {
 			VerifiablePayment e = expected[i];
 			Subscription a = subscriptions[i];
-			assertEquals("Incorrect payment date", e.getTimestamp().toInstant().atZone(ObjectifyEntities.ZONE),
-					a.getPaymentDate());
+			assertEquals("Incorrect payment date", TestHelper.toZonedDateTime(e.getTimestamp()), a.getPaymentDate());
 			assertEquals("Incorrect extends to date", e.extendsToDate, a.getExtendsToDate());
 			assertEquals("Incorrect restart flag", e.getIsRestartSubscription(), a.isRestartSubscription());
 		}

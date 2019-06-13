@@ -2,7 +2,6 @@ package net.officefloor.app.subscription;
 
 import static net.officefloor.app.subscription.TestHelper.toText;
 
-import java.time.Instant;
 import java.time.ZonedDateTime;
 import java.time.temporal.ChronoUnit;
 import java.util.Date;
@@ -15,7 +14,6 @@ import com.googlecode.objectify.Ref;
 
 import net.officefloor.app.subscription.DomainService.PaidDomain;
 import net.officefloor.app.subscription.store.Domain;
-import net.officefloor.app.subscription.store.ObjectifyEntities;
 import net.officefloor.app.subscription.store.User;
 import net.officefloor.nosql.objectify.mock.ObjectifyRule;
 import net.officefloor.web.jwt.mock.MockJwtAccessTokenRule;
@@ -64,7 +62,7 @@ public class DomainServiceTest {
 		Ref<User> anotherUserRef = Ref.create(anotherUser);
 
 		// Load the payments
-		ZonedDateTime now = ZonedDateTime.now(ObjectifyEntities.ZONE);
+		ZonedDateTime now = TestHelper.now();
 		this.helper.setupPayment(userRef, "officefloor.org", false, now.minus(2, ChronoUnit.YEARS));
 		this.helper.setupPayment(userRef, "officefloor.org", false, now.minus(1, ChronoUnit.YEARS));
 		this.helper.setupPayment(userRef, "officefloor.org", false, now);
@@ -73,7 +71,7 @@ public class DomainServiceTest {
 		this.helper.setupPayment(userRef, "missing.domain", false, now);
 
 		// Create the expire dates
-		ZonedDateTime expireOfficeFloor = Instant.now().atZone(ObjectifyEntities.ZONE).plus(1, ChronoUnit.YEARS);
+		ZonedDateTime expireOfficeFloor = TestHelper.now().plus(1, ChronoUnit.YEARS);
 		ZonedDateTime expireActivicy = expireOfficeFloor.plus(2, ChronoUnit.WEEKS);
 		ZonedDateTime expireNotReturned = expireOfficeFloor.plus(3, ChronoUnit.MONTHS);
 

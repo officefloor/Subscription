@@ -17,11 +17,10 @@
  */
 package net.officefloor.app.subscription;
 
+import java.time.ZoneId;
 import java.time.ZonedDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.Date;
-
-import net.officefloor.app.subscription.store.ObjectifyEntities;
 
 /**
  * Utility functions for writing response.
@@ -30,8 +29,10 @@ import net.officefloor.app.subscription.store.ObjectifyEntities;
  */
 public class ResponseUtil {
 
+	public static final ZoneId ZONE = ZoneId.of("GMT");
+
 	public static String toText(Date date) {
-		return toText(date.toInstant().atZone(ObjectifyEntities.ZONE));
+		return toText(date.toInstant().atZone(ZONE));
 	}
 
 	public static String toText(ZonedDateTime date) {

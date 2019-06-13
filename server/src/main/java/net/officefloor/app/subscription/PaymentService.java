@@ -32,7 +32,6 @@ import com.paypal.orders.OrdersCaptureRequest;
 import lombok.Value;
 import net.officefloor.app.subscription.store.Domain;
 import net.officefloor.app.subscription.store.Invoice;
-import net.officefloor.app.subscription.store.ObjectifyEntities;
 import net.officefloor.app.subscription.store.Payment;
 import net.officefloor.app.subscription.store.User;
 import net.officefloor.server.http.HttpException;
@@ -80,7 +79,7 @@ public class PaymentService {
 		objectify.save().entities(payment).now();
 
 		// TODO trigger service to load domain
-		ZonedDateTime expiresDate = ZonedDateTime.now(ObjectifyEntities.ZONE).plus(1, ChronoUnit.YEARS);
+		ZonedDateTime expiresDate = ZonedDateTime.now(ResponseUtil.ZONE).plus(1, ChronoUnit.YEARS);
 		Domain domain = new Domain(domainName, Date.from(expiresDate.toInstant()));
 		objectify.save().entities(domain).now();
 

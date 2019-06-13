@@ -21,6 +21,8 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.fail;
 
+import java.time.ZonedDateTime;
+
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.rules.RuleChain;
@@ -31,6 +33,7 @@ import com.paypal.orders.Order;
 import net.officefloor.app.subscription.PaymentService.CapturedPayment;
 import net.officefloor.app.subscription.store.Domain;
 import net.officefloor.app.subscription.store.Invoice;
+import net.officefloor.app.subscription.store.ObjectifyEntities;
 import net.officefloor.app.subscription.store.Payment;
 import net.officefloor.app.subscription.store.User;
 import net.officefloor.nosql.objectify.mock.ObjectifyRule;
@@ -87,8 +90,12 @@ public class PaymentServiceTest {
 		fail("TODO test restart domain subscription");
 	}
 
-	@Test
-	public void createPayment() throws Exception {
+	@FunctionalInterface
+	private static interface ValidateDomainExpiry {
+		void validate(ZonedDateTime paymentTimestamp, ZonedDateTime domainExpiresDate);
+	}
+
+	private void doPaymentTest(ValidateDomainExpiry validator) throws Exception {
 
 		// Record
 		this.payPal.addOrdersCaptureResponse(new Order().id("MOCK_ORDER_ID").status("COMPLETED"))
@@ -128,6 +135,10 @@ public class PaymentServiceTest {
 		assertEquals("Incorrect domain on domain", "officefloor.org", domain.getDomain());
 		assertNotNull("Should have expires", domain.getExpires());
 		assertNotNull("Should have domain timestamp", domain.getTimestamp());
+
+		// Valdiate the domain timestamp
+		validator.validate(payment.getTimestamp().toInstant().atZone(ResponseUtil.ZONE),
+				domain.getExpires().toInstant().atZone(ResponseUtil.ZONE));
 	}
 
 }

@@ -32,7 +32,6 @@ import com.googlecode.objectify.Ref;
 import net.officefloor.app.subscription.DomainPaymentService.DomainPayment;
 import net.officefloor.app.subscription.DomainPaymentService.DomainPayments;
 import net.officefloor.app.subscription.store.Domain;
-import net.officefloor.app.subscription.store.ObjectifyEntities;
 import net.officefloor.app.subscription.store.User;
 import net.officefloor.nosql.objectify.mock.ObjectifyRule;
 import net.officefloor.server.http.HttpException;
@@ -67,10 +66,8 @@ public class DomainPaymentServiceTest {
 		User anotherUser = this.helper.setupUser("Another");
 
 		// Load the domain and payments for another user
-		this.helper.setupPayment(Ref.create(anotherUser), "officefloor.org", false,
-				ZonedDateTime.now(ObjectifyEntities.ZONE));
-		this.objectify
-				.store(new Domain("officefloor.org", Date.from(ZonedDateTime.now(ObjectifyEntities.ZONE).toInstant())));
+		this.helper.setupPayment(Ref.create(anotherUser), "officefloor.org", false, TestHelper.now());
+		this.objectify.store(new Domain("officefloor.org", Date.from(TestHelper.now().toInstant())));
 
 		// Obtain the payments
 		MockWoofResponse response = this.server
@@ -86,7 +83,7 @@ public class DomainPaymentServiceTest {
 		Ref<User> userRef = Ref.create(user);
 
 		// Load the payments
-		ZonedDateTime now = ZonedDateTime.now(ObjectifyEntities.ZONE);
+		ZonedDateTime now = TestHelper.now();
 		ZonedDateTime firstPaymentDate = now.minus(4, ChronoUnit.YEARS);
 		ZonedDateTime secondPaymentDate = now.minus(2, ChronoUnit.YEARS);
 		ZonedDateTime thirdPaymentDate = now.minus(1, ChronoUnit.YEARS);
@@ -115,7 +112,7 @@ public class DomainPaymentServiceTest {
 		Ref<User> userRef = Ref.create(user);
 
 		// Load the payments
-		ZonedDateTime now = ZonedDateTime.now(ObjectifyEntities.ZONE);
+		ZonedDateTime now = TestHelper.now();
 		final int NUMBER_OF_PAYMENTS = 10;
 		for (int i = 0; i < NUMBER_OF_PAYMENTS; i++) {
 			this.helper.setupPayment(userRef, "officefloor.org", false, now.plus(i, ChronoUnit.SECONDS));

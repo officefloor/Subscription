@@ -1,6 +1,5 @@
 package net.officefloor.app.subscription.store;
 
-import java.time.ZoneId;
 import java.util.Date;
 
 import net.officefloor.nosql.objectify.ObjectifyEntityLocator;
@@ -11,8 +10,6 @@ import net.officefloor.nosql.objectify.ObjectifyEntityLocator;
  * @author Daniel Sagenschneider
  */
 public class ObjectifyEntities implements ObjectifyEntityLocator {
-
-	public static final ZoneId ZONE = ZoneId.of("GMT");
 
 	public static Date getCreationTimestamp() {
 		return new Date();

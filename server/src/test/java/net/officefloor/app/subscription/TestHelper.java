@@ -41,6 +41,15 @@ public class TestHelper {
 	private ObjectifyRule objectify;
 
 	/**
+	 * Obtains the current time.
+	 * 
+	 * @return Current time.
+	 */
+	public static ZonedDateTime now() {
+		return ZonedDateTime.now(ResponseUtil.ZONE);
+	}
+
+	/**
 	 * Converts {@link ZonedDateTime} to network date format.
 	 * 
 	 * @param date Date.
@@ -48,6 +57,16 @@ public class TestHelper {
 	 */
 	public static String toText(ZonedDateTime date) {
 		return DateTimeFormatter.RFC_1123_DATE_TIME.format(date);
+	}
+
+	/**
+	 * Converts {@link Date} to {@link ZonedDateTime}.
+	 * 
+	 * @param date {@link Date}.
+	 * @return {@link ZonedDateTime}.
+	 */
+	public static ZonedDateTime toZonedDateTime(Date date) {
+		return date.toInstant().atZone(ResponseUtil.ZONE);
 	}
 
 	/**
