@@ -22,6 +22,7 @@ import static org.junit.Assert.assertNotNull;
 
 import java.time.ZonedDateTime;
 import java.time.temporal.ChronoUnit;
+import java.util.Arrays;
 
 import org.junit.Before;
 import org.junit.Rule;
@@ -29,7 +30,11 @@ import org.junit.Test;
 import org.junit.rules.RuleChain;
 
 import com.googlecode.objectify.Ref;
+import com.paypal.orders.Capture;
+import com.paypal.orders.Money;
 import com.paypal.orders.Order;
+import com.paypal.orders.PaymentCollection;
+import com.paypal.orders.PurchaseUnit;
 
 import net.officefloor.app.subscription.PaymentService.CapturedPayment;
 import net.officefloor.app.subscription.store.Domain;
@@ -134,9 +139,12 @@ public class PaymentServiceTest {
 
 		// Record
 		final String ORDER_ID = "MOCK_ORDER_ID";
-		this.payPal.addOrdersCaptureResponse(new Order().id(ORDER_ID).status("COMPLETED")).validate((request) -> {
-			assertEquals("MOCK_ORDER_ID", this.payPal.getOrderId(request));
-		});
+		this.payPal.addOrdersCaptureResponse(new Order().id(ORDER_ID).status("COMPLETED")
+				.purchaseUnits(Arrays.asList(new PurchaseUnit().payments(new PaymentCollection().captures(Arrays.asList(
+						new Capture().id("MOCK_RECEIPT").amount(new Money().value("5.00").currencyCode("AUD"))))))))
+				.validate((request) -> {
+					assertEquals("MOCK_ORDER_ID", this.payPal.getOrderId(request));
+				});
 
 		// Setup the invoice
 		Invoice invoice = new Invoice(this.userRef, Domain.PRODUCT_TYPE, "officefloor.org", isRestartSubscription);
@@ -163,7 +171,7 @@ public class PaymentServiceTest {
 		assertEquals("Incorrect product type", Domain.PRODUCT_TYPE, payment.getProductType());
 		assertEquals("Incorrect product reference", "officefloor.org", payment.getProductReference());
 		assertEquals("Incorrect amount", Integer.valueOf(5_00), payment.getAmount());
-		assertEquals("Incorrect receipt", "CAPTURE_ID", payment.getReceipt());
+		assertEquals("Incorrect receipt", "MOCK_RECEIPT", payment.getReceipt());
 		assertEquals("Incorrect restart subscription", Boolean.valueOf(isRestartSubscription),
 				payment.getIsRestartSubscription());
 		assertNotNull("Should have payment timestamp", payment.getTimestamp());

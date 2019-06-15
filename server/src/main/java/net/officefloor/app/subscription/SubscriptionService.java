@@ -63,6 +63,8 @@ public class SubscriptionService {
 		private String paidByName;
 		private String paidByEmail;
 		private String paymentOrderId;
+		private String paymentReceipt;
+		private Integer paymentAmount;
 	}
 
 	@Next("UsePayments")
@@ -100,8 +102,8 @@ public class SubscriptionService {
 		return payments.toArray(new Payment[payments.size()]);
 	}
 
-	public static void sendSbuscriptions(@Parameter Subscription[] subscriptions,
-			@HttpPathParameter(DOMAIN_PATH_PARAMETER) String domainName, ObjectResponse<DomainPayments> response) {
+	public static void sendSubscriptions(@Parameter Subscription[] subscriptions,
+			ObjectResponse<DomainPayments> response) {
 
 		// Create domain payments from subscriptions
 		Function<Subscription, String> name = (subscription) -> subscription == null ? null
@@ -111,8 +113,12 @@ public class SubscriptionService {
 		DomainPayment[] domainPayments = Stream.of(subscriptions).map((subscription) -> {
 			return new DomainPayment(toText(subscription.getPaymentDate()), toText(subscription.getExtendsToDate()),
 					subscription.isRestartSubscription(), name.apply(subscription), email.apply(subscription),
-					subscription.getPaymentOrderId());
+					subscription.getPaymentOrderId(), subscription.getPaymentReceipt(),
+					subscription.getPaymentAmount());
 		}).toArray(DomainPayment[]::new);
+
+		// Obtain the domain
+		String domainName = subscriptions.length > 0 ? subscriptions[0].getProductReference() : null;
 
 		// Send the response
 		response.send(new DomainPayments(domainName, domainPayments[0].getExtendsToDate(), domainPayments));

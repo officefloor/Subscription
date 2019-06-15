@@ -80,6 +80,8 @@ export class DomainComponent implements OnInit {
                     const isPaidByYou = ( userEmail == paidByEmail )
                     const paidBy = isPaidByYou ? 'Yourself' : paidByName + ' - ' + paidByEmail
                     const paymentOrderId = payment.paymentOrderId
+                    const paymentReceipt = payment.paymentReceipt
+                    const paymentAmount = payment.paymentAmount ? payment.paymentAmount / 100 : null
 
                     // Determine first start date
                     if ( !startDate || payment.isRestartSubscription ) {
@@ -96,6 +98,8 @@ export class DomainComponent implements OnInit {
                         isPaidByYou: isPaidByYou,
                         paidBy: paidBy,
                         paymentOrderId: paymentOrderId,
+                        paymentReceipt: paymentReceipt,
+                        paymentAmount: paymentAmount,
                         isSubscriptionCompletion: false,
                     }
                     this.payments.push( paymentRow )
@@ -148,6 +152,8 @@ class PaymentRow {
     isPaidByYou: boolean
     paidBy: string
     paymentOrderId: string
+    paymentReceipt: string
+    paymentAmount: number
     paymentDate: string
     isRestartSubscription: boolean
     isSubscriptionCompletion: boolean

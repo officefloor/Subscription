@@ -25,8 +25,10 @@ import com.braintreepayments.http.HttpResponse;
 import com.googlecode.objectify.Objectify;
 import com.googlecode.objectify.Ref;
 import com.paypal.core.PayPalHttpClient;
+import com.paypal.orders.Capture;
 import com.paypal.orders.Order;
 import com.paypal.orders.OrdersCaptureRequest;
+import com.paypal.orders.PurchaseUnit;
 
 import lombok.Value;
 import net.officefloor.app.subscription.store.Domain;
@@ -73,9 +75,17 @@ public class PaymentService {
 			throw new HttpException(HttpStatus.PAYMENT_REQUIRED);
 		}
 
-		// TODO extract amount and receipt from response
-		int amount = 500;
-		String receipt = "CAPTURE_ID";
+		// Obtain the payment details
+		int amount = 0;
+		String receipt = null;
+		if (order.purchaseUnits().size() > 0) {
+			PurchaseUnit purchaseUnit = order.purchaseUnits().get(0);
+			if (purchaseUnit.payments().captures().size() > 0) {
+				Capture capture = purchaseUnit.payments().captures().get(0);
+				amount = Math.round(Float.parseFloat(capture.amount().value()) * 100);
+				receipt = capture.id();
+			}
+		}
 
 		// Obtain payments for the domain
 		List<Payment> payments = new ArrayList<>();

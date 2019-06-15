@@ -53,6 +53,9 @@
     <section name="Domain" source="net.officefloor.plugin.section.clazz.ClassSectionSource" location="net.officefloor.app.subscription.DomainService" x="426" y="471">
       <input name="getDomains" parameter-type=""/>
       <input name="updateDomain" parameter-type="[Lnet.officefloor.app.subscription.SubscriptionCalculator$Subscription;"/>
+      <output name="Updated" argument-type="[Lnet.officefloor.app.subscription.SubscriptionCalculator$Subscription;">
+        <section name="Subsciption" input="sendSubscriptions"/>
+      </output>
     </section>
     <section name="ExpiryCalculator" source="net.officefloor.plugin.section.clazz.ClassSectionSource" location="net.officefloor.app.subscription.SubscriptionCalculator" x="483" y="390">
       <input name="calculateSubscriptions" parameter-type="[Lnet.officefloor.app.subscription.store.Payment;"/>
@@ -85,7 +88,7 @@
     </section>
     <section name="Subsciption" source="net.officefloor.plugin.section.clazz.ClassSectionSource" location="net.officefloor.app.subscription.SubscriptionService" x="426" y="602">
       <input name="getDomainPayments" parameter-type=""/>
-      <input name="sendSbuscriptions" parameter-type="[Lnet.officefloor.app.subscription.SubscriptionCalculator$Subscription;"/>
+      <input name="sendSubscriptions" parameter-type="[Lnet.officefloor.app.subscription.SubscriptionCalculator$Subscription;"/>
       <output name="UsePayments" argument-type="[Lnet.officefloor.app.subscription.store.Payment;">
         <section name="SubscriptionCalculcator" input="calculateSubscriptions"/>
       </output>
@@ -93,7 +96,7 @@
     <section name="SubscriptionCalculcator" source="net.officefloor.plugin.section.clazz.ClassSectionSource" location="net.officefloor.app.subscription.SubscriptionCalculator" x="493" y="688">
       <input name="calculateSubscriptions" parameter-type="[Lnet.officefloor.app.subscription.store.Payment;"/>
       <output name="Subscription" argument-type="[Lnet.officefloor.app.subscription.SubscriptionCalculator$Subscription;">
-        <section name="Subsciption" input="sendSbuscriptions"/>
+        <section name="Subsciption" input="sendSubscriptions"/>
       </output>
     </section>
   </sections>

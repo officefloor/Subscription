@@ -140,6 +140,8 @@ public class SubscriptionCalculatorTest {
 			assertNotNull("Should have payer", subscription.getPaidBy());
 			assertEquals("Incorrect payer", this.user.getId(), subscription.getPaidBy().getId());
 			assertEquals("Incorrect payment order id", "MOCK_PAYMENT_ORDER_ID", subscription.getPaymentOrderId());
+			assertEquals("Incorrect payment receipt", "MOCK_RECEIPT", subscription.getPaymentReceipt());
+			assertEquals("Incorrect payment amount", Integer.valueOf(500), subscription.getPaymentAmount());
 		}
 	}
 
@@ -181,6 +183,8 @@ public class SubscriptionCalculatorTest {
 			assertNotNull("Should have payer", subscription.getPaidBy());
 			assertEquals("Incorrect payer", anotherRef.get().getId(), subscription.getPaidBy().getId());
 			assertEquals("Incorrect payment order id", "MOCK_PAYMENT_ORDER_ID", subscription.getPaymentOrderId());
+			assertEquals("Incorrect payment receipt", "MOCK_RECEIPT", subscription.getPaymentReceipt());
+			assertEquals("Incorrect payment amount", Integer.valueOf(500), subscription.getPaymentAmount());
 		}
 	}
 

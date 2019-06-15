@@ -16,6 +16,7 @@ import net.officefloor.app.subscription.SubscriptionCalculator.Subscription;
 import net.officefloor.app.subscription.store.Domain;
 import net.officefloor.app.subscription.store.Payment;
 import net.officefloor.app.subscription.store.User;
+import net.officefloor.plugin.section.clazz.Next;
 import net.officefloor.plugin.section.clazz.Parameter;
 import net.officefloor.web.ObjectResponse;
 
@@ -57,11 +58,12 @@ public class DomainService {
 		response.send(domainResponses);
 	}
 
-	public static void updateDomain(@Parameter Subscription[] subscriptions, Objectify objectify) {
+	@Next("Updated")
+	public static Subscription[] updateDomain(@Parameter Subscription[] subscriptions, Objectify objectify) {
 
 		// Determine if have subscriptions
 		if ((subscriptions == null) || (subscriptions.length == 0)) {
-			return; // no subscription, so don't update domain
+			return subscriptions; // no subscription, so don't update domain
 		}
 
 		// Obtain the expires date (first subscription)
@@ -84,6 +86,9 @@ public class DomainService {
 			domain = new Domain(domainName, expiresDate);
 		}
 		objectify.save().entities(domain).now();
+
+		// Return the subscriptions
+		return subscriptions;
 	}
 
 }

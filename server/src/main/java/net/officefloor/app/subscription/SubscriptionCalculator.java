@@ -47,6 +47,8 @@ public class SubscriptionCalculator {
 		private boolean isRestartSubscription;
 		private User paidBy;
 		private String paymentOrderId;
+		private String paymentReceipt;
+		private Integer paymentAmount;
 	}
 
 	@Data
@@ -56,6 +58,8 @@ public class SubscriptionCalculator {
 		private final User payer;
 		private final ZonedDateTime paymentDate;
 		private final String paymentOrderId;
+		private final String paymentReceipt;
+		private final Integer paymentAmount;
 		private ZonedDateTime extendsToDate = null;
 	}
 
@@ -83,16 +87,20 @@ public class SubscriptionCalculator {
 			ZonedDateTime paymentDate = payment.getTimestamp().toInstant().atZone(ResponseUtil.ZONE);
 			User payer = payment.getUser().get();
 			String paymentOrderId = payment.getInvoice().get().getPaymentOrderId();
+			String paymentReceipt = payment.getReceipt();
+			Integer amount = payment.getAmount();
 
 			// Determine if paid by user
 			if ((!isAdmin) && ((payer == null) || (!user.getId().equals(payer.getId())))) {
 				// Not paid by user (so no access to details)
 				payer = null;
 				paymentOrderId = null;
+				paymentReceipt = null;
+				amount = null;
 			}
 
 			// Add payment
-			paymentStates.add(new PaymentState(payment, payer, paymentDate, paymentOrderId));
+			paymentStates.add(new PaymentState(payment, payer, paymentDate, paymentOrderId, paymentReceipt, amount));
 		}
 
 		// Sort the payment states reverse chronologically
@@ -120,7 +128,7 @@ public class SubscriptionCalculator {
 		return Stream.of(states)
 				.map((state) -> new Subscription(state.getPayment().getProductReference(), state.getPaymentDate(),
 						state.getExtendsToDate(), state.getPayment().getIsRestartSubscription(), state.getPayer(),
-						state.getPaymentOrderId()))
+						state.getPaymentOrderId(), state.getPaymentReceipt(), state.getPaymentAmount()))
 				.toArray(Subscription[]::new);
 	}
 

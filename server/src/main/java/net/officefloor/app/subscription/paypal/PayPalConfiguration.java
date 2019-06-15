@@ -17,9 +17,12 @@
  */
 package net.officefloor.app.subscription.paypal;
 
+import java.io.IOException;
+
 import com.googlecode.objectify.Objectify;
 import com.paypal.core.PayPalEnvironment;
 
+import net.officefloor.app.subscription.InitialiseService;
 import net.officefloor.app.subscription.store.Administration;
 import net.officefloor.pay.paypal.PayPalConfigurationRepository;
 import net.officefloor.plugin.managedobject.clazz.Dependency;
@@ -36,8 +39,13 @@ public class PayPalConfiguration implements PayPalConfigurationRepository {
 
 	@Override
 	public PayPalEnvironment createPayPalEnvironment() {
-		Administration admin = this.objectify.load().type(Administration.class).first().now();
-		if (admin == null) {
+		Administration admin;
+		try {
+			admin = InitialiseService.getAdministration(this.objectify);
+			if (admin == null) {
+				return null;
+			}
+		} catch (IOException ex) {
 			return null;
 		}
 		switch (admin.getPaypalEnvironment()) {

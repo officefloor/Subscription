@@ -94,14 +94,15 @@ public class SubscriptionServiceTest {
 		// Obtain the payments
 		MockWoofResponse response = this.server
 				.send(this.jwt.authorize(user, MockWoofServer.mockRequest("/subscriptions/domain/officefloor.org")));
-		response.assertJson(200,
-				new DomainPayments("officefloor.org", ResponseUtil.toText(now), new DomainPayment[] {
-						new DomainPayment(toText(thirdPaymentDate), toText(now), false, "Daniel",
-								"daniel@officefloor.org", null),
-						new DomainPayment(toText(secondPaymentDate), toText(thirdPaymentDate), true, "Daniel",
-								"daniel@officefloor.org", null),
-						new DomainPayment(toText(firstPaymentDate), toText(firstPaymentDate.plus(1, ChronoUnit.YEARS)),
-								false, "Daniel", "daniel@officefloor.org", null) }));
+		response.assertJson(200, new DomainPayments("officefloor.org", ResponseUtil.toText(now), new DomainPayment[] {
+				new DomainPayment(toText(thirdPaymentDate), toText(now), false, "Daniel", "daniel@officefloor.org",
+						"O#" + toText(thirdPaymentDate), "R#" + toText(thirdPaymentDate), 5_00),
+				new DomainPayment(toText(secondPaymentDate), toText(thirdPaymentDate), true, "Daniel",
+						"daniel@officefloor.org", "O#" + toText(secondPaymentDate), "R#" + toText(secondPaymentDate),
+						25_00),
+				new DomainPayment(toText(firstPaymentDate), toText(firstPaymentDate.plus(1, ChronoUnit.YEARS)), false,
+						"Daniel", "daniel@officefloor.org", "O#" + toText(firstPaymentDate),
+						"R#" + toText(firstPaymentDate), 5_00) }));
 	}
 
 	@Test
@@ -121,8 +122,10 @@ public class SubscriptionServiceTest {
 		// Load the expected payment responses
 		DomainPayment[] payments = new DomainPayment[NUMBER_OF_PAYMENTS];
 		for (int i = 0; i < NUMBER_OF_PAYMENTS; i++) {
-			payments[NUMBER_OF_PAYMENTS - 1 - i] = new DomainPayment(toText(now.plus(i, ChronoUnit.SECONDS)),
-					toText(now.plus(i + 1, ChronoUnit.YEARS)), false, "Daniel", "daniel@officefloor.org", null);
+			ZonedDateTime timestamp = now.plus(i, ChronoUnit.SECONDS);
+			payments[NUMBER_OF_PAYMENTS - 1 - i] = new DomainPayment(toText(timestamp),
+					toText(now.plus(i + 1, ChronoUnit.YEARS)), false, "Daniel", "daniel@officefloor.org",
+					"O#" + toText(timestamp), "R#" + toText(timestamp), 5_00);
 		}
 
 		// Obtain the payments

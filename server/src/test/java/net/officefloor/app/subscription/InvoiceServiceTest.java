@@ -19,6 +19,7 @@ package net.officefloor.app.subscription;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.fail;
 
 import java.util.List;
 
@@ -139,6 +140,16 @@ public class InvoiceServiceTest {
 		assertEquals("Incorrect invoiced domain", "officefloor.org", invoice.getProductReference());
 		assertEquals("Incorrect payment order id", "MOCK_ORDER_ID", invoice.getPaymentOrderId());
 		assertNotNull("Should have invoice timestamp", invoice.getTimestamp());
+	}
+
+	@Test
+	public void createInvoiceWithRestart() {
+		fail("TODO implement");
+	}
+
+	@Test
+	public void createInvoiceNoRequiringRestart() {
+		fail("TODO implement");
 	}
 
 }

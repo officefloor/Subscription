@@ -72,6 +72,7 @@ module.exports = () => {
 			payDetails = [{}]
 		}
 		let orderId = 1
+		let receiptId = 1
 		for (let i = 0; i < numberOfYears; i++) {
 			paymentDate.add(365 - (Math.floor(Math.random() * 50)), 'day')
 			extendsToDate.add(1, 'year')
@@ -89,6 +90,8 @@ module.exports = () => {
 				paidByName: details.name,
 				paidByEmail: details.email,
 				paymentOrderId: details.email ? 'ORDER-' + (orderId++) : undefined,
+				paymentReceipt: details.email ? 'RECEIPT-' + (receiptId++) : undefined,
+				paymentAmount: details.email ? (isRestartSubscription ? 2500 : 500) : undefined,
 			})
 		}
 		return {

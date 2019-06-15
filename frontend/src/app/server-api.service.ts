@@ -66,7 +66,22 @@ export interface Subscription {
     paidByName: string
     paidByEmail: string
     paymentOrderId: string
+    paymentReceipt: string
+    paymentAmount: number
 }
+
+export interface CreatedInvoice {
+    orderId: string
+    status: string
+    invoiceId: string
+}
+
+export interface CapturedPayment {
+    orderId: string
+    status: string
+    domain: string
+}
+
 
 @Injectable( {
     providedIn: 'root'
@@ -111,4 +126,13 @@ export class ServerApiService {
     public getDomainSubscriptions( domainName: string ): Observable<DomainPayments> {
         return this.http.get<DomainPayments>( `${this.serverUrl}/subscriptions/domain/${domainName}` )
     }
+
+    public createInvoice( domainName: string, isRestartSubscription: boolean ): Observable<CreatedInvoice> {
+        return this.http.post<CreatedInvoice>( `${this.serverUrl}/invoices/domain/${domainName}?restart=${isRestartSubscription}`, null )
+    }
+
+    public capturePayment( orderId: string ): Observable<CapturedPayment> {
+        return this.http.post<CapturedPayment>( `${this.serverUrl}/payments/domain/${orderId}`, null )
+    }
+
 }

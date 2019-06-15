@@ -113,11 +113,12 @@ public class TestHelper {
 
 		// Create the invoice
 		Invoice invoice = new Invoice(userRef, Domain.PRODUCT_TYPE, domain, isRestart);
+		invoice.setPaymentOrderId("O#" + toText(timestamp));
 		this.objectify.store(invoice);
 
 		// Create the payment
-		Payment payment = new Payment(userRef, Ref.create(invoice), Domain.PRODUCT_TYPE, domain, isRestart, 500,
-				"R" + toText(timestamp));
+		Payment payment = new Payment(userRef, Ref.create(invoice), Domain.PRODUCT_TYPE, domain, isRestart,
+				isRestart ? 25_00 : 5_00, "R#" + toText(timestamp));
 		payment.setTimestamp(Date.from(timestamp.toInstant()));
 		this.objectify.store(payment);
 
