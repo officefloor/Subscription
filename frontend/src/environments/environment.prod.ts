@@ -1,9 +1,7 @@
-import { ServerApiService, CreatedInvoice, CapturedPayment } from '../app/server-api.service'
+import { ServerApiService, CreatedInvoice, DomainPayments } from '../app/server-api.service'
 
 export const environment = {
     production: true,
-
-    serverUrl: window.location.href.startsWith( 'http://localhost:4200' ) ? 'http://localhost:8080' : '',
 
     createOrder: (
         domainName: string,
@@ -36,13 +34,13 @@ export const environment = {
         console.log( 'Order: ' + orderId + " with data:\n\n" + JSON.stringify( data, null, 2 ) + "\n\n" );
 
         // Capture the payment
-        return serverApiService.capturePayment( orderId ).toPromise().then(( capturedPayment: CapturedPayment ) => {
+        return serverApiService.capturePayment( orderId ).toPromise().then(( domainPayments: DomainPayments ) => {
 
             // Indicate captured payment
-            console.log( 'Prod PayPal captured payment', JSON.stringify( capturedPayment, null, 2 ) )
+            console.log( 'Prod PayPal captured payment', JSON.stringify( domainPayments, null, 2 ) )
 
             // Return captured details
-            return capturedPayment
+            return domainPayments
         } )
     }
 

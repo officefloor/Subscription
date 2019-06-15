@@ -1,7 +1,8 @@
 import { Component, OnInit, SimpleChanges, Input } from '@angular/core'
 import { InitialiseService } from '../initialise.service'
-import { ServerApiService, Initialisation } from '../server-api.service'
+import { ServerApiService, Initialisation, DomainPayments } from '../server-api.service'
 import { environment } from '../../environments/environment'
+import { LatestDomainPaymentsService } from '../latest-domain-payments.service'
 
 // Loaded via PayPal script
 declare let paypal: any;
@@ -24,6 +25,7 @@ export class CheckoutComponent implements OnInit {
     constructor(
         private initialiseService: InitialiseService,
         private serverApiService: ServerApiService,
+        private latestDomainPaymentsService: LatestDomainPaymentsService,
     ) { }
 
     private loadExternalScript( scriptUrl: string ) {
@@ -63,7 +65,14 @@ export class CheckoutComponent implements OnInit {
                         component.domainName, component.isResetSubscription, paypalCurrency, this.serverApiService,
                         data, actions ),
                     onApprove: ( data, actions ) => environment.capturePayment(
-                        data.orderID, this.serverApiService, data, actions )
+                        data.orderID, this.serverApiService, data, actions ).then(( domainPayments: DomainPayments ) => {
+                            this.latestDomainPaymentsService.notifyLatest( domainPayments )
+                        } ).catch(( error: any ) => {
+                            console.error( 'Failed to take payment', error )
+
+                            // TODO provide appropriate alerting
+                            alert( 'Failed to take payment: ' + ( error.message ? error.message : error ) )
+                        } )
                 } ).render( '#paypal-button' )
             } )
         } )

@@ -5,12 +5,11 @@
  */
 
 import 'zone.js/dist/zone-error' // easier development debugging
-import { ServerApiService } from '../app/server-api.service'
+import { ServerApiService, DomainPayments, Subscription, formatDate } from '../app/server-api.service'
+import * as moment from 'moment'
 
 export const environment = {
     production: false,
-
-    serverUrl: window.location.href.startsWith( 'http://localhost:4200' ) ? 'http://localhost:8080' : '',
 
     createOrder: (
         domainName: string,
@@ -53,7 +52,24 @@ export const environment = {
             // Show a success message to your buyer
             console.log( 'Dev PayPal captured payment: ' + JSON.stringify( details, null, 2 ) )
 
-            return details
+            // Return the updated payment
+            const now = moment()
+            const subscription: Subscription = {
+                paymentDate: formatDate( now ),
+                extendsToDate: formatDate( now.add( 1, 'year' ) ),
+                isRestartSubscription: false,
+                paidByName: 'Testing',
+                paidByEmail: 'test@test.com',
+                paymentOrderId: orderId,
+                paymentReceipt: 'testing',
+                paymentAmount: 500
+            }
+            const domainPayments: DomainPayments = {
+                domainName: 'paid.domain',
+                expiresDate: formatDate( now.add( 1, 'year' ) ),
+                payments: [subscription]
+            }
+            return domainPayments
         } )
     }
 

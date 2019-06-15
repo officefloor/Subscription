@@ -1,13 +1,18 @@
 import { Injectable } from '@angular/core'
 import { HttpClient } from '@angular/common/http'
 import { Observable } from 'rxjs'
-import { environment } from '../environments/environment'
 import * as moment from 'moment'
 
 declare let window: any
 
+const DATE_FORMAT = 'ddd, D MMM YYYY H:mm:ss [GMT]'
+
+export function formatDate( date: moment.Moment ) {
+    return date.format( DATE_FORMAT )
+}
+
 export function parseDate( value: string ): moment.Moment {
-    return moment( value, 'ddd, D MMM YYYY H:mm:ss [GMT]' )
+    return moment( value, DATE_FORMAT )
 }
 
 export function isExpired( date: moment.Moment ): boolean {
@@ -76,12 +81,6 @@ export interface CreatedInvoice {
     invoiceId: string
 }
 
-export interface CapturedPayment {
-    orderId: string
-    status: string
-    domain: string
-}
-
 
 @Injectable( {
     providedIn: 'root'
@@ -89,7 +88,7 @@ export interface CapturedPayment {
 export class ServerApiService {
 
     // Direct to separate server port when running in development
-    private serverUrl: string = environment.serverUrl
+    private serverUrl: string = window.location.href.startsWith( 'http://localhost:4200' ) ? 'http://localhost:8080' : ''
 
     constructor(
         private http: HttpClient
@@ -131,8 +130,8 @@ export class ServerApiService {
         return this.http.post<CreatedInvoice>( `${this.serverUrl}/invoices/domain/${domainName}?restart=${isRestartSubscription}`, null )
     }
 
-    public capturePayment( orderId: string ): Observable<CapturedPayment> {
-        return this.http.post<CapturedPayment>( `${this.serverUrl}/payments/domain/${orderId}`, null )
+    public capturePayment( orderId: string ): Observable<DomainPayments> {
+        return this.http.post<DomainPayments>( `${this.serverUrl}/payments/domain/${orderId}`, null )
     }
 
 }

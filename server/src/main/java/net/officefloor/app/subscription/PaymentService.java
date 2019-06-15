@@ -30,9 +30,7 @@ import com.paypal.orders.Order;
 import com.paypal.orders.OrdersCaptureRequest;
 import com.paypal.orders.PurchaseUnit;
 
-import lombok.Value;
 import net.officefloor.app.subscription.SubscriptionCalculator.Subscription;
-import net.officefloor.app.subscription.SubscriptionService.DomainPayment;
 import net.officefloor.app.subscription.SubscriptionService.DomainPayments;
 import net.officefloor.app.subscription.store.Domain;
 import net.officefloor.app.subscription.store.Invoice;
@@ -40,8 +38,6 @@ import net.officefloor.app.subscription.store.Payment;
 import net.officefloor.app.subscription.store.User;
 import net.officefloor.plugin.section.clazz.Next;
 import net.officefloor.plugin.section.clazz.Parameter;
-import net.officefloor.plugin.variable.Out;
-import net.officefloor.plugin.variable.Val;
 import net.officefloor.server.http.HttpException;
 import net.officefloor.server.http.HttpStatus;
 import net.officefloor.web.HttpPathParameter;
@@ -54,17 +50,9 @@ import net.officefloor.web.ObjectResponse;
  */
 public class PaymentService {
 
-	@Value
-	public static class CapturedPayment {
-		private String orderId;
-		private String status;
-		private String domain;
-		private DomainPayment[] subscriptions;
-	}
-
 	@Next("UpdateDomain")
 	public static Payment[] capturePayment(User user, @HttpPathParameter("orderId") String orderId, Objectify objectify,
-			PayPalHttpClient paypal, Out<CapturedPayment> capturedPayment) throws IOException {
+			PayPalHttpClient paypal) throws IOException {
 
 		// Obtain the invoice
 		Invoice invoice = objectify.load().type(Invoice.class).filter("paymentOrderId", orderId).first().now();
@@ -112,22 +100,18 @@ public class PaymentService {
 		// Include payment
 		payments.add(payment);
 
-		// Provide for return
-		capturedPayment.set(new CapturedPayment(orderId, captureStatus, domainName, null));
-
 		// Return the payments
 		return payments.toArray(new Payment[payments.size()]);
 	}
 
-	public static void sendPayment(User user, @Parameter Subscription[] subscriptions, @Val CapturedPayment captured,
-			ObjectResponse<CapturedPayment> response) {
+	public static void sendPayment(User user, @Parameter Subscription[] subscriptions,
+			ObjectResponse<DomainPayments> response) {
 
 		// Obtain the domain payments
 		DomainPayments domainPayments = SubscriptionService.translateToDomainPayments(subscriptions);
 
 		// Send the response
-		response.send(new CapturedPayment(captured.getOrderId(), captured.getStatus(), captured.getDomain(),
-				domainPayments.getPayments()));
+		response.send(domainPayments);
 	}
 
 }

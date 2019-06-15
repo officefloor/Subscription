@@ -30,7 +30,7 @@ public class DomainService {
 	@Value
 	public static class PaidDomain {
 		private String domainName;
-		private String expireDate;
+		private String expiresDate;
 	}
 
 	public static void getDomains(User user, Objectify objectify, ObjectResponse<PaidDomain[]> response)

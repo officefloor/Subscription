@@ -32,7 +32,8 @@
 						[class.subscription-complete-date]="payment.isSubscriptionCompletion">{{payment.subscriptionEndDate}}</td>
 					<td [class.payer]="payment.isPaidByYou">{{payment.paidBy}}</td>
 					<td><div [hidden]="!payment.paymentOrderId">
-							Order#:&nbsp;{{payment.paymentOrderId}}<br />Receipt#:&nbsp;{{payment.paymentReceipt}}<br />Amount:&nbsp;{{payment.paymentAmount | currency}}
+							Order#:&nbsp;{{payment.paymentOrderId}}<br />Receipt#:&nbsp;{{payment.paymentReceipt}}<br />Amount:&nbsp;{{payment.paymentAmount
+							| currency:paymentCurrency}}
 						</div></td>
 					<td>{{payment.paymentDate}}</td>
 				</tr>

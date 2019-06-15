@@ -36,8 +36,8 @@ import com.paypal.orders.Order;
 import com.paypal.orders.PaymentCollection;
 import com.paypal.orders.PurchaseUnit;
 
-import net.officefloor.app.subscription.PaymentService.CapturedPayment;
 import net.officefloor.app.subscription.SubscriptionService.DomainPayment;
+import net.officefloor.app.subscription.SubscriptionService.DomainPayments;
 import net.officefloor.app.subscription.store.Domain;
 import net.officefloor.app.subscription.store.Invoice;
 import net.officefloor.app.subscription.store.Payment;
@@ -161,11 +161,11 @@ public class PaymentServiceTest {
 		this.objectify.get(Invoice.class, 1, (loader) -> loader);
 
 		// Ensure correct response
-		CapturedPayment capturedPayment = response.getJson(200, CapturedPayment.class);
-		assertEquals("Incorrect order ID", "MOCK_ORDER_ID", capturedPayment.getOrderId());
-		assertEquals("Incorrect status", "COMPLETED", capturedPayment.getStatus());
-		assertEquals("Incorrect domain", "officefloor.org", capturedPayment.getDomain());
-		DomainPayment subscription = capturedPayment.getSubscriptions()[0];
+		DomainPayments domainPayments = response.getJson(200, DomainPayments.class);
+		assertEquals("Incorrect domain", "officefloor.org", domainPayments.getDomainName());
+		DomainPayment subscription = domainPayments.getPayments()[0];
+		assertEquals("Incorrect expiry date", TestHelper.toZonedDateTime(subscription.getExtendsToDate()),
+				TestHelper.toZonedDateTime(domainPayments.getExpiresDate()));
 		validator.validate(TestHelper.toZonedDateTime(subscription.getPaymentDate()),
 				TestHelper.toZonedDateTime(subscription.getExtendsToDate()));
 		assertEquals("Incorrect subscription name", this.user.getName(), subscription.getPaidByName());
