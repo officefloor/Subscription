@@ -53,11 +53,11 @@
     <section name="Domain" source="net.officefloor.plugin.section.clazz.ClassSectionSource" location="net.officefloor.app.subscription.DomainService" x="426" y="471">
       <input name="getDomains" parameter-type=""/>
       <input name="updateDomain" parameter-type="[Lnet.officefloor.app.subscription.SubscriptionCalculator$Subscription;"/>
-      <output name="Updated" argument-type="[Lnet.officefloor.app.subscription.SubscriptionCalculator$Subscription;">
-        <section name="Subsciption" input="sendSubscriptions"/>
+      <output name="DomainUpdated" argument-type="[Lnet.officefloor.app.subscription.SubscriptionCalculator$Subscription;">
+        <section name="Payment" input="sendPayment"/>
       </output>
     </section>
-    <section name="ExpiryCalculator" source="net.officefloor.plugin.section.clazz.ClassSectionSource" location="net.officefloor.app.subscription.SubscriptionCalculator" x="483" y="390">
+    <section name="ExpiryCalculator" source="net.officefloor.plugin.section.clazz.ClassSectionSource" location="net.officefloor.app.subscription.SubscriptionCalculator" x="496" y="404">
       <input name="calculateSubscriptions" parameter-type="[Lnet.officefloor.app.subscription.store.Payment;"/>
       <output name="Subscription" argument-type="[Lnet.officefloor.app.subscription.SubscriptionCalculator$Subscription;">
         <section name="Domain" input="updateDomain"/>
@@ -76,6 +76,7 @@
     </section>
     <section name="Payment" source="net.officefloor.plugin.section.clazz.ClassSectionSource" location="net.officefloor.app.subscription.PaymentService" x="434" y="317">
       <input name="capturePayment" parameter-type=""/>
+      <input name="sendPayment" parameter-type="[Lnet.officefloor.app.subscription.SubscriptionCalculator$Subscription;"/>
       <output name="UpdateDomain" argument-type="[Lnet.officefloor.app.subscription.store.Payment;">
         <section name="ExpiryCalculator" input="calculateSubscriptions"/>
       </output>
@@ -93,7 +94,7 @@
         <section name="SubscriptionCalculcator" input="calculateSubscriptions"/>
       </output>
     </section>
-    <section name="SubscriptionCalculcator" source="net.officefloor.plugin.section.clazz.ClassSectionSource" location="net.officefloor.app.subscription.SubscriptionCalculator" x="493" y="688">
+    <section name="SubscriptionCalculcator" source="net.officefloor.plugin.section.clazz.ClassSectionSource" location="net.officefloor.app.subscription.SubscriptionCalculator" x="498" y="724">
       <input name="calculateSubscriptions" parameter-type="[Lnet.officefloor.app.subscription.store.Payment;"/>
       <output name="Subscription" argument-type="[Lnet.officefloor.app.subscription.SubscriptionCalculator$Subscription;">
         <section name="Subsciption" input="sendSubscriptions"/>

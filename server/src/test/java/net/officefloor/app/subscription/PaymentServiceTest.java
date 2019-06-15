@@ -37,6 +37,7 @@ import com.paypal.orders.PaymentCollection;
 import com.paypal.orders.PurchaseUnit;
 
 import net.officefloor.app.subscription.PaymentService.CapturedPayment;
+import net.officefloor.app.subscription.SubscriptionService.DomainPayment;
 import net.officefloor.app.subscription.store.Domain;
 import net.officefloor.app.subscription.store.Invoice;
 import net.officefloor.app.subscription.store.Payment;
@@ -83,7 +84,7 @@ public class PaymentServiceTest {
 	@Test
 	public void createFirstDomainPayment() throws Exception {
 		this.doPaymentTest(false,
-				(paymentTime, expiresTime) -> assertEquals(paymentTime.plus(1, ChronoUnit.YEARS), expiresTime));
+				(paymentTime, expiresTime) -> assertTime(paymentTime.plus(1, ChronoUnit.YEARS), expiresTime));
 	}
 
 	@Test
@@ -91,7 +92,7 @@ public class PaymentServiceTest {
 		ZonedDateTime previous = TestHelper.now().minus(1, ChronoUnit.MONTHS);
 		this.helper.setupPayment(this.userRef, "officefloor.org", false, previous);
 		this.doPaymentTest(false,
-				(paymentTime, expiresTime) -> assertEquals(previous.plus(2, ChronoUnit.YEARS), expiresTime));
+				(paymentTime, expiresTime) -> assertTime(previous.plus(2, ChronoUnit.YEARS), expiresTime));
 	}
 
 	@Test
@@ -100,7 +101,7 @@ public class PaymentServiceTest {
 		Payment payment = this.helper.setupPayment(this.userRef, "officefloor.org", false, previous);
 		this.helper.setupDomain(payment);
 		this.doPaymentTest(false,
-				(paymentTime, expiresTime) -> assertEquals(previous.plus(2, ChronoUnit.YEARS), expiresTime));
+				(paymentTime, expiresTime) -> assertTime(previous.plus(2, ChronoUnit.YEARS), expiresTime));
 	}
 
 	@Test
@@ -109,7 +110,7 @@ public class PaymentServiceTest {
 		Payment payment = this.helper.setupPayment(this.userRef, "officefloor.org", false, previous);
 		this.helper.setupDomain(payment);
 		this.doPaymentTest(false,
-				(paymentTime, expiresTime) -> assertEquals(previous.plus(2, ChronoUnit.YEARS), expiresTime));
+				(paymentTime, expiresTime) -> assertTime(previous.plus(2, ChronoUnit.YEARS), expiresTime));
 	}
 
 	@Test
@@ -118,7 +119,7 @@ public class PaymentServiceTest {
 		Payment payment = this.helper.setupPayment(this.userRef, "officefloor.org", false, previous);
 		this.helper.setupDomain(payment);
 		this.doPaymentTest(true,
-				(paymentTime, expiresTime) -> assertEquals(previous.plus(2, ChronoUnit.YEARS), expiresTime));
+				(paymentTime, expiresTime) -> assertTime(previous.plus(2, ChronoUnit.YEARS), expiresTime));
 	}
 
 	@Test
@@ -127,7 +128,7 @@ public class PaymentServiceTest {
 		Payment payment = this.helper.setupPayment(this.userRef, "officefloor.org", false, previous);
 		this.helper.setupDomain(payment);
 		this.doPaymentTest(true,
-				(paymentTime, expiresTime) -> assertEquals(paymentTime.plus(1, ChronoUnit.YEARS), expiresTime));
+				(paymentTime, expiresTime) -> assertTime(paymentTime.plus(1, ChronoUnit.YEARS), expiresTime));
 	}
 
 	@FunctionalInterface
@@ -152,17 +153,27 @@ public class PaymentServiceTest {
 		this.objectify.store(invoice);
 
 		// Send request
-		MockWoofResponse response = this.server.send(this.jwt
-				.authorize(user, MockWoofServer.mockRequest("/payments/domain/MOCK_ORDER_ID")).method(HttpMethod.POST));
+		MockWoofResponse response = this.server
+				.send(this.jwt.authorize(this.user, MockWoofServer.mockRequest("/payments/domain/MOCK_ORDER_ID"))
+						.method(HttpMethod.POST));
 
 		// Ensure only one invoice
 		this.objectify.get(Invoice.class, 1, (loader) -> loader);
 
 		// Ensure correct response
-		CapturedPayment order = response.getJson(200, CapturedPayment.class);
-		assertEquals("Incorrect order ID", "MOCK_ORDER_ID", order.getOrderId());
-		assertEquals("Incorrect status", "COMPLETED", order.getStatus());
-		assertEquals("Incorrect domain", "officefloor.org", order.getDomain());
+		CapturedPayment capturedPayment = response.getJson(200, CapturedPayment.class);
+		assertEquals("Incorrect order ID", "MOCK_ORDER_ID", capturedPayment.getOrderId());
+		assertEquals("Incorrect status", "COMPLETED", capturedPayment.getStatus());
+		assertEquals("Incorrect domain", "officefloor.org", capturedPayment.getDomain());
+		DomainPayment subscription = capturedPayment.getSubscriptions()[0];
+		validator.validate(TestHelper.toZonedDateTime(subscription.getPaymentDate()),
+				TestHelper.toZonedDateTime(subscription.getExtendsToDate()));
+		assertEquals("Incorrect subscription name", this.user.getName(), subscription.getPaidByName());
+		assertEquals("Incorrect subscription email", this.user.getEmail(), subscription.getPaidByEmail());
+		assertEquals("Incorrect subscription amount", Integer.valueOf(5_00), subscription.getPaymentAmount());
+		assertEquals("Incorrect subscription orderId", ORDER_ID, subscription.getPaymentOrderId());
+		assertEquals("INcorrect subscription receipt", "MOCK_RECEIPT", subscription.getPaymentReceipt());
+		assertNotNull("Should have subscription payment date", subscription.getPaymentDate());
 
 		// Ensure payment captured
 		Payment payment = this.objectify.get(Payment.class, 1, (loader) -> loader.filter("invoice", invoice)).get(0);
@@ -185,6 +196,10 @@ public class PaymentServiceTest {
 		// Validate the domain timestamp
 		validator.validate(TestHelper.toZonedDateTime(payment.getTimestamp()),
 				TestHelper.toZonedDateTime(domain.getExpires()));
+	}
+
+	private static void assertTime(ZonedDateTime expected, ZonedDateTime actual) {
+		assertEquals(expected.truncatedTo(ChronoUnit.SECONDS), actual.truncatedTo(ChronoUnit.SECONDS));
 	}
 
 }

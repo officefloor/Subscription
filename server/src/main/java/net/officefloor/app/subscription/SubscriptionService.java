@@ -32,6 +32,7 @@ import net.officefloor.app.subscription.SubscriptionCalculator.Subscription;
 import net.officefloor.app.subscription.store.Domain;
 import net.officefloor.app.subscription.store.Payment;
 import net.officefloor.app.subscription.store.User;
+import net.officefloor.plugin.managedfunction.clazz.NonFunctionMethod;
 import net.officefloor.plugin.section.clazz.Next;
 import net.officefloor.plugin.section.clazz.Parameter;
 import net.officefloor.server.http.HttpException;
@@ -59,7 +60,7 @@ public class SubscriptionService {
 	public static class DomainPayment {
 		private String paymentDate;
 		private String extendsToDate;
-		private boolean isRestartSubscription;
+		private boolean restartSubscription;
 		private String paidByName;
 		private String paidByEmail;
 		private String paymentOrderId;
@@ -102,8 +103,8 @@ public class SubscriptionService {
 		return payments.toArray(new Payment[payments.size()]);
 	}
 
-	public static void sendSubscriptions(@Parameter Subscription[] subscriptions,
-			ObjectResponse<DomainPayments> response) {
+	@NonFunctionMethod
+	public static DomainPayments translateToDomainPayments(@Parameter Subscription[] subscriptions) {
 
 		// Create domain payments from subscriptions
 		Function<Subscription, String> name = (subscription) -> subscription == null ? null
@@ -119,9 +120,20 @@ public class SubscriptionService {
 
 		// Obtain the domain
 		String domainName = subscriptions.length > 0 ? subscriptions[0].getProductReference() : null;
+		String extendsToDate = subscriptions.length > 0 ? toText(subscriptions[0].getExtendsToDate()) : null;
+
+		// Return the domain payments
+		return new DomainPayments(domainName, extendsToDate, domainPayments);
+	}
+
+	public static void sendSubscriptions(@Parameter Subscription[] subscriptions,
+			ObjectResponse<DomainPayments> response) {
+
+		// Translate to domain payments
+		DomainPayments domainPayments = translateToDomainPayments(subscriptions);
 
 		// Send the response
-		response.send(new DomainPayments(domainName, domainPayments[0].getExtendsToDate(), domainPayments));
+		response.send(domainPayments);
 	}
 
 }

@@ -71,6 +71,16 @@ public class TestHelper {
 	}
 
 	/**
+	 * Converts text to {@link ZonedDateTime}.
+	 * 
+	 * @param date Text date.
+	 * @return {@link ZonedDateTime}.
+	 */
+	public static ZonedDateTime toZonedDateTime(String date) {
+		return ZonedDateTime.parse(date, DateTimeFormatter.RFC_1123_DATE_TIME).withZoneSameInstant(ResponseUtil.ZONE);
+	}
+
+	/**
 	 * Creates a new {@link User} without storing in database.
 	 * 
 	 * @param name  Name of {@link User}.

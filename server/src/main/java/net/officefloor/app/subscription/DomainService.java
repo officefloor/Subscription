@@ -58,7 +58,7 @@ public class DomainService {
 		response.send(domainResponses);
 	}
 
-	@Next("Updated")
+	@Next("DomainUpdated")
 	public static Subscription[] updateDomain(@Parameter Subscription[] subscriptions, Objectify objectify) {
 
 		// Determine if have subscriptions
