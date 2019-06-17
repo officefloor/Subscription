@@ -52,16 +52,13 @@ public class InitialiseServiceTest {
 	@Rule
 	public RuleChain chain = RuleChain.outerRule(this.obectify).around(this.server);
 
+	private TestHelper helper = new TestHelper(this.obectify);
+
 	@Test
 	public void retrieveInitialisation() throws Exception {
 
 		// Store configuration
-		Administration administration = new Administration("MOCK_GOOGLE_CLIENT_ID",
-				new Administrator[] { new Administrator("MOCK_ADMIN_1", "NOTES_1"),
-						new Administrator("MOCK_ADMIN_2", "NOTES_2") },
-				"MOCK_PAYPAL_ENVIRONMENT", "MOCK_PAYPAL_CLIENT_ID", "MOCK_PAYPAL_CLIENT_SECRET",
-				"MOCK_PAYPAL_CURRENCY");
-		this.obectify.store(administration);
+		this.helper.setupAdministration();
 
 		// Ensure able to obtain initialisation from configuration
 		MockWoofResponse response = this.server
@@ -128,6 +125,7 @@ public class InitialiseServiceTest {
 		assertEquals("sandbox", admin.getPaypalEnvironment());
 		assertEquals("MOCK_PAYPAL_CLIENT_ID", admin.getPaypalClientId());
 		assertEquals("MOCK_PAYPAL_CLIENT_SECRET", admin.getPaypalClientSecret());
+		assertEquals("MOCK_INVOICE_{id}_{timestamp}", admin.getPaypalInvoiceIdTemplate());
 		assertEquals("MOCK_PAYPAL_CURRENCY", admin.getPaypalCurrency());
 	}
 

@@ -56,6 +56,9 @@ public class Administration {
 	private String paypalClientSecret;
 
 	@NonNull
+	private String paypalInvoiceIdTemplate;
+
+	@NonNull
 	private String paypalCurrency;
 
 	@Data

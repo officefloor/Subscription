@@ -56,67 +56,59 @@ public class ConfigureServiceTest {
 	@Rule
 	public RuleChain chain = RuleChain.outerRule(this.jwt).around(this.objectify).around(this.server);
 
+	private final TestHelper helper = new TestHelper(this.objectify);
+
 	@Test
 	public void getConfiguration() throws Exception {
 
 		User user = TestHelper.newUser("Daniel", User.ROLE_ADMIN);
-
-		// Configure administration
-		Administration existing = new Administration("MOCK_GOOGLE_ID",
-				new Administrator[] { new Administrator("MOCK_GOOGLE_ADMIN", "MOCK_NOTES") }, "sandbox",
-				"MOCK_PAYPAL_ID", "MOCK_PAYPAL_SECRET", "MOCK_CURRENCY");
-		this.objectify.store(existing);
+		this.helper.setupAdministration();
 
 		// Ensure can obtain configuration
 		MockWoofResponse response = this.server.send(this.jwt
 				.authorize(user, MockWoofServer.mockRequest("/configuration")).header("Accept", "application/json"));
-		response.assertJson(200, new Configuration("MOCK_GOOGLE_ID",
-				new ConfigurationAdministrator[] { new ConfigurationAdministrator("MOCK_GOOGLE_ADMIN", "MOCK_NOTES") },
-				"sandbox", "MOCK_PAYPAL_ID", "MOCK_PAYPAL_SECRET", "MOCK_CURRENCY"));
+		response.assertJson(200, new Configuration("MOCK_GOOGLE_CLIENT_ID",
+				new ConfigurationAdministrator[] { new ConfigurationAdministrator("MOCK_ADMIN_1", "MOCK_NOTES_1"),
+						new ConfigurationAdministrator("MOCK_ADMIN_2", "MOCK_NOTES_2") },
+				"MOCK_PAYPAL_ENVIRONMENT", "MOCK_PAYPAL_CLIENT_ID", "MOCK_PAYPAL_CLIENT_SECRET",
+				"MOCK_PAYPAL_INVOICE_{id}", "MOCK_PAYPAL_CURRENCY"));
 	}
 
 	@Test
 	public void updateConfiguration() throws Exception {
 
 		User user = TestHelper.newUser("Daniel", User.ROLE_ADMIN);
-
-		// Configure administration
-		Administration existing = new Administration("MOCK_OVERRIDE_GOOGLE_ID",
-				new Administrator[] { new Administrator("MOCK_OVERRIDE_ADMIN", "MOCK_NOTES") }, "override",
-				"MOCK_OVERRIDE_PAYPAL_ID", "MOCK_OVERRIDE_PAYPAL_SECRET", "MOCK_OVERRIDE_CURRENCY");
-		this.objectify.store(existing);
+		Administration existing = this.helper.setupAdministration();
 
 		// Configure system
-		final String UPDATED_GOOGLE_ID = "MOCK_GOOGLE_CLIENT_ID";
+		final String UPDATED_GOOGLE_ID = "CHANGE_GOOGLE_CLIENT_ID";
 		ConfigurationAdministrator[] configurationAdministrators = new ConfigurationAdministrator[] {
-				new ConfigurationAdministrator("MOCK_ADMIN_1", "MOCK_NOTES_1"),
-				new ConfigurationAdministrator("MOCK_ADMIN_2", "MOCK_NOTES_2") };
+				new ConfigurationAdministrator("CHANGE_ADMIN_1", "CHANGE_NOTES_1") };
 		MockWoofResponse response = this.server.send(this.jwt.authorize(user,
 				MockWoofServer.mockJsonRequest(HttpMethod.POST, "/configuration",
 						new Configuration(UPDATED_GOOGLE_ID, configurationAdministrators, "sandbox",
-								"MOCK_CLIENT_PAYPAL_ID", "MOCK_CLIENT_PAYPAL_SECRET", "MOCK_CURRENCY"))));
+								"CHANGE_CLIENT_PAYPAL_ID", "CHANGE_CLIENT_PAYPAL_SECRET",
+								"CHANGE_INVOICE_{id}_{template}", "CHANGE_CURRENCY"))));
 		response.assertJson(200, new Configured(true));
 
 		// Ensure configured
 		Administration admin = this.objectify.consistent(() -> this.objectify.get(Administration.class),
 				(administration) -> UPDATED_GOOGLE_ID.equals(administration.getGoogleClientId()));
 		assertEquals("Should only be one entry", existing.getId(), admin.getId());
-		assertEquals("MOCK_GOOGLE_CLIENT_ID", admin.getGoogleClientId());
+		assertEquals("CHANGE_GOOGLE_CLIENT_ID", admin.getGoogleClientId());
 		assertAdministrators(configurationAdministrators, (a) -> a, admin.getAdministrators());
 		assertEquals("sandbox", admin.getPaypalEnvironment());
-		assertEquals("MOCK_CLIENT_PAYPAL_ID", admin.getPaypalClientId());
-		assertEquals("MOCK_CLIENT_PAYPAL_SECRET", admin.getPaypalClientSecret());
-		assertEquals("MOCK_CURRENCY", admin.getPaypalCurrency());
+		assertEquals("CHANGE_CLIENT_PAYPAL_ID", admin.getPaypalClientId());
+		assertEquals("CHANGE_CLIENT_PAYPAL_SECRET", admin.getPaypalClientSecret());
+		assertEquals("CHANGE_INVOICE_{id}_{template}", admin.getPaypalInvoiceIdTemplate());
+		assertEquals("CHANGE_CURRENCY", admin.getPaypalCurrency());
 	}
 
 	@Test
 	public void onlyAdministratorGetsConfiguration() throws Exception {
 
 		// Configure administration
-		Administration administration = new Administration("MOCK_GOOGLE_CLIENT_ID",
-				new Administrator[] { new Administrator("MOCK_ADMIN", "MOCK_NOTES") }, "sandbox",
-				"MOCK_CLIENT_PAYPAL_ID", "MOCK_CLIENT_PAYPAL_SECRET", "MOCK_CURRENCY");
-		this.objectify.store(administration);
+		this.helper.setupAdministration();
 
 		// Non-admin attempt to get configuration
 		User user = TestHelper.newUser("Daniel");
@@ -129,20 +121,20 @@ public class ConfigureServiceTest {
 	public void onlyAdministratorUpdatesConfiguration() throws Exception {
 
 		// Configure administration
-		Administrator[] administrators = new Administrator[] { new Administrator("MOCK_ADMIN", "MOCK_NOTES") };
-		Administration administration = new Administration("MOCK_GOOGLE_CLIENT_ID", administrators, "sandbox",
-				"MOCK_CLIENT_PAYPAL_ID", "MOCK_CLIENT_PAYPAL_SECRET", "MOCK_CURRENCY");
-		this.objectify.store(administration);
+		Administrator[] administrators = new Administrator[] { new Administrator("MOCK_ADMIN_1", "MOCK_NOTES_1"),
+				new Administrator("MOCK_ADMIN_2", "MOCK_NOTES_2") };
+		Administration administration = this.helper.setupAdministration();
 
 		// Non-admin attempt to configure
 		User user = TestHelper.newUser("Daniel");
-		ConfigurationAdministrator[] configurationAdministrators = new ConfigurationAdministrator[] {
-				new ConfigurationAdministrator("CHANGE_ADMIN_1", "CHANGE_NOTES_1"),
-				new ConfigurationAdministrator("CHANGE_ADMIN_2", "CHANGE_NOTES_2") };
-		MockWoofResponse response = this.server.send(this.jwt.authorize(user,
-				MockWoofServer.mockJsonRequest(HttpMethod.POST, "/configuration",
-						new Configuration("CHANGE_GOOGLE_ID", configurationAdministrators, "changed",
-								"CHANGE_PAYPAL_ID", "CHANGE_PAYPAL_SECRET", "CHANGE_CURRENCY"))));
+		MockWoofResponse response = this.server.send(this.jwt.authorize(user, MockWoofServer.mockJsonRequest(
+				HttpMethod.POST, "/configuration",
+				new Configuration("CHANGE_GOOGLE_ID",
+						new ConfigurationAdministrator[] {
+								new ConfigurationAdministrator("CHANGE_ADMIN_1", "CHANGE_NOTES_1"),
+								new ConfigurationAdministrator("CHANGE_ADMIN_2", "CHANGE_NOTES_2") },
+						"changed", "CHANGE_PAYPAL_ID", "CHANGE_PAYPAL_SECRET", "CHANGE_INVOICE_{id}",
+						"CHANGE_CURRENCY"))));
 		response.assertJsonError(new HttpException(HttpStatus.FORBIDDEN, "Forbidden"));
 
 		// Ensure not changed
@@ -151,10 +143,11 @@ public class ConfigureServiceTest {
 		assertEquals("MOCK_GOOGLE_CLIENT_ID", admin.getGoogleClientId());
 		assertAdministrators(administrators, (a) -> new ConfigurationAdministrator(a.getGoogleId(), a.getNotes()),
 				admin.getAdministrators());
-		assertEquals("sandbox", admin.getPaypalEnvironment());
-		assertEquals("MOCK_CLIENT_PAYPAL_ID", admin.getPaypalClientId());
-		assertEquals("MOCK_CLIENT_PAYPAL_SECRET", admin.getPaypalClientSecret());
-		assertEquals("MOCK_CURRENCY", admin.getPaypalCurrency());
+		assertEquals("MOCK_PAYPAL_ENVIRONMENT", admin.getPaypalEnvironment());
+		assertEquals("MOCK_PAYPAL_CLIENT_ID", admin.getPaypalClientId());
+		assertEquals("MOCK_PAYPAL_CLIENT_SECRET", admin.getPaypalClientSecret());
+		assertEquals("MOCK_PAYPAL_INVOICE_{id}", admin.getPaypalInvoiceIdTemplate());
+		assertEquals("MOCK_PAYPAL_CURRENCY", admin.getPaypalCurrency());
 	}
 
 	private static <T> void assertAdministrators(T[] configurationAdministrators,

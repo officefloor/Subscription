@@ -30,6 +30,7 @@ export class ConfigureComponent implements OnInit {
             paypalEnvironment: '',
             paypalClientId: '',
             paypalClientSecret: '',
+            paypalInvoiceIdTemplate: '',
             paypalCurrency: '',
         } )
     }
@@ -51,6 +52,7 @@ export class ConfigureComponent implements OnInit {
                     paypalEnvironment: configuration.paypalEnvironment,
                     paypalClientId: configuration.paypalClientId,
                     paypalClientSecret: configuration.paypalClientSecret,
+                    paypalInvoiceIdTemplate: configuration.paypalInvoiceIdTemplate,
                     paypalCurrency: configuration.paypalCurrency
                 } )
 
@@ -90,6 +92,7 @@ export class ConfigureComponent implements OnInit {
             paypalEnvironment: form.paypalEnvironment,
             paypalClientId: form.paypalClientId,
             paypalClientSecret: form.paypalClientSecret,
+            paypalInvoiceIdTemplate: form.paypalInvoiceIdTemplate,
             paypalCurrency: form.paypalCurrency,
         } ).subscribe(() => {
             this.isSaving = false

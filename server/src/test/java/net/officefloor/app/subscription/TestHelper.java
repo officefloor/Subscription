@@ -25,6 +25,8 @@ import java.util.Date;
 import com.googlecode.objectify.Ref;
 
 import lombok.Value;
+import net.officefloor.app.subscription.store.Administration;
+import net.officefloor.app.subscription.store.Administration.Administrator;
 import net.officefloor.app.subscription.store.Domain;
 import net.officefloor.app.subscription.store.Invoice;
 import net.officefloor.app.subscription.store.Payment;
@@ -108,6 +110,30 @@ public class TestHelper {
 		User user = newUser(name, roles);
 		this.objectify.store(user);
 		return user;
+	}
+
+	/**
+	 * Creates a new {@link Administration} without storing in database.
+	 * 
+	 * @return {@link Administration}.
+	 */
+	public static Administration newAdministration() {
+		return new Administration("MOCK_GOOGLE_CLIENT_ID",
+				new Administrator[] { new Administrator("MOCK_ADMIN_1", "MOCK_NOTES_1"),
+						new Administrator("MOCK_ADMIN_2", "MOCK_NOTES_2") },
+				"MOCK_PAYPAL_ENVIRONMENT", "MOCK_PAYPAL_CLIENT_ID", "MOCK_PAYPAL_CLIENT_SECRET",
+				"MOCK_PAYPAL_INVOICE_{id}", "MOCK_PAYPAL_CURRENCY");
+	}
+
+	/**
+	 * Sets up an {@link Administration} in database.
+	 * 
+	 * @return {@link Administration}.
+	 */
+	public Administration setupAdministration() {
+		Administration admin = newAdministration();
+		this.objectify.store(admin);
+		return admin;
 	}
 
 	/**

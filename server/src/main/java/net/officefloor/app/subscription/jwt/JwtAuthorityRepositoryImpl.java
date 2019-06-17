@@ -31,15 +31,17 @@ public class JwtAuthorityRepositoryImpl implements JwtAuthorityRepository {
 	@Override
 	public List<JwtAccessKey> retrieveJwtAccessKeys(RetrieveKeysContext context) throws Exception {
 
-		// TODO remove old access keys (where expire time is less than:)
-		context.getActiveAfter();
+		// Obtain the access keys (deleting old keys)
+		List<JwtAccessKey> jwtAccessKeys = new ArrayList<>();
+		NEXT_KEY: for (AccessKey accessKey : this.objectify.load().type(AccessKey.class).iterable()) {
 
-		// Obtain the access keys
-		List<AccessKey> accessKeys = this.objectify.load().type(AccessKey.class).list();
+			// Determine if expired
+			if (accessKey.getExpireTime() < context.getActiveAfter()) {
+				this.objectify.delete().entity(accessKey).now();
+				continue NEXT_KEY;
+			}
 
-		// Translate into JWT access keys for return
-		List<JwtAccessKey> jwtAccessKeys = new ArrayList<>(accessKeys.size());
-		for (AccessKey accessKey : accessKeys) {
+			// Add the active access key
 			Key publicKey = context.deserialise(accessKey.getPublicKey());
 			Key privateKey = context.deserialise(accessKey.getPrivateKey());
 			jwtAccessKeys.add(
@@ -68,15 +70,17 @@ public class JwtAuthorityRepositoryImpl implements JwtAuthorityRepository {
 	@Override
 	public List<JwtRefreshKey> retrieveJwtRefreshKeys(RetrieveKeysContext context) throws Exception {
 
-		// TODO remove old refresh keys (where expire time is less than:)
-		context.getActiveAfter();
-
 		// Obtain the refresh keys
-		List<RefreshKey> refreshKeys = this.objectify.load().type(RefreshKey.class).list();
+		List<JwtRefreshKey> jwtRefreshKeys = new ArrayList<>();
+		NEXT_KEY: for (RefreshKey refreshKey : this.objectify.load().type(RefreshKey.class).iterable()) {
 
-		// Translate into JWT refresh keys for return
-		List<JwtRefreshKey> jwtRefreshKeys = new ArrayList<>(refreshKeys.size());
-		for (RefreshKey refreshKey : refreshKeys) {
+			// Determine if expired
+			if (refreshKey.getExpireTime() < context.getActiveAfter()) {
+				this.objectify.delete().entity(refreshKey).now();
+				continue NEXT_KEY;
+			}
+
+			// Add the active refresh key
 			Key key = context.deserialise(refreshKey.getKey());
 			jwtRefreshKeys.add(new JwtRefreshKeyImpl(refreshKey.getStartTime(), refreshKey.getExpireTime(),
 					refreshKey.getInitVector(), refreshKey.getStartSalt(), refreshKey.getLace(),

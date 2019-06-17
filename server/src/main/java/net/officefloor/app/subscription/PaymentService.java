@@ -22,6 +22,8 @@ import java.util.ArrayList;
 import java.util.List;
 
 import com.braintreepayments.http.HttpResponse;
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.googlecode.objectify.Objectify;
 import com.googlecode.objectify.Ref;
 import com.paypal.core.PayPalHttpClient;
@@ -30,6 +32,7 @@ import com.paypal.orders.Order;
 import com.paypal.orders.OrdersCaptureRequest;
 import com.paypal.orders.PurchaseUnit;
 
+import lombok.Value;
 import net.officefloor.app.subscription.SubscriptionCalculator.Subscription;
 import net.officefloor.app.subscription.SubscriptionService.DomainPayments;
 import net.officefloor.app.subscription.store.Domain;
@@ -50,6 +53,8 @@ import net.officefloor.web.ObjectResponse;
  */
 public class PaymentService {
 
+	private static ObjectMapper mapper = new ObjectMapper();
+
 	@Next("UpdateDomain")
 	public static Payment[] capturePayment(User user, @HttpPathParameter("orderId") String orderId, Objectify objectify,
 			PayPalHttpClient paypal) throws IOException {
@@ -63,9 +68,33 @@ public class PaymentService {
 		boolean isRestartSubscription = invoice.getIsRestartSubscription();
 
 		// Capture the funds
-		HttpResponse<Order> orderResponse = paypal.execute(new OrdersCaptureRequest(orderId));
+		HttpResponse<Order> orderResponse;
+		try {
+			orderResponse = paypal.execute(new OrdersCaptureRequest(orderId));
+		} catch (IOException ex) {
+
+			// Obtain the error message
+			String errorMessage = ex.getMessage();
+
+			// Determine if extract PayPal error
+			try {
+				PayPalError paypalError = mapper.readValue(ex.getMessage(), PayPalError.class);
+				if ((paypalError.details != null) && (paypalError.details.length > 0)) {
+					errorMessage = paypalError.details[0].getDescription();
+				}
+			} catch (IOException ignoreJsonEx) {
+				// just take as text error
+			}
+
+			// Indicate failure in paypal
+			throw new HttpException(HttpStatus.INTERNAL_SERVER_ERROR, errorMessage);
+		}
 		Order order = orderResponse.result();
 		String captureStatus = order.status();
+
+		// TODO REMOVE
+		System.out.println("TODO REMOVE: paypal " + captureStatus);
+
 		if (!"COMPLETED".equalsIgnoreCase(captureStatus)) {
 			throw new HttpException(HttpStatus.PAYMENT_REQUIRED);
 		}
@@ -112,6 +141,18 @@ public class PaymentService {
 
 		// Send the response
 		response.send(domainPayments);
+	}
+
+	@Value
+	@JsonIgnoreProperties(ignoreUnknown = true)
+	public static class PayPalError {
+		PayPalIssue[] details;
+	}
+
+	@Value
+	@JsonIgnoreProperties(ignoreUnknown = true)
+	public static class PayPalIssue {
+		String description;
 	}
 
 }

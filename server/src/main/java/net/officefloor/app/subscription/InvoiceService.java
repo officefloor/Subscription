@@ -18,7 +18,12 @@
 package net.officefloor.app.subscription;
 
 import java.io.IOException;
+import java.text.DecimalFormat;
+import java.time.Instant;
+import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.List;
+import java.util.function.Function;
 
 import com.braintreepayments.http.HttpResponse;
 import com.googlecode.objectify.Objectify;
@@ -52,9 +57,17 @@ import net.officefloor.web.ObjectResponse;
  */
 public class InvoiceService {
 
-	private static final String SUBSCRIPTION_VALUE = "4.54";
-	private static final String SUBSCRIPTION_TAX = "0.46";
-	private static final String SUBSCRIPTION_TOTAL = "5.00";
+	/*
+	 * Values in cents.
+	 */
+
+	private static final int SUBSCRIPTION_VALUE = 4_54;
+	private static final int SUBSCRIPTION_TAX = 46;
+
+	private static final int RESTART_VALUE = 18_18;
+	private static final int RESTART_TAX = 1_82;
+
+	private static final DecimalFormat formatCurrency = new DecimalFormat("0.00");
 
 	@Value
 	public static class CreatedInvoice {
@@ -67,7 +80,12 @@ public class InvoiceService {
 			@HttpQueryParameter("restart") String restart, Objectify objectify, PayPalHttpClient paypal,
 			ObjectResponse<CreatedInvoice> response) throws IOException {
 
-		// TODO validate the domain name
+		// Validate the domain name
+		domainName = domainName.trim();
+		if (domainName.contains(" ") || domainName.startsWith(".") || domainName.endsWith(".")
+				|| (!domainName.contains("."))) {
+			throw new HttpException(422, "Invalid domain " + domainName);
+		}
 
 		// Determine if restart subscription
 		boolean isRestart = Boolean.parseBoolean(restart);
@@ -80,28 +98,57 @@ public class InvoiceService {
 
 		// Obtain the currency
 		String currency = administration.getPaypalCurrency();
+		Function<Integer, String> amount = (value) -> formatCurrency.format(value / 100.0);
+		Function<Integer, Money> newMoney = (value) -> new Money().value(amount.apply(value)).currencyCode(currency);
+
+		// Determine if restart required
+		Domain domain = objectify.load().type(Domain.class).filter("domain", domainName).first().now();
+		if (domain == null) {
+			isRestart = false; // domain not registered, so no restart required
+		} else if (domain.getExpires().toInstant().isAfter(Instant.now())) {
+			isRestart = false; // domain not expires, so no restart required
+		}
 
 		// Create the invoice entry
 		Invoice invoice = new Invoice(Ref.create(user), Domain.PRODUCT_TYPE, domainName, isRestart);
 		objectify.save().entities(invoice).now();
 		String invoiceId = String.valueOf(invoice.getId());
 
+		// Calculate the PayPal unique invoice Id
+		String paypalInvoiceId = administration.getPaypalInvoiceIdTemplate();
+		paypalInvoiceId = paypalInvoiceId.replace("{id}", invoiceId);
+		paypalInvoiceId = paypalInvoiceId.replace("{timestamp}", String.valueOf(System.currentTimeMillis()));
+
+		// Load the items
+		List<Item> items = new ArrayList<>(2);
+		items.add(new Item().name("Subscription").description("Domain subscription " + domainName)
+				.unitAmount(newMoney.apply(SUBSCRIPTION_VALUE)).tax(newMoney.apply(SUBSCRIPTION_TAX)).quantity("1")
+				.category("DIGITAL_GOODS").url("http://" + domainName));
+		if (isRestart) {
+			items.add(new Item().name("Restart").description("Restart domain subscription")
+					.unitAmount(newMoney.apply(RESTART_VALUE)).tax(newMoney.apply(RESTART_TAX)).quantity("1")
+					.category("DIGITAL_GOODS").url("http://" + domainName));
+		}
+
 		// Create order for the domain
-		HttpResponse<Order> orderResponse = paypal.execute(new OrdersCreateRequest().requestBody(new OrderRequest()
-				.intent("CAPTURE")
-				.applicationContext(new ApplicationContext().shippingPreference("NO_SHIPPING").userAction("PAY_NOW"))
-				.purchaseUnits(Arrays
-						.asList(new PurchaseUnitRequest().description("OfficeFloor domain subscription " + domainName)
-								.softDescriptor("OfficeFloor domain").invoiceId(invoiceId)
-								.amount(new AmountWithBreakdown().value(SUBSCRIPTION_TOTAL).currencyCode(currency)
+		HttpResponse<Order> orderResponse = paypal
+				.execute(new OrdersCreateRequest().requestBody(new OrderRequest().intent("CAPTURE")
+						.applicationContext(
+								new ApplicationContext().shippingPreference("NO_SHIPPING").userAction("PAY_NOW"))
+						.purchaseUnits(Arrays.asList(new PurchaseUnitRequest()
+								.invoiceId(paypalInvoiceId).description(
+										"OfficeFloor domain subscription " + domainName)
+								.softDescriptor("OfficeFloor domain")
+								.amount(new AmountWithBreakdown()
+										.value(amount.apply(SUBSCRIPTION_VALUE
+												+ SUBSCRIPTION_TAX + (isRestart ? RESTART_VALUE + RESTART_TAX : 0)))
+										.currencyCode(currency)
 										.breakdown(new AmountBreakdown()
-												.itemTotal(new Money().value(SUBSCRIPTION_VALUE).currencyCode(currency))
-												.taxTotal(new Money().value(SUBSCRIPTION_TAX).currencyCode(currency))))
-								.items(Arrays.asList(new Item().name("Subscription")
-										.description("Domain subscription " + domainName)
-										.unitAmount(new Money().value(SUBSCRIPTION_VALUE).currencyCode(currency))
-										.tax(new Money().value(SUBSCRIPTION_TAX).currencyCode(currency)).quantity("1")
-										.category("DIGITAL_GOODS").url("http://" + domainName)))))));
+												.itemTotal(newMoney
+														.apply(SUBSCRIPTION_VALUE + (isRestart ? RESTART_VALUE : 0)))
+												.taxTotal(newMoney
+														.apply(SUBSCRIPTION_TAX + (isRestart ? RESTART_TAX : 0)))))
+								.items(items)))));
 		Order order = orderResponse.result();
 
 		// Update the invoice with the order

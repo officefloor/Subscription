@@ -46,6 +46,7 @@ public class ConfigureService {
 		private String paypalEnvironment;
 		private String paypalClientId;
 		private String paypalClientSecret;
+		private String paypalInvoiceIdTemplate;
 		private String paypalCurrency;
 	}
 
@@ -77,7 +78,7 @@ public class ConfigureService {
 				.toArray(ConfigurationAdministrator[]::new);
 		Configuration configuration = new Configuration(admin.getGoogleClientId(), configurationAdministrators,
 				admin.getPaypalEnvironment(), admin.getPaypalClientId(), admin.getPaypalClientSecret(),
-				admin.getPaypalCurrency());
+				admin.getPaypalInvoiceIdTemplate(), admin.getPaypalCurrency());
 		response.send(configuration);
 	}
 
@@ -102,6 +103,7 @@ public class ConfigureService {
 		administration.setPaypalEnvironment(configuration.getPaypalEnvironment());
 		administration.setPaypalClientId(configuration.getPaypalClientId());
 		administration.setPaypalClientSecret(configuration.getPaypalClientSecret());
+		administration.setPaypalInvoiceIdTemplate(configuration.getPaypalInvoiceIdTemplate());
 		administration.setPaypalCurrency(configuration.getPaypalCurrency());
 		objectify.save().entity(administration).now();
 

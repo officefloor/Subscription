@@ -50,6 +50,7 @@ export interface Configuration {
     paypalEnvironment: string
     paypalClientId: string
     paypalClientSecret: string
+    paypalInvoiceIdTemplate: string
     paypalCurrency: string
 }
 

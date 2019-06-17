@@ -59,10 +59,10 @@ public class StoreTest {
 
 		this.entity(
 				new Administration("GOOGLE_CLIENT_ID", new Administrator[] { new Administrator("GOOGLE_ID", "NOTES") },
-						"sandbox", "PAYPAL_CLIENT", "PAYPAL_SECRET", "AUD"),
+						"sandbox", "PAYPAL_CLIENT", "PAYPAL_SECRET", "INVOICE_{id}", "AUD"),
 				e -> e.getGoogleClientId(), e -> e.getAdministrators()[0].getGoogleId(),
 				e -> e.getAdministrators()[0].getNotes(), e -> e.getPaypalEnvironment(), e -> e.getPaypalClientId(),
-				e -> e.getPaypalClientSecret(), e -> e.getPaypalCurrency());
+				e -> e.getPaypalClientSecret(), e -> e.getPaypalInvoiceIdTemplate(), e -> e.getPaypalCurrency());
 
 		User user = this.entity(TestHelper.newUser("Daniel", "admin"), e -> e.getId(), e -> e.getEmail(),
 				e -> e.getName(), e -> e.getPhotoUrl(), e -> e.getRoles()[0], e -> e.getTimestamp());
