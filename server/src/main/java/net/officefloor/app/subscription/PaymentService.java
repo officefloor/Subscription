@@ -91,10 +91,6 @@ public class PaymentService {
 		}
 		Order order = orderResponse.result();
 		String captureStatus = order.status();
-
-		// TODO REMOVE
-		System.out.println("TODO REMOVE: paypal " + captureStatus);
-
 		if (!"COMPLETED".equalsIgnoreCase(captureStatus)) {
 			throw new HttpException(HttpStatus.PAYMENT_REQUIRED);
 		}

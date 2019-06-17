@@ -29,6 +29,7 @@ import org.junit.Rule;
 import org.junit.Test;
 import org.junit.rules.RuleChain;
 
+import com.braintreepayments.http.exceptions.HttpException;
 import com.googlecode.objectify.Ref;
 import com.paypal.orders.Capture;
 import com.paypal.orders.Money;
@@ -45,6 +46,7 @@ import net.officefloor.app.subscription.store.User;
 import net.officefloor.nosql.objectify.mock.ObjectifyRule;
 import net.officefloor.pay.paypal.mock.PayPalRule;
 import net.officefloor.server.http.HttpMethod;
+import net.officefloor.server.http.HttpStatus;
 import net.officefloor.web.jwt.mock.MockJwtAccessTokenRule;
 import net.officefloor.woof.mock.MockWoofResponse;
 import net.officefloor.woof.mock.MockWoofServer;
@@ -85,6 +87,31 @@ public class PaymentServiceTest {
 	public void createFirstDomainPayment() throws Exception {
 		this.doPaymentTest(false,
 				(paymentTime, expiresTime) -> assertTime(paymentTime.plus(1, ChronoUnit.YEARS), expiresTime));
+	}
+
+	@Test
+	public void paypalError() throws Exception {
+
+		// Setup the invoice
+		Invoice invoice = new Invoice(this.userRef, Domain.PRODUCT_TYPE, "officefloor.org", false);
+		invoice.setPaymentOrderId("MOCK_ORDER_ID");
+		this.objectify.store(invoice);
+
+		// Create the exception
+		String description = "Duplicate Invoice ID detected. To avoid a potential duplicate transaction your account setting requires that Invoice Id be unique for each transaction.";
+		HttpException exception = new HttpException(
+				"{\"name\":\"UNPROCESSABLE_ENTITY\",\"details\":[{\"issue\":\"DUPLICATE_INVOICE_ID\",\"description\":\""
+						+ description
+						+ "\"}],\"message\":\"The requested action could not be performed, semantically incorrect, or failed business validation.\",\"debug_id\":\"d3555a123af38\",\"links\":[{\"href\":\"https://developer.paypal.com/docs/api/orders/v2/#error-DUPLICATE_INVOICE_ID\",\"rel\":\"information_link\",\"method\":\"GET\"}]}",
+				422, null);
+		this.payPal.addException(exception);
+
+		// Send request
+		MockWoofResponse response = this.server
+				.send(this.jwt.authorize(this.user, MockWoofServer.mockRequest("/payments/domain/MOCK_ORDER_ID"))
+						.method(HttpMethod.POST));
+		response.assertJsonError(
+				new net.officefloor.server.http.HttpException(HttpStatus.INTERNAL_SERVER_ERROR, description));
 	}
 
 	@Test
