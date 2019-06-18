@@ -51,6 +51,9 @@ export class DomainComponent implements OnInit, OnDestroy, DomainPaymentsListene
 
     ngOnInit(): void {
 
+        // Specify the domain
+        this.domainName = this.route.snapshot.paramMap.get( 'domain' )
+
         // Register for latest domain payments
         this.latestDomainPaymentsService.addListener( this )
 
@@ -64,9 +67,6 @@ export class DomainComponent implements OnInit, OnDestroy, DomainPaymentsListene
             if ( !user ) {
                 return
             }
-
-            // Specify the domain
-            this.domainName = this.route.snapshot.paramMap.get( 'domain' )
 
             // Obtain email address to determine if logged in user
             this.userEmail = user.email

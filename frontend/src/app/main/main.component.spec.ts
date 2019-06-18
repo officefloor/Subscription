@@ -1,25 +1,47 @@
-import { async, ComponentFixture, TestBed } from '@angular/core/testing';
+import { MainComponent } from './main.component'
+import { async, ComponentFixture, TestBed } from '@angular/core/testing'
+import { HttpClientTestingModule, HttpTestingController } from '@angular/common/http/testing'
+import { HttpClient, HttpErrorResponse } from '@angular/common/http'
+import { ReactiveFormsModule } from '@angular/forms'
+import { Router, RouterModule } from '@angular/router'
+import { AuthenticationService } from '../authentication.service'
+import { SocialUser } from "angularx-social-login"
+import { of } from 'rxjs'
 
-import { MainComponent } from './main.component';
+describe( 'MainComponent', () => {
 
-describe('MainComponent', () => {
-  let component: MainComponent;
-  let fixture: ComponentFixture<MainComponent>;
+    let authenticationServiceSpy: any
+    let routerSpy: any
+    let httpClient: HttpClient
+    let httpTestingController: HttpTestingController
 
-  beforeEach(async(() => {
-    TestBed.configureTestingModule({
-      declarations: [ MainComponent ]
-    })
-    .compileComponents();
-  }));
+    beforeEach( async(() => {
+        authenticationServiceSpy = jasmine.createSpyObj( 'AuthenticationService', ['initialise', 'readyState', 'authenticationState'] )
+        routerSpy = jasmine.createSpyObj( 'Router', ['navigate'] )
 
-  beforeEach(() => {
-    fixture = TestBed.createComponent(MainComponent);
-    component = fixture.componentInstance;
-    fixture.detectChanges();
-  });
+        TestBed.configureTestingModule( {
+            declarations: [MainComponent],
+            imports: [ReactiveFormsModule, RouterModule, HttpClientTestingModule],
+            providers: [
+                { provide: AuthenticationService, useValue: authenticationServiceSpy },
+                { provide: Router, useValue: routerSpy },
+            ],
+        } ).compileComponents()
 
-  it('should create', () => {
-    expect(component).toBeTruthy();
-  });
-});
+        httpClient = TestBed.get( HttpClient )
+        httpTestingController = TestBed.get( HttpTestingController )
+    } ) )
+
+    function newComponent( user: SocialUser = null ): { component: MainComponent, fixture: ComponentFixture<MainComponent> } {
+        authenticationServiceSpy.authenticationState.and.returnValue( of( user ) )
+        const fixture = TestBed.createComponent( MainComponent )
+        const component = fixture.componentInstance
+        fixture.detectChanges()
+        return { component, fixture }
+    }
+
+    it( 'should create', () => {
+        const component = newComponent()
+        expect( component ).toBeTruthy()
+    } )
+} )

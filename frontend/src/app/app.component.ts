@@ -1,6 +1,6 @@
-import { Component, OnInit } from '@angular/core';
-import { SocialUser } from "angularx-social-login";
-import { AuthenticationService } from './authentication.service';
+import { Component, OnInit } from '@angular/core'
+import { SocialUser } from 'angularx-social-login'
+import { AuthenticationService } from './authentication.service'
 
 @Component( {
     selector: 'app-root',

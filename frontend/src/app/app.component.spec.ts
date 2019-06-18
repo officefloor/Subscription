@@ -1,35 +1,52 @@
-import { TestBed, async } from '@angular/core/testing';
-import { RouterTestingModule } from '@angular/router/testing';
-import { AppComponent } from './app.component';
+import { AppComponent } from './app.component'
+import { TestBed, async, ComponentFixture } from '@angular/core/testing'
+import { of } from 'rxjs'
+import { RouterTestingModule } from '@angular/router/testing'
+import { HttpClientTestingModule, HttpTestingController } from '@angular/common/http/testing'
+import { HttpClient, HttpErrorResponse } from '@angular/common/http'
+import { LoginComponent } from './login/login.component'
+import { AlertComponent } from './alert/alert.component'
+import { AuthenticationService } from './authentication.service'
+import { SocialUser } from 'angularx-social-login'
 
 describe( 'AppComponent', () => {
+
+    let authenticationServiceSpy: any
+    let httpClient: HttpClient
+    let httpTestingController: HttpTestingController
+
     beforeEach( async(() => {
+        authenticationServiceSpy = jasmine.createSpyObj( 'AuthenticationService', ['initialise', 'readyState', 'authenticationState'] )
+
         TestBed.configureTestingModule( {
-            imports: [
-                RouterTestingModule
-            ],
-            declarations: [
-                AppComponent
-            ],
-        } ).compileComponents();
-    } ) );
+            imports: [RouterTestingModule, HttpClientTestingModule],
+            declarations: [AppComponent, LoginComponent, AlertComponent],
+            providers: [{ provide: AuthenticationService, useValue: authenticationServiceSpy }],
+        } ).compileComponents()
 
-    it( 'should create the app', () => {
-        const fixture = TestBed.createComponent( AppComponent );
-        const app = fixture.debugElement.componentInstance;
-        expect( app ).toBeTruthy();
-    } );
+        httpClient = TestBed.get( HttpClient )
+        httpTestingController = TestBed.get( HttpTestingController )
+    } ) )
 
-    it( `should have as title 'my-app'`, () => {
-        const fixture = TestBed.createComponent( AppComponent );
-        const app = fixture.debugElement.componentInstance;
-        expect( app.title ).toEqual( 'my-app' );
-    } );
+    function newApp( isReady: boolean = true, user: SocialUser = null ): { app: AppComponent, fixture: ComponentFixture<AppComponent> } {
+        authenticationServiceSpy.readyState.and.returnValue( of( isReady ) )
+        authenticationServiceSpy.authenticationState.and.returnValue( of( user ) )
+        authenticationServiceSpy.initialise
+        const fixture = TestBed.createComponent( AppComponent )
+        const app = fixture.debugElement.componentInstance
+        fixture.detectChanges()
+        return { app, fixture }
+    }
+
+    it( `should be ready`, () => {
+        const { app } = newApp()
+        expect( app.isInitialised ).toBeTruthy()
+    } )
 
     it( 'should render title in a h1 tag', () => {
-        const fixture = TestBed.createComponent( AppComponent );
-        fixture.detectChanges();
-        const compiled = fixture.debugElement.nativeElement;
-        expect( compiled.querySelector( 'h1' ).textContent ).toContain( 'Welcome to my-app!' );
-    } );
-} );
+        const { app, fixture } = newApp()
+        const compiled = fixture.debugElement.nativeElement
+        expect( compiled.querySelector( 'h1' ).textContent ).toContain( 'OfficeFloor Subscription' )
+    } )
+
+} )
