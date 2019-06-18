@@ -3,6 +3,7 @@ import { FormGroup, FormControl, FormArray, FormBuilder, AbstractControl } from 
 import { ServerApiService, Configuration, Administrator } from '../server-api.service'
 import { SocialUser } from "angularx-social-login"
 import { AuthenticationService } from '../authentication.service'
+import { AlertService } from '../alert.service'
 
 declare let JSON: any
 
@@ -17,12 +18,13 @@ export class ConfigureComponent implements OnInit {
 
     configurationForm: FormGroup
 
-    errorMessage: string = null
+    isHide: boolean = true
 
     constructor(
         private serverApiService: ServerApiService,
         private authenticationService: AuthenticationService,
         private formBuilder: FormBuilder,
+        private alertService: AlertService,
     ) {
         this.configurationForm = this.formBuilder.group( {
             googleClientId: '',
@@ -61,6 +63,9 @@ export class ConfigureComponent implements OnInit {
                     this.addAdministrator( admin.googleId, admin.notes )
                 } )
 
+                // Show configuration
+                this.isHide = false
+
             }, this.handleError() )
         } )
     }
@@ -96,7 +101,7 @@ export class ConfigureComponent implements OnInit {
             paypalCurrency: form.paypalCurrency,
         } ).subscribe(() => {
             this.isSaving = false
-            console.log( 'Successfully updated configuration' )
+            this.alertService.success( 'Successfully updated configuration' )
         }, this.handleError() )
     }
 
@@ -106,21 +111,11 @@ export class ConfigureComponent implements OnInit {
             // Ensure put into state to display error
             this.isSaving = false
 
-            // Indicate detail of the error
-            console.warn( 'Access error: ', error )
+            // Flag to hide
+            this.isHide = true
 
-            // Display error
-            if ( error['status'] === 401 ) {
-                this.errorMessage = 'Login timed out. Please login again'
-            } else if ( error['status'] === 403 ) {
-                this.errorMessage = 'Sorry, you do not have permissions for configuration'
-            } else if ( error['statusText'] ) {
-                this.errorMessage = error['statusText']
-            } else if ( error['status'] ) {
-                this.errorMessage = 'Technical error. HTTP Status ' + error['status']
-            } else {
-                this.errorMessage = 'Technical error in accessing configuration'
-            }
+            // Alert regarding failure
+            this.alertService.error( error )
         }
     }
 

@@ -3,6 +3,7 @@ import { InitialiseService } from '../initialise.service'
 import { ServerApiService, Initialisation, DomainPayments } from '../server-api.service'
 import { environment } from '../../environments/environment'
 import { LatestDomainPaymentsService } from '../latest-domain-payments.service'
+import { AlertService } from '../alert.service'
 
 // Loaded via PayPal script
 declare let paypal: any;
@@ -26,6 +27,7 @@ export class CheckoutComponent implements OnInit {
         private initialiseService: InitialiseService,
         private serverApiService: ServerApiService,
         private latestDomainPaymentsService: LatestDomainPaymentsService,
+        private alertService: AlertService,
     ) { }
 
     private loadExternalScript( scriptUrl: string ) {
@@ -68,10 +70,7 @@ export class CheckoutComponent implements OnInit {
                         data.orderID, this.serverApiService, data, actions ).then(( domainPayments: DomainPayments ) => {
                             this.latestDomainPaymentsService.notifyLatest( domainPayments )
                         } ).catch(( error: any ) => {
-                            console.error( 'Failed to take payment', error )
-
-                            // TODO provide appropriate alerting
-                            alert( 'Failed to take payment: ' + ( error.message ? error.message : error ) )
+                            this.alertService.error( error )
                         } )
                 } ).render( '#paypal-button' )
             } )

@@ -17,7 +17,8 @@ import { MatSortModule } from '@angular/material';
 import { DomainComponent } from './domain/domain.component'
 import { InitialiseService } from './initialise.service'
 import { Initialisation } from './server-api.service'
-import { AuthenticationService } from './authentication.service'
+import { AuthenticationService } from './authentication.service';
+import { AlertComponent } from './alert/alert.component'
 
 declare let Promise
 declare let Error
@@ -59,6 +60,7 @@ export function provideAuthServiceConfig( initialiseService: InitialiseService )
         ConfigureComponent,
         MainComponent,
         DomainComponent,
+        AlertComponent,
     ],
     imports: [
         BrowserModule,

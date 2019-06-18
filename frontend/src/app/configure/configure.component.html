@@ -1,7 +1,4 @@
-<div [hidden]="!errorMessage" class="container">
-	<div class="alert alert-danger" role="alert">{{errorMessage}}</div>
-</div>
-<div [hidden]="errorMessage" class="container">
+<div [hidden]="isHide" class="container">
 	<form [formGroup]="configurationForm" (submit)="updateConfiguration()">
 		<h1>Google</h1>
 		<div class="form-group">

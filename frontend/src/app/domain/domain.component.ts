@@ -8,6 +8,7 @@ import { SocialUser } from "angularx-social-login"
 import * as moment from 'moment'
 import { Sort } from '@angular/material/sort'
 import { LatestDomainPaymentsService, DomainPaymentsListener } from '../latest-domain-payments.service'
+import { AlertService } from '../alert.service'
 
 @Component( {
     selector: 'app-domain',
@@ -45,6 +46,7 @@ export class DomainComponent implements OnInit, OnDestroy, DomainPaymentsListene
         private route: ActivatedRoute,
         private serverApiService: ServerApiService,
         private latestDomainPaymentsService: LatestDomainPaymentsService,
+        private alertService: AlertService,
     ) { }
 
     ngOnInit(): void {
@@ -76,7 +78,16 @@ export class DomainComponent implements OnInit, OnDestroy, DomainPaymentsListene
                 this.latestDomainPayments( domainPayments )
 
             }, ( error: any ) => {
-                console.log( 'TODO error: ', error )
+
+                // Handle no access to domain
+                if ( error.status && error.status === 403 ) {
+                    // Swallow error, as may pay to get access
+                    console.log( 'No access to domain', this.domainName )
+                    return
+                }
+
+                // Alert regarding the generic error
+                this.alertService.error( error )
             } )
         } )
     }

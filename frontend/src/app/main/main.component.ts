@@ -6,6 +6,7 @@ import * as moment from 'moment'
 import { Sort } from '@angular/material/sort'
 import { FormGroup, FormControl, ValidationErrors } from '@angular/forms'
 import { Router } from '@angular/router'
+import { AlertService } from '../alert.service'
 
 @Component( {
     selector: 'app-main',
@@ -33,6 +34,7 @@ export class MainComponent implements OnInit {
         private authentication: AuthenticationService,
         private serverApiService: ServerApiService,
         private router: Router,
+        private alertService: AlertService,
     ) { }
 
     ngOnInit() {
@@ -72,8 +74,8 @@ export class MainComponent implements OnInit {
                 this.domains = []
                 this.sortedDomains = []
 
-                // No domains
-                console.error( 'Failed retrieving domains for user', error )
+                // Provide alert regarding error
+                this.alertService.error( error )
             } )
         } )
     }
