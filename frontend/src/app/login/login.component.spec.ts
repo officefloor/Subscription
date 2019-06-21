@@ -6,6 +6,7 @@ import { AuthenticationService } from '../authentication.service'
 import { SocialUser } from 'angularx-social-login'
 import { InitialiseService } from '../initialise.service'
 import { of } from 'rxjs'
+//import { Promise } from 'core-js'
 
 describe( 'LoginComponent', () => {
 
@@ -15,7 +16,7 @@ describe( 'LoginComponent', () => {
     let httpTestingController: HttpTestingController
 
     beforeEach( async(() => {
-        initialiseServiceSpy = jasmine.createSpyObj( 'InitialiseService', ['intialisation'] )
+        initialiseServiceSpy = jasmine.createSpyObj( 'InitialiseService', ['initialisation'] )
         authenticationServiceSpy = jasmine.createSpyObj( 'AuthenticationService', ['authenticationState'] )
 
         TestBed.configureTestingModule( {
@@ -32,7 +33,7 @@ describe( 'LoginComponent', () => {
     } ) )
 
     function newComponent( user: SocialUser = null ): { component: LoginComponent, fixture: ComponentFixture<LoginComponent> } {
-        initialiseServiceSpy.intialisation.and.returnValue( Promise.resolve( { isAuthenticationRequired: true } ) )
+        initialiseServiceSpy.initialisation.and.returnValue( Promise.resolve( { isAuthenticationRequired: true } ) )
         authenticationServiceSpy.authenticationState.and.returnValue( of( user ) )
         const fixture = TestBed.createComponent( LoginComponent )
         const component = fixture.componentInstance

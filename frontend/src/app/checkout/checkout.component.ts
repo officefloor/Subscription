@@ -4,6 +4,7 @@ import { ServerApiService, Initialisation, DomainPayments } from '../server-api.
 import { environment } from '../../environments/environment'
 import { LatestDomainPaymentsService } from '../latest-domain-payments.service'
 import { AlertService } from '../alert.service'
+import { Promise } from 'core-js'
 
 // Loaded via PayPal script
 declare let paypal: any;
@@ -53,7 +54,7 @@ export class CheckoutComponent implements OnInit {
 
     ngOnInit() {
         // Load PayPal for domain
-        this.initialiseService.intialisation().then(( initialisation: Initialisation ) => {
+        this.initialiseService.initialisation().then(( initialisation: Initialisation ) => {
 
             // Load the configuration
             const paypalClientId = initialisation.paypalClientId

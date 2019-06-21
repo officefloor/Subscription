@@ -19,9 +19,7 @@ import { InitialiseService } from './initialise.service'
 import { Initialisation } from './server-api.service'
 import { AuthenticationService } from './authentication.service';
 import { AlertComponent } from './alert/alert.component'
-
-declare let Promise
-declare let Error
+//import { Promise, Error} from 'core-js'
 
 /**
  * Override initialise to enable loading configuration form server.
@@ -29,7 +27,7 @@ declare let Error
 function setupLoginProvider( loginProvider: any, initialiseService: InitialiseService ) {
     const initialise = loginProvider.initialize
     loginProvider.initialize = () => new Promise(( resolve, reject ) => {
-        initialiseService.intialisation().then(( initialisation: Initialisation ) => {
+        initialiseService.initialisation().then(( initialisation: Initialisation ) => {
 
             // Determine if authentication required
             if ( !initialisation.isAuthenticationRequired ) {

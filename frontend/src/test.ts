@@ -1,6 +1,11 @@
 // This file is required by karma.conf.js and loads recursively all the .spec and framework files
 
 import 'zone.js/dist/zone-testing';
+
+// Fix to avoid issues of core-js Promise overriding zone.js
+declare let Zone: any
+Zone.assertZonePatched = () => null
+
 import { getTestBed } from '@angular/core/testing';
 import {
   BrowserDynamicTestingModule,

@@ -1,4 +1,7 @@
-import { Injectable } from '@angular/core';
+import { Injectable } from '@angular/core'
+import { Observable, OperatorFunction, throwError, ObservedValueOf } from 'rxjs'
+import { catchError } from 'rxjs/operators'
+import { Array } from 'core-js'
 
 export interface AlertListener {
     success( message: string )
@@ -10,7 +13,7 @@ export interface AlertListener {
 } )
 export class AlertService {
 
-    private listeners: AlertListener[] = []
+    private listeners: Array<AlertListener> = []
 
     constructor() { }
 
@@ -23,6 +26,24 @@ export class AlertService {
         if ( index >= 0 ) {
             this.listeners.splice( index, 1 )
         }
+    }
+
+    public alertError<T, O>( filter: ( error: any ) => boolean = null ): OperatorFunction<T, T | Observable<never>> {
+        return catchError(( error ) => {
+
+            // Ensure can determine if include
+            if ( !filter ) {
+                filter = () => true
+            }
+
+            // Notify of error (if include)
+            if ( filter( error ) ) {
+                this.error( error )
+            }
+
+            // Propagate the failure
+            return throwError( error )
+        } )
     }
 
     public success( message: string ) {

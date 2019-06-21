@@ -5,6 +5,8 @@ import { ServerApiService, AuthenticateResponse, AccessTokenResponse, Initialisa
 import { Observable, BehaviorSubject, of } from 'rxjs'
 import { map } from 'rxjs/operators'
 import { InitialiseService } from './initialise.service'
+import { Promise } from 'core-js'
+import { AlertService } from './alert.service'
 
 @Injectable( {
     providedIn: 'root'
@@ -24,30 +26,35 @@ export class AuthenticationService {
     constructor(
         private initialiseService: InitialiseService,
         private authService: AuthService,
-        private serverApiService: ServerApiService
+        private serverApiService: ServerApiService,
+        private alertService: AlertService,
     ) { }
 
-    initialise() {
+    initialise(): Promise<Initialisation> {
         // Load once initialised
-        this.initialiseService.intialisation().then(( initialisation: Initialisation ) => {
+        return this.initialiseService.initialisation().then(( initialisation: Initialisation ) => {
 
             // Determine if initialisation required
             if ( !initialisation.isAuthenticationRequired ) {
                 this.authService = null
                 this.ready.next( true )
-                this.state.next( new SocialUser() )
-                return
+                const user = new SocialUser()
+                user.name = 'No Authentication'
+                this.state.next( user )
+                return initialisation
             }
 
             // Determine when ready
             this.authService.readyState.subscribe(( ready ) => {
-                if ( ready[0] && ( ready[0] == 'GOOGLE' ) ) {
+                if ( ready[0] && ( ready[0] === 'GOOGLE' ) ) {
                     this.ready.next( true )
                 }
             } )
 
             // Initiate login
-            this.authService.authState.subscribe(( user: SocialUser ) => {
+            this.authService.authState.pipe(
+                   this.alertService.alertError()
+            ).subscribe(( user: SocialUser ) => {
 
                 // Notify auth token
                 if ( user != null ) {
@@ -65,16 +72,27 @@ export class AuthenticationService {
 
                         // Notify logged in
                         this.state.next( user )
-                    }, ( error: any ) => {
-                        console.log( 'TODO handle login error: ' + error )
-                    } )
+
+                    }, this.handleError )
 
                 } else {
                     // Notify of logout
                     this.state.next( null )
                 }
-            } )
+            }, this.handleError )
+
+            // Return the initialisation
+            return initialisation
         } )
+    }
+
+    private handleError( error: any ) {
+
+        // Error with login, so not logged in
+        this.state.next( null )
+
+        // Notify of error
+        this.alertService.error( error )
     }
 
     public signIn(): void {
