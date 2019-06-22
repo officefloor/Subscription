@@ -9,8 +9,8 @@ describe( 'InitialiseService', () => {
 
     let service: InitialiseService
 
-    let success: string = null
-    let error: any = null
+    let successAlert: string = null
+    let errorAlert: any = null
 
     let httpClient: HttpClient
     let httpTestingController: HttpTestingController
@@ -25,11 +25,11 @@ describe( 'InitialiseService', () => {
         httpTestingController = TestBed.get( HttpTestingController )
 
         alertService = TestBed.get( AlertService )
-        success = null
-        error = null
+        successAlert = null
+        errorAlert = null
         alertService.addListener( {
-            success: ( message ) => success = message,
-            error: ( ex ) => error = ex
+            success: ( message ) => successAlert = message,
+            error: ( ex ) => errorAlert = ex
         } )
 
         service = TestBed.get( InitialiseService )
@@ -58,6 +58,7 @@ describe( 'InitialiseService', () => {
     it( 'failed to initialise', ( done: DoneFn ) => {
         service.initialisation().catch(( ex: HttpErrorResponse ) => {
             expect( ex.error ).toEqual( 'Test' )
+            expect( errorAlert ).toEqual( ex )
             done()
         } )
         const req = httpTestingController.expectOne( "/initialise" )

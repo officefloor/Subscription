@@ -3,7 +3,7 @@ import { AuthService, SocialUser } from "angularx-social-login"
 import { GoogleLoginProvider } from "angularx-social-login"
 import { ServerApiService, AuthenticateResponse, AccessTokenResponse, Initialisation } from './server-api.service'
 import { Observable, BehaviorSubject, of } from 'rxjs'
-import { map } from 'rxjs/operators'
+import { map, mergeAll, tap } from 'rxjs/operators'
 import { InitialiseService } from './initialise.service'
 import { Promise } from 'core-js'
 import { AlertService } from './alert.service'
@@ -45,41 +45,44 @@ export class AuthenticationService {
             }
 
             // Determine when ready
-            this.authService.readyState.subscribe(( ready ) => {
-                if ( ready[0] && ( ready[0] === 'GOOGLE' ) ) {
-                    this.ready.next( true )
-                }
-            } )
+            this.authService.readyState.pipe(
+                tap(( ready ) => {
+                    if ( ready[0] && ( ready[0] === 'GOOGLE' ) ) {
+                        this.ready.next( true )
+                    }
+                } ),
+                this.alertService.alertError()
+            ).subscribe()
 
             // Initiate login
+            let loggedInUser: SocialUser
             this.authService.authState.pipe(
-                   this.alertService.alertError()
-            ).subscribe(( user: SocialUser ) => {
+                map(( user: SocialUser ) => {
+                    loggedInUser = user
 
-                // Notify auth token
-                if ( user != null ) {
+                    // Login to the server
+                    return this.serverApiService.authenticate( user.idToken )
+                } ),
+                mergeAll(),
+                tap(( response: AuthenticateResponse ) => {
 
-                    // Inform server of login
-                    this.serverApiService.authenticate( user.idToken ).subscribe(( response: AuthenticateResponse ) => {
+                    // Capture the tokens
+                    const refreshToken: string = response.refreshToken
+                    const accessToken: string = response.accessToken
 
-                        // Capture the tokens
-                        const refreshToken: string = response.refreshToken
-                        const accessToken: string = response.accessToken
+                    // Store the tokens
+                    localStorage.setItem( AuthenticationService.REFRESH_TOKEN, refreshToken )
+                    localStorage.setItem( AuthenticationService.ACCESS_TOKEN, accessToken )
 
-                        // Store the tokens
-                        localStorage.setItem( AuthenticationService.REFRESH_TOKEN, refreshToken )
-                        localStorage.setItem( AuthenticationService.ACCESS_TOKEN, accessToken )
-
-                        // Notify logged in
-                        this.state.next( user )
-
-                    }, this.handleError )
-
-                } else {
-                    // Notify of logout
+                    // Notify logged in
+                    this.state.next( loggedInUser )
+                } ),
+                this.alertService.alertError(() => {
+                    // Error with login, so not logged in
                     this.state.next( null )
-                }
-            }, this.handleError )
+                    return true
+                } )
+            ).subscribe()
 
             // Return the initialisation
             return initialisation

@@ -5,7 +5,7 @@ import { HttpClient, HttpErrorResponse } from '@angular/common/http'
 import { AuthService, SocialUser } from 'angularx-social-login'
 import { InitialiseService } from './initialise.service'
 import { Initialisation } from './server-api.service'
-//import { Promise } from 'core-js'
+import { Promise } from 'core-js'
 import { of, BehaviorSubject } from 'rxjs'
 
 describe( 'AuthenticationService', () => {

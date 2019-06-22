@@ -6,7 +6,7 @@ import { AuthenticationService } from '../authentication.service'
 import { SocialUser } from 'angularx-social-login'
 import { InitialiseService } from '../initialise.service'
 import { of } from 'rxjs'
-//import { Promise } from 'core-js'
+import { Promise } from 'core-js'
 
 describe( 'LoginComponent', () => {
 

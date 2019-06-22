@@ -19,7 +19,7 @@ import { InitialiseService } from './initialise.service'
 import { Initialisation } from './server-api.service'
 import { AuthenticationService } from './authentication.service';
 import { AlertComponent } from './alert/alert.component'
-//import { Promise, Error} from 'core-js'
+import { Promise, Error} from 'core-js'
 
 /**
  * Override initialise to enable loading configuration form server.

@@ -74,6 +74,10 @@
  */
 import 'zone.js/dist/zone';  // Included with Angular CLI.
 
+// Capture Zone Promise (as gets overwritten by vendors.js)
+declare let window: any
+window.FIX_ZONE_PROMISE = Promise
+
 
 /***************************************************************************************************
  * APPLICATION IMPORTS

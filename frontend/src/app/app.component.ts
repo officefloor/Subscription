@@ -18,11 +18,12 @@ export class AppComponent implements OnInit {
     ) { }
 
     ngOnInit(): void {
+
         // Determine when ready
-        this.authenticationService.readyState().subscribe(( isReady: boolean ) => this.isInitialised = isReady )
+        this.authenticationService.readyState().subscribe(( isReady ) => this.isInitialised = isReady )
 
         // Keep track of logged in user
-        this.authenticationService.authenticationState().subscribe(( user: SocialUser ) => this.user = user )
+        this.authenticationService.authenticationState().subscribe(( user ) => this.user = user )
 
         // Initialise authentication
         this.authenticationService.initialise()
