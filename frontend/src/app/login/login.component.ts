@@ -23,7 +23,7 @@ export class LoginComponent implements OnInit {
 
     ngOnInit() {
         // Determine if show login
-        this.initialiseService.initialisation().then(( initialisation: Initialisation ) => this.isAuthenticationRequired = initialisation.isAuthenticationRequired )
+        this.initialiseService.initialisation().subscribe(( initialisation: Initialisation ) => this.isAuthenticationRequired = initialisation.isAuthenticationRequired )
 
         // Monitor user
         this.authenticationService.authenticationState().subscribe(( user: SocialUser ) => this.user = user );

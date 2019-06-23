@@ -2,17 +2,21 @@ import { Injectable } from '@angular/core'
 import { ServerApiService, Initialisation } from './server-api.service'
 import { Promise, Error } from 'core-js'
 import { AlertService } from './alert.service'
+import { Observable, from } from 'rxjs'
+import { isEmpty } from 'rxjs/operators'
 
 @Injectable( {
     providedIn: 'root'
 } )
 export class InitialiseService {
 
-    private initialisePromise = new Promise(
-        ( resolve: ( Initialisation ) => void, reject: ( Error ) => void ) =>
-            this.serverApiService.getInitialisation().pipe(
-                this.alertService.alertError()
-            ).subscribe( resolve, reject )
+    private initialisePromise = new Promise<Initialisation>(( resolve, reject ) =>
+        this.serverApiService.getInitialisation().pipe(
+            this.alertService.alertError(( error ) => {
+                this.alertService.error( "Failed to initialise. Please refresh page." )
+                return true
+            } )
+        ).subscribe( resolve, reject )
     )
 
     constructor(
@@ -20,8 +24,8 @@ export class InitialiseService {
         private alertService: AlertService,
     ) { }
 
-    public initialisation(): Promise<Initialisation> {
-        return this.initialisePromise
+    public initialisation(): Observable<Initialisation> {
+        return from( this.initialisePromise ) as Observable<Initialisation>
     }
 
 }

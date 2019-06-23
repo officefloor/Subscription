@@ -4,13 +4,14 @@ import { HttpClientTestingModule, HttpTestingController } from '@angular/common/
 import { HttpClient, HttpErrorResponse } from '@angular/common/http'
 import { AlertService } from './alert.service'
 import { Initialisation } from './server-api.service'
+import { Array } from 'core-js'
 
 describe( 'InitialiseService', () => {
 
     let service: InitialiseService
 
     let successAlert: string = null
-    let errorAlert: any = null
+    let errorAlerts: Array<any> = null
 
     let httpClient: HttpClient
     let httpTestingController: HttpTestingController
@@ -26,10 +27,10 @@ describe( 'InitialiseService', () => {
 
         alertService = TestBed.get( AlertService )
         successAlert = null
-        errorAlert = null
+        errorAlerts = []
         alertService.addListener( {
             success: ( message ) => successAlert = message,
-            error: ( ex ) => errorAlert = ex
+            error: ( ex ) => errorAlerts.push( ex )
         } )
 
         service = TestBed.get( InitialiseService )
@@ -46,7 +47,7 @@ describe( 'InitialiseService', () => {
 
     it( 'initialised successfully', ( done: DoneFn ) => {
         const init = { googleClientId: 'MOCK' }
-        service.initialisation().then(( initialisation: Initialisation ) => {
+        service.initialisation().subscribe(( initialisation: Initialisation ) => {
             expect( initialisation.googleClientId ).toEqual( 'MOCK' )
             done()
         } )
@@ -56,11 +57,14 @@ describe( 'InitialiseService', () => {
     } )
 
     it( 'failed to initialise', ( done: DoneFn ) => {
-        service.initialisation().catch(( ex: HttpErrorResponse ) => {
-            expect( ex.error ).toEqual( 'Test' )
-            expect( errorAlert ).toEqual( ex )
-            done()
-        } )
+        service.initialisation().subscribe(
+            () => fail( 'Should not be successful' ),
+            ( ex: HttpErrorResponse ) => {
+                expect( ex.error ).toEqual( 'Test' )
+                expect( errorAlerts[0] ).toEqual( 'Failed to initialise. Please refresh page.' )
+                expect( errorAlerts[1] ).toEqual( ex )
+                done()
+            } )
         const req = httpTestingController.expectOne( "/initialise" )
         expect( req.request.method ).toEqual( "GET" )
         req.flush( 'Test', { status: 500, statusText: 'Error' } )

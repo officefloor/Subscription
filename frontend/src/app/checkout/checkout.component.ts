@@ -5,6 +5,7 @@ import { environment } from '../../environments/environment'
 import { LatestDomainPaymentsService } from '../latest-domain-payments.service'
 import { AlertService } from '../alert.service'
 import { Promise } from 'core-js'
+import { map } from 'rxjs/operators'
 
 // Loaded via PayPal script
 declare let paypal: any;
@@ -54,28 +55,29 @@ export class CheckoutComponent implements OnInit {
 
     ngOnInit() {
         // Load PayPal for domain
-        this.initialiseService.initialisation().then(( initialisation: Initialisation ) => {
+        this.initialiseService.initialisation().pipe(
+            map(( initialisation: Initialisation ) => {
 
-            // Load the configuration
-            const paypalClientId = initialisation.paypalClientId
-            const paypalCurrency = initialisation.paypalCurrency
+                // Load the configuration
+                const paypalClientId = initialisation.paypalClientId
+                const paypalCurrency = initialisation.paypalCurrency
 
-            // Load Paypal
-            const component = this
-            this.loadExternalScript( `https://www.paypal.com/sdk/js?client-id=${paypalClientId}&currency=${paypalCurrency}` ).then(() => {
-                paypal.Buttons( {
-                    createOrder: ( data, actions ) => environment.createOrder(
-                        component.domainName, component.isResetSubscription, paypalCurrency, this.serverApiService,
-                        data, actions ),
-                    onApprove: ( data, actions ) => environment.capturePayment(
-                        data.orderID, this.serverApiService, data, actions ).then(( domainPayments: DomainPayments ) => {
-                            this.latestDomainPaymentsService.notifyLatest( domainPayments )
-                        } ).catch(( error: any ) => {
-                            this.alertService.error( error )
-                        } )
-                } ).render( '#paypal-button' )
-            } )
-        } )
+                // Load Paypal
+                const component = this
+                this.loadExternalScript( `https://www.paypal.com/sdk/js?client-id=${paypalClientId}&currency=${paypalCurrency}` ).then(() => {
+                    paypal.Buttons( {
+                        createOrder: ( data, actions ) => environment.createOrder(
+                            component.domainName, component.isResetSubscription, paypalCurrency, this.serverApiService,
+                            data, actions ),
+                        onApprove: ( data, actions ) => environment.capturePayment(
+                            data.orderID, this.serverApiService, data, actions ).then(( domainPayments: DomainPayments ) => {
+                                this.latestDomainPaymentsService.notifyLatest( domainPayments )
+                            } ).catch(( error: any ) => {
+                                this.alertService.error( error )
+                            } )
+                    } ).render( '#paypal-button' )
+                } )
+            } ) )
     }
 
 }

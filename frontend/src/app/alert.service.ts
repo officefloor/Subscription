@@ -28,7 +28,7 @@ export class AlertService {
         }
     }
 
-    public alertError<T, O>( filter: ( error: any ) => boolean = null ): OperatorFunction<T, T | Observable<never>> {
+    public alertError<T>( filter: ( error: any ) => boolean = null ): OperatorFunction<T, T | Observable<never>> {
         return catchError(( error ) => {
 
             // Ensure can determine if include

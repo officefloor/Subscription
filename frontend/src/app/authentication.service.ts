@@ -2,11 +2,12 @@ import { Injectable } from '@angular/core'
 import { AuthService, SocialUser } from "angularx-social-login"
 import { GoogleLoginProvider } from "angularx-social-login"
 import { ServerApiService, AuthenticateResponse, AccessTokenResponse, Initialisation } from './server-api.service'
-import { Observable, BehaviorSubject, of } from 'rxjs'
-import { map, mergeAll, tap } from 'rxjs/operators'
+import { Observable, BehaviorSubject, of, throwError } from 'rxjs'
+import { map, catchError } from 'rxjs/operators'
+import { concatFMap } from './rxjs.util'
 import { InitialiseService } from './initialise.service'
-import { Promise } from 'core-js'
 import { AlertService } from './alert.service'
+import { Array } from 'core-js'
 
 @Injectable( {
     providedIn: 'root'
@@ -30,63 +31,70 @@ export class AuthenticationService {
         private alertService: AlertService,
     ) { }
 
-    initialise(): Promise<Initialisation> {
-        // Load once initialised
-        return this.initialiseService.initialisation().then(( initialisation: Initialisation ) => {
+    initialise(): Observable<Initialisation> {
+        return this.initialiseService.initialisation().pipe(
+            concatFMap(( initialisation: Initialisation ) => {
 
-            // Determine if initialisation required
-            if ( !initialisation.isAuthenticationRequired ) {
-                this.authService = null
-                this.ready.next( true )
-                const user = new SocialUser()
-                user.name = 'No Authentication'
-                this.state.next( user )
-                return initialisation
-            }
+                // Determine if requires authentication
+                if ( !initialisation.isAuthenticationRequired ) {
+                    this.authService = null
+                    this.ready.next( true )
+                    const user = new SocialUser()
+                    user.name = 'No Authentication'
+                    this.state.next( user )
+                    return of( initialisation )
+                }
 
-            // Determine when ready
-            this.authService.readyState.pipe(
-                tap(( ready ) => {
-                    if ( ready[0] && ( ready[0] === 'GOOGLE' ) ) {
-                        this.ready.next( true )
-                    }
-                } ),
-                this.alertService.alertError()
-            ).subscribe()
+                // Determine when ready
+                return this.authService.readyState.pipe(
+                    map(( ready: any ) => {
+                        const isReady: boolean = ready[0] && ( ready[0] === 'GOOGLE' )
+                        if ( isReady ) {
+                            this.ready.next( isReady ) // flag ready
+                        }
+                        return isReady
+                    } ),
+                    concatFMap(( isReady: boolean ) => {
 
-            // Initiate login
-            let loggedInUser: SocialUser
-            this.authService.authState.pipe(
-                map(( user: SocialUser ) => {
-                    loggedInUser = user
+                        // Ensure ready
+                        if ( !isReady ) {
+                            return of( initialisation )
+                        }
 
-                    // Login to the server
-                    return this.serverApiService.authenticate( user.idToken )
-                } ),
-                mergeAll(),
-                tap(( response: AuthenticateResponse ) => {
+                        // Authentication ready so determine login
+                        return this.authService.authState.pipe(
+                            concatFMap(( user: SocialUser ) => {
 
-                    // Capture the tokens
-                    const refreshToken: string = response.refreshToken
-                    const accessToken: string = response.accessToken
+                                // Ensure logged in
+                                if ( !user ) {
+                                    return of( initialisation )
+                                }
 
-                    // Store the tokens
-                    localStorage.setItem( AuthenticationService.REFRESH_TOKEN, refreshToken )
-                    localStorage.setItem( AuthenticationService.ACCESS_TOKEN, accessToken )
+                                // User logged in
+                                return this.serverApiService.authenticate( user.idToken ).pipe(
+                                    concatFMap(( response: AuthenticateResponse ) => {
 
-                    // Notify logged in
-                    this.state.next( loggedInUser )
-                } ),
-                this.alertService.alertError(() => {
-                    // Error with login, so not logged in
-                    this.state.next( null )
-                    return true
-                } )
-            ).subscribe()
+                                        // Capture the tokens
+                                        const refreshToken: string = response.refreshToken
+                                        const accessToken: string = response.accessToken
 
-            // Return the initialisation
-            return initialisation
-        } )
+                                        // Store the tokens
+                                        localStorage.setItem( AuthenticationService.REFRESH_TOKEN, refreshToken )
+                                        localStorage.setItem( AuthenticationService.ACCESS_TOKEN, accessToken )
+
+                                        // Notify logged in
+                                        this.state.next( user )
+
+                                        // Initialised
+                                        return of( initialisation )
+                                    } )
+                                )
+                            } )
+                        )
+                    } )
+                )
+            } )
+        )
     }
 
     private handleError( error: any ) {

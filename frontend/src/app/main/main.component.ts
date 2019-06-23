@@ -7,6 +7,8 @@ import { Sort } from '@angular/material/sort'
 import { FormGroup, FormControl, ValidationErrors } from '@angular/forms'
 import { Router } from '@angular/router'
 import { AlertService } from '../alert.service'
+import { iif, of } from 'rxjs'
+import { mergeMap, tap } from 'rxjs/operators'
 
 @Component( {
     selector: 'app-main',
@@ -38,46 +40,43 @@ export class MainComponent implements OnInit {
     ) { }
 
     ngOnInit() {
-        this.authentication.authenticationState().subscribe(( user: SocialUser ) => {
+        this.authentication.authenticationState().pipe(
+            mergeMap(( user: SocialUser | null ) => iif(() => user !== null,
+                this.serverApiService.getDomains().pipe(
+                    tap(( domains: Domain[] ) => {
 
-            // Nothing further if not logged in
-            if ( !user ) {
-                return
-            }
+                        // Load the new domains
+                        this.domains = []
+                        for ( let domain of domains ) {
+                            const expireMoment = parseDate( domain.expiresDate )
 
-            // Load the domains
-            this.serverApiService.getDomains().subscribe(( domains: Domain[] ) => {
+                            // Create the domain row
+                            const domainRow: DomainRow = {
+                                ...domain,
+                                localExpires: expireMoment.format( "D MMM YYYY" ),
+                                sortExpires: expireMoment.unix(),
+                                timeAgo: expireMoment.fromNow(),
+                                isExpired: isExpired( expireMoment ),
+                                isExpireSoon: isExpireSoon( expireMoment ),
+                            }
+                            this.domains.push( domainRow )
+                        }
 
-                // Load the new domains
-                this.domains = []
-                for ( let domain of domains ) {
-                    const expireMoment = parseDate( domain.expiresDate )
-
-                    // Create the domain row
-                    const domainRow: DomainRow = {
-                        ...domain,
-                        localExpires: expireMoment.format( "D MMM YYYY" ),
-                        sortExpires: expireMoment.unix(),
-                        timeAgo: expireMoment.fromNow(),
-                        isExpired: isExpired( expireMoment ),
-                        isExpireSoon: isExpireSoon( expireMoment ),
-                    }
-                    this.domains.push( domainRow )
-                }
-
-                // Track new domains
-                this.sortedDomains = this.domains.slice()
-
-            }, ( error: any ) => {
+                        // Track new domains
+                        this.sortedDomains = this.domains.slice()
+                    } )
+                )
+            ) ),
+            this.alertService.alertError(( error: any ) => {
 
                 // Error, so no domains
                 this.domains = []
                 this.sortedDomains = []
 
                 // Provide alert regarding error
-                this.alertService.error( error )
+                return true
             } )
-        } )
+        ).subscribe()
     }
 
     sortDomains( sort: Sort ) {

@@ -7,6 +7,8 @@ import { InitialiseService } from './initialise.service'
 import { Initialisation } from './server-api.service'
 import { Promise } from 'core-js'
 import { of, BehaviorSubject } from 'rxjs'
+import { concatFMap } from './rxjs.util'
+import { catchError, concatAll } from 'rxjs/operators'
 
 describe( 'AuthenticationService', () => {
 
@@ -25,6 +27,7 @@ describe( 'AuthenticationService', () => {
             readyState: readyState,
             authState: authState
         }
+        localStorage.removeItem( "accessToken" )
 
         TestBed.configureTestingModule( {
             imports: [HttpClientTestingModule],
@@ -40,6 +43,8 @@ describe( 'AuthenticationService', () => {
         service = TestBed.get( AuthenticationService )
     } )
 
+    afterEach(() => httpTestingController.verify() )
+
     function newInitialisation( isAuthenticationRequired: boolean = true ): Initialisation {
         return {
             isAuthenticationRequired: isAuthenticationRequired,
@@ -53,65 +58,81 @@ describe( 'AuthenticationService', () => {
 
     it( 'no authentication required', ( done: DoneFn ) => {
         const initialisation = newInitialisation( false )
-        initialisationServiceSpy.initialisation.and.returnValue( Promise.resolve( initialisation ) )
-        service.initialise().then(( result: Initialisation ) => {
-            expect( result ).toEqual( initialisation )
-            service.readyState().subscribe(( isReady ) => expect( isReady ).toBeTruthy( 'Should be ready' ) )
-            service.authenticationState().subscribe(( user ) => {
-                expect( user ).toBeTruthy()
-                expect( user.name ).toEqual( 'No Authentication' )
-                done()
-            } )
-        } ).catch( fail )
+        initialisationServiceSpy.initialisation.and.returnValue( of( initialisation ) )
+        service.initialise().pipe(
+            concatFMap(( init: Initialisation ) => {
+                expect( init ).toEqual( initialisation )
+                return service.readyState()
+            } ),
+            concatFMap(( isReady: boolean ) => {
+                expect( isReady ).toEqual( true, 'Should be ready' )
+                return service.authenticationState()
+            } ),
+        ).subscribe(( user: SocialUser ) => {
+            expect( user ).toBeTruthy()
+            expect( user.name ).toEqual( 'No Authentication' )
+            done()
+        }, fail )
     } )
 
     it( 'should be ready', ( done: DoneFn ) => {
-        const initialisation = newInitialisation()
-        initialisationServiceSpy.initialisation.and.returnValue( Promise.resolve( initialisation ) )
+        initialisationServiceSpy.initialisation.and.returnValue( of( newInitialisation() ) )
         readyState.next( ['GOOGLE'] )
-        service.initialise().then(( result: Initialisation ) => {
-            expect( result ).toEqual( initialisation )
-            service.readyState().subscribe(( isReady ) => {
-                expect( isReady ).toBeTruthy( 'Should be ready' )
-                done()
-            } )
-        } ).catch( fail )
+        authState.next( null )
+        service.initialise().pipe(
+            concatFMap(( init ) => service.readyState() ),
+        ).subscribe(( isReady: boolean ) => {
+            expect( isReady ).toBeTruthy( 'Should be ready' )
+            done()
+        }, fail )
     } )
 
     it( 'not authenticated', ( done: DoneFn ) => {
-        initialisationServiceSpy.initialisation.and.returnValue( Promise.resolve( newInitialisation() ) )
+        initialisationServiceSpy.initialisation.and.returnValue( of( newInitialisation() ) )
         readyState.next( ['GOOGLE'] )
-        service.initialise().then(( result: Initialisation ) => {
-            service.authenticationState().subscribe(( user ) => {
-                expect( user ).toBeNull( 'Should not be logged in' )
-                done()
-            } )
-        } ).catch( fail )
+        authState.next( null )
+        service.initialise().pipe(
+            concatFMap(( init ) => service.authenticationState() ),
+        ).subscribe(( user: SocialUser ) => {
+            expect( user ).toBeNull( 'Should not be logged in' )
+            done()
+        }, fail )
     } )
 
     it( 'authenticated', ( done: DoneFn ) => {
-
-        // TODO finish
-        if ( true == true ) return done()
-
         const user = new SocialUser()
-        initialisationServiceSpy.initialisation.and.returnValue( Promise.resolve( newInitialisation() ) )
+        initialisationServiceSpy.initialisation.and.returnValue( of( newInitialisation() ) )
         readyState.next( ['GOOGLE'] )
         authState.next( user )
-        service.initialise().then(( result: Initialisation ) => {
-            service.authenticationState().subscribe(( authUser ) => {
-                expect( authUser ).toEqual( user, 'Should be logged in' )
-                done()
-            } )
-        } ).catch( fail )
+        service.initialise().pipe(
+            concatFMap(( init ) => service.authenticationState() ),
+        ).subscribe(( authUser: SocialUser ) => {
+            expect( authUser ).toEqual( user, 'Should be logged in' )
+            expect( service.getAccessToken() ).toEqual( 'MOCK_ACCESS_TOKEN' )
+            done()
+        }, fail )
+        const req = httpTestingController.expectOne( "/authenticate" )
+        expect( req.request.method ).toEqual( 'POST' )
+        req.flush( {
+            accessToken: 'MOCK_ACCESS_TOKEN',
+            refreshToken: 'MOCK_REFRESH_TOKEN'
+        } )
     } )
 
     it( 'authentication error', ( done: DoneFn ) => {
-
-        // TODO finish
-        if ( true == true ) return done()
-
-        fail( new Error( 'TODO implement' ) )
+        initialisationServiceSpy.initialisation.and.returnValue( of( newInitialisation() ) )
+        readyState.next( ['GOOGLE'] )
+        authState.next( new SocialUser() )
+        service.initialise().pipe(
+            catchError(( init ) => service.authenticationState() )
+        ).subscribe(( authUser ) => {
+            expect( authUser ).toBeNull()
+            expect( service.getAccessToken() ).toBeNull()
+            done()
+        } )
+        const req = httpTestingController.expectOne( "/authenticate" )
+        expect( req.request.method ).toEqual( 'POST' )
+        req.flush( 'failed', { status: 500, statusText: 'Server failure' } )
     } )
 
 } )

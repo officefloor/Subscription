@@ -33,7 +33,7 @@ describe( 'LoginComponent', () => {
     } ) )
 
     function newComponent( user: SocialUser = null ): { component: LoginComponent, fixture: ComponentFixture<LoginComponent> } {
-        initialiseServiceSpy.initialisation.and.returnValue( Promise.resolve( { isAuthenticationRequired: true } ) )
+        initialiseServiceSpy.initialisation.and.returnValue( of( { isAuthenticationRequired: true } ) )
         authenticationServiceSpy.authenticationState.and.returnValue( of( user ) )
         const fixture = TestBed.createComponent( LoginComponent )
         const component = fixture.componentInstance

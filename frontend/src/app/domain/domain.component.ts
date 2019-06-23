@@ -58,7 +58,7 @@ export class DomainComponent implements OnInit, OnDestroy, DomainPaymentsListene
         this.latestDomainPaymentsService.addListener( this )
 
         // Load payment currency
-        this.initialiseServer.initialisation().then(( initialisation: Initialisation ) => this.paymentCurrency = initialisation.paypalCurrency )
+        this.initialiseServer.initialisation().subscribe(( initialisation: Initialisation ) => this.paymentCurrency = initialisation.paypalCurrency )
 
         // Only load if authenticated
         this.authentication.authenticationState().subscribe(( user: SocialUser ) => {
