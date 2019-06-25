@@ -2,7 +2,7 @@
 	<div *ngFor="let alert of alerts" class="alert"
 		[class.alert-success]="!alert.isError"
 		[class.alert-danger]="alert.isError" role="alert">
-		{{alert.message}}
+		<span class="alert-content">{{alert.message}}</span>
 		<button type="button" class="close" data-dismiss="alert"
 			(click)="alert.remove()" aria-label="Close">
 			<span aria-hidden="true">&times;</span>

@@ -1,5 +1,7 @@
 import { Component, OnInit, OnDestroy } from '@angular/core'
 import { AlertService, AlertListener } from '../alert.service'
+import { Array, String } from 'core-js'
+import { HttpErrorResponse } from '@angular/common/http'
 
 export class Alert {
     constructor(
@@ -8,7 +10,7 @@ export class Alert {
         private alerts: Alert[],
     ) {
         if ( !this.isError ) {
-            setTimeout(() => this.remove(), 5_000)
+            setTimeout(() => this.remove(), 5000 )
         }
     }
 
@@ -27,7 +29,7 @@ export class Alert {
 } )
 export class AlertComponent implements OnInit, OnDestroy, AlertListener {
 
-    alerts: Alert[] = []
+    alerts: Array<Alert> = []
 
     constructor(
         private alertService: AlertService
@@ -46,13 +48,13 @@ export class AlertComponent implements OnInit, OnDestroy, AlertListener {
     }
     error( error: any ) {
         console.error( 'Alert', error )
-        const technicalErrorMessage = 'Technical failure.  Please reload page and retry. If error continues please raise support ticket'
+        const technicalErrorMessage = 'Technical failure. Please reload page and retry. If error continues please raise support ticket'
 
         // Handle error
         if ( typeof ( error ) === 'string' ) {
             this.addAlert( true, error )
 
-        } else if ( ( error.name === 'HttpErrorResponse' ) && error.status ) {
+        } else if ( error instanceof HttpErrorResponse ) {
             // Handle error with server
             switch ( error.status ) {
                 case 401:
@@ -62,8 +64,8 @@ export class AlertComponent implements OnInit, OnDestroy, AlertListener {
                     this.addAlert( true, 'Sorry you do not have permissions' )
                     return
             }
-            if ( String(error.status).startsWith( '4' ) ) {
-                this.addAlert( true, 'Failure communicating to server' )
+            if ( String( error.status ).startsWith( '4' ) ) {
+                this.addAlert( true, 'Failure communicating to server. Please refresh page and try again.' )
             } else {
                 this.addAlert( true, technicalErrorMessage )
             }

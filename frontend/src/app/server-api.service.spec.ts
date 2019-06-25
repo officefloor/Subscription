@@ -18,7 +18,7 @@ describe( 'ServerApiService', () => {
         httpTestingController = TestBed.get( HttpTestingController )
     } )
 
-    it( 'should be created', () => {
+    it( 'should be created (tested by other tests)', () => {
         const service: ServerApiService = TestBed.get( ServerApiService )
         expect( service ).toBeTruthy()
     } )

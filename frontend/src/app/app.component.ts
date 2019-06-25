@@ -11,7 +11,7 @@ export class AppComponent implements OnInit {
 
     isInitialised: boolean = false
 
-    user: SocialUser
+    user: SocialUser = null
 
     constructor(
         private authenticationService: AuthenticationService

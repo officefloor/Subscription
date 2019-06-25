@@ -9,6 +9,12 @@ import { AlertComponent } from './alert/alert.component'
 import { AuthenticationService } from './authentication.service'
 import { SocialUser } from 'angularx-social-login'
 
+export function expectVisible( dom: HTMLElement, selector: string, isVisible: boolean ): void {
+    const element = dom.querySelector( selector )
+    expect( element ).toBeTruthy( 'Can not find element ' + selector )
+    expect( element.hasAttribute( 'hidden' ) ).toEqual( !isVisible, ( isVisible ? 'Visible ' : 'Hidden ' ) + selector )
+}
+
 describe( 'AppComponent', () => {
 
     let authenticationServiceSpy: any
@@ -28,25 +34,39 @@ describe( 'AppComponent', () => {
         httpTestingController = TestBed.get( HttpTestingController )
     } ) )
 
-    function newApp( isReady: boolean = true, user: SocialUser = null ): { app: AppComponent, fixture: ComponentFixture<AppComponent> } {
+    function newApp( isReady: boolean = true, user: SocialUser = null ): { app: AppComponent, fixture: ComponentFixture<AppComponent>, dom: HTMLElement } {
         authenticationServiceSpy.readyState.and.returnValue( of( isReady ) )
         authenticationServiceSpy.authenticationState.and.returnValue( of( user ) )
         authenticationServiceSpy.initialise
         const fixture = TestBed.createComponent( AppComponent )
         const app = fixture.debugElement.componentInstance
+        const dom = fixture.debugElement.nativeElement
         fixture.detectChanges()
-        return { app, fixture }
+        return { app, fixture, dom }
     }
 
-    it( `should be ready`, () => {
-        const { app } = newApp()
-        expect( app.isInitialised ).toBeTruthy()
+    it( 'show loading', () => {
+        const { dom } = newApp( false )
+        expectVisible( dom, '.loading', true )
+        expectVisible( dom, '.login', false )
+        expectVisible( dom, '.ready', false )
     } )
 
-    it( 'should render title in a h1 tag', () => {
-        const { app, fixture } = newApp()
-        const compiled = fixture.debugElement.nativeElement
-        expect( compiled.querySelector( 'h1' ).textContent ).toContain( 'OfficeFloor Subscription' )
+    it( 'not logged in', () => {
+        const { dom } = newApp( true, null )
+        expectVisible( dom, '.loading', false )
+        expectVisible( dom, '.login', true )
+        expectVisible( dom, '.ready', true )
+        expectVisible( dom, '.content', false )
+        expectVisible( dom, '.login-content', true )
+    } )
+
+    it( 'logged in', () => {
+        const { dom } = newApp( true, new SocialUser() )
+        expectVisible( dom, '.loading', false )
+        expectVisible( dom, '.ready', true )
+        expectVisible( dom, '.content', true )
+        expectVisible( dom, '.login-content', false )
     } )
 
 } )
