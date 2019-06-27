@@ -2,6 +2,7 @@ import { Injectable } from '@angular/core'
 import { HttpClient } from '@angular/common/http'
 import { Observable } from 'rxjs'
 import * as moment from 'moment'
+import { Array } from 'core-js'
 
 declare let window: any
 
@@ -62,7 +63,7 @@ export interface Domain {
 export interface DomainPayments {
     domainName: string
     expiresDate: string
-    payments: Subscription[]
+    payments: Array<Subscription>
 }
 
 export interface Subscription {

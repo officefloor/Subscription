@@ -120,6 +120,7 @@ describe( 'MainComponent', () => {
             newDomain( 'activicy.com' ),
             newDomain( 'sagenschneider.net' ),
         ], fixture )
+        fixture.detectChanges()
         expectDomains( domains, component, dom )
     } )
 

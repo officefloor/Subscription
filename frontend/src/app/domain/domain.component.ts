@@ -1,6 +1,5 @@
 import { Component, OnInit, OnDestroy } from '@angular/core'
 import { ActivatedRoute, ParamMap } from '@angular/router'
-import { switchMap } from 'rxjs/operators'
 import { ServerApiService, parseDate, isExpired, isExpireSoon, DomainPayments, Subscription, Initialisation } from '../server-api.service'
 import { InitialiseService } from '../initialise.service'
 import { AuthenticationService } from '../authentication.service'
@@ -9,6 +8,10 @@ import * as moment from 'moment'
 import { Sort } from '@angular/material/sort'
 import { LatestDomainPaymentsService, DomainPaymentsListener } from '../latest-domain-payments.service'
 import { AlertService } from '../alert.service'
+import { concatFMap } from '../rxjs.util'
+import { of, throwError } from 'rxjs'
+import { catchError } from 'rxjs/operators'
+import { Array } from 'core-js'
 
 @Component( {
     selector: 'app-domain',
@@ -16,6 +19,12 @@ import { AlertService } from '../alert.service'
     styleUrls: ['./domain.component.css']
 } )
 export class DomainComponent implements OnInit, OnDestroy, DomainPaymentsListener {
+
+    private static NO_PAYMENTS: DomainPayments = {
+        domainName: null,
+        expiresDate: null,
+        payments: null
+    }
 
     paymentCurrency: string
 
@@ -31,9 +40,9 @@ export class DomainComponent implements OnInit, OnDestroy, DomainPaymentsListene
 
     private userEmail: string = null
 
-    private payments: PaymentRow[] = []
+    private payments: Array<PaymentRow> = []
 
-    sortedPayments: PaymentRow[] = []
+    sortedPayments: Array<PaymentRow> = []
 
     private currentSort: Sort = {
         active: 'date',
@@ -61,36 +70,30 @@ export class DomainComponent implements OnInit, OnDestroy, DomainPaymentsListene
         this.initialiseServer.initialisation().subscribe(( initialisation: Initialisation ) => this.paymentCurrency = initialisation.paypalCurrency )
 
         // Only load if authenticated
-        this.authentication.authenticationState().subscribe(( user: SocialUser ) => {
-
-            // Nothing further if not logged in
-            if ( !user ) {
-                return
-            }
-
-            // Obtain email address to determine if logged in user
-            this.userEmail = user.email
-
-            // Load the subscriptions for domain
-            this.serverApiService.getDomainSubscriptions( this.domainName ).subscribe(( domainPayments: DomainPayments ) => {
-
-                // Load the domain payments
-                this.latestDomainPayments( domainPayments )
-
-            }, ( error: any ) => {
-
-                // Handle no access to domain
-                if ( error.status && error.status === 403 ) {
-                    // Swallow error, as may pay to get access
-                    console.log( 'No access to domain', this.domainName )
-                    return
+        this.authentication.authenticationState().pipe(
+            concatFMap(( user: SocialUser ) => {
+                // Nothing further if not logged in
+                if ( !user ) {
+                    return of( DomainComponent.NO_PAYMENTS )
                 }
 
-                // Alert regarding the generic error
-                this.alertService.error( error )
-            } )
+                // Obtain email address to determine if logged in user
+                this.userEmail = user.email
+
+                // Load the subscriptions for domain
+                return this.serverApiService.getDomainSubscriptions( this.domainName )
+            } ),
+            catchError(( error ) => {
+                // No access, then empty list
+                return error.status && ( error.status === 403 ) ? of( DomainComponent.NO_PAYMENTS ) : throwError( error )
+            } ),
+            this.alertService.alertError()
+        ).subscribe(( domainPayments: DomainPayments ) => {
+            // Load the domain payments
+            this.latestDomainPayments( domainPayments )
         } )
     }
+
 
     ngOnDestroy(): void {
         this.latestDomainPaymentsService.removeListener( this )
@@ -116,7 +119,6 @@ export class DomainComponent implements OnInit, OnDestroy, DomainPaymentsListene
         // Load the payments
         const LOCAL_DATE_FORMAT = 'D MMM YYYY'
         this.payments = []
-        let startDate: string = null
         for ( let payment of domainPayments.payments ) {
             const extendsToMoment = parseDate( payment.extendsToDate )
             const sortDate = extendsToMoment.unix()
@@ -130,15 +132,11 @@ export class DomainComponent implements OnInit, OnDestroy, DomainPaymentsListene
             const paymentReceipt = payment.paymentReceipt
             const paymentAmount = payment.paymentAmount ? payment.paymentAmount / 100 : null
 
-            // Determine first start date
-            if ( !startDate || payment.isRestartSubscription ) {
-                startDate = paymentDate
-            }
 
             // Add the payment
             const paymentRow: PaymentRow = {
                 sortDate: sortDate,
-                subscriptionStartDate: startDate,
+                subscriptionStartDate: null, // loaded below
                 subscriptionEndDate: extendsToDate,
                 paymentDate: paymentDate,
                 isRestartSubscription: payment.isRestartSubscription,
@@ -150,9 +148,22 @@ export class DomainComponent implements OnInit, OnDestroy, DomainPaymentsListene
                 isSubscriptionCompletion: false,
             }
             this.payments.push( paymentRow )
+        }
+
+        // Calculate the start dates
+        let startDate: string = null
+        for ( let payment of [... this.payments].reverse() ) {
+
+            // Determine first start date (or reset to start again)
+            if ( !startDate || payment.isRestartSubscription ) {
+                startDate = payment.paymentDate
+            }
+
+            // Load the start date
+            payment.subscriptionStartDate = startDate
 
             // Specify start date for next row
-            startDate = extendsToDate
+            startDate = payment.extendsToDate
         }
 
         // Sort payments (with first being subscription completion)

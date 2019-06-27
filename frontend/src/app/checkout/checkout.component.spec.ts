@@ -7,6 +7,7 @@ describe( 'CheckoutComponent', () => {
 
     let component: CheckoutComponent
     let fixture: ComponentFixture<CheckoutComponent>
+    let dom: HTMLElement
 
     let httpClient: HttpClient
     let httpTestingController: HttpTestingController
@@ -24,11 +25,35 @@ describe( 'CheckoutComponent', () => {
     beforeEach(() => {
         fixture = TestBed.createComponent( CheckoutComponent )
         component = fixture.componentInstance
-        fixture.detectChanges()
+        dom = fixture.nativeElement
     } )
 
-    it( 'should create', () => {
+    afterEach(() => httpTestingController.verify() )
+
+    it( 'should load script', ( done: DoneFn ) => {
         expect( component ).toBeTruthy()
+        component.ngOnInit()
+        const req = httpTestingController.expectOne( '/initialise' )
+        req.flush( {
+            paypalClientId: 'MOCK_CLIENT_ID',
+            paypalCurrency: 'MOCK_CURRENCY'
+        } )
+
+        // Allow HTTP response to be processed
+        setTimeout(() => {
+            // Confirm promise created
+            const scriptSrc = 'https://www.paypal.com/sdk/js?client-id=MOCK_CLIENT_ID&currency=MOCK_CURRENCY'
+            const scriptPromise = CheckoutComponent.scriptLoadPromises[scriptSrc]
+            expect( scriptPromise ).toBeTruthy( 'should load script' )
+
+            // Ensure script being loaded
+            fixture.detectChanges()
+            const script = document.body.querySelector( 'script:last-child' )
+            expect( script ).toBeTruthy( 'should add script' )
+            expect( script.attributes['src'].textContent ).toEqual( scriptSrc )
+
+            done()
+        }, 0 )
     } )
 
 } )
