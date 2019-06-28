@@ -47,7 +47,7 @@ export interface Administrator {
 
 export interface Configuration {
     googleClientId: string
-    administrators: [Administrator]
+    administrators: Array<Administrator>
     paypalEnvironment: string
     paypalClientId: string
     paypalClientSecret: string

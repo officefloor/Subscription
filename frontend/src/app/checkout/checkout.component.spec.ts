@@ -40,7 +40,8 @@ describe( 'CheckoutComponent', () => {
         } )
 
         // Allow HTTP response to be processed
-        setTimeout(() => {
+        fixture.detectChanges()
+        fixture.whenStable().then(() => {
             // Confirm promise created
             const scriptSrc = 'https://www.paypal.com/sdk/js?client-id=MOCK_CLIENT_ID&currency=MOCK_CURRENCY'
             const scriptPromise = CheckoutComponent.scriptLoadPromises[scriptSrc]
@@ -53,7 +54,7 @@ describe( 'CheckoutComponent', () => {
             expect( script.attributes['src'].textContent ).toEqual( scriptSrc )
 
             done()
-        }, 0 )
+        } )
     } )
 
 } )

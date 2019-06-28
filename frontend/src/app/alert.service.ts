@@ -13,7 +13,7 @@ export interface AlertListener {
 } )
 export class AlertService {
 
-    private listeners: Array<AlertListener> = []
+    private listeners: Array<AlertListener> = new Array()
 
     constructor() { }
 
@@ -31,6 +31,17 @@ export class AlertService {
     public alertError<T>( filter: ( error: any ) => boolean = null ): OperatorFunction<T, T | Observable<never>> {
         return catchError(( error ) => {
 
+            // Attempt to handle the error
+            this.handleError( filter )( error )
+
+            // Propagate the failure
+            return throwError( error )
+        } )
+    }
+
+    public handleError( filter: ( error: any ) => boolean = null ): ( error: any ) => void {
+        return ( error ) => {
+
             // Ensure can determine if include
             if ( !filter ) {
                 filter = () => true
@@ -40,10 +51,7 @@ export class AlertService {
             if ( filter( error ) ) {
                 this.error( error )
             }
-
-            // Propagate the failure
-            return throwError( error )
-        } )
+        }
     }
 
     public success( message: string ) {

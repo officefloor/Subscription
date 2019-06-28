@@ -87,11 +87,10 @@ export class DomainComponent implements OnInit, OnDestroy, DomainPaymentsListene
                 // No access, then empty list
                 return error.status && ( error.status === 403 ) ? of( DomainComponent.NO_PAYMENTS ) : throwError( error )
             } ),
-            this.alertService.alertError()
         ).subscribe(( domainPayments: DomainPayments ) => {
             // Load the domain payments
             this.latestDomainPayments( domainPayments )
-        } )
+        }, this.alertService.handleError() )
     }
 
 

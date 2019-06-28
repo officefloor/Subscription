@@ -4,8 +4,11 @@ import { ServerApiService, Configuration, Administrator } from '../server-api.se
 import { SocialUser } from "angularx-social-login"
 import { AuthenticationService } from '../authentication.service'
 import { AlertService } from '../alert.service'
+import { JSON, Error } from 'core-js'
+import { of, throwError } from 'rxjs'
+import { finalize } from 'rxjs/operators'
+import { concatFMap } from '../rxjs.util'
 
-declare let JSON: any
 
 @Component( {
     selector: 'app-configure',
@@ -25,7 +28,11 @@ export class ConfigureComponent implements OnInit {
         private authenticationService: AuthenticationService,
         private formBuilder: FormBuilder,
         private alertService: AlertService,
-    ) {
+    ) { }
+
+    ngOnInit() {
+
+        // Setup form
         this.configurationForm = this.formBuilder.group( {
             googleClientId: '',
             administrators: this.formBuilder.array( [] ),
@@ -35,39 +42,41 @@ export class ConfigureComponent implements OnInit {
             paypalInvoiceIdTemplate: '',
             paypalCurrency: '',
         } )
-    }
 
-    ngOnInit() {
-        this.authenticationService.authenticationState().subscribe(( user: SocialUser ) => {
+        // Load form
+        this.authenticationService.authenticationState().pipe(
+            concatFMap(( user: SocialUser ) => {
 
-            // Only load configuration if logged in user
-            if ( !user ) {
-                return
-            }
+                // Only load configuration if logged in user
+                if ( !user ) {
+                    return throwError( 'Must be logged in to access configuration' )
+                }
 
-            // Load configuration
-            this.serverApiService.getConfiguration().subscribe(( configuration: Configuration ) => {
+                // Load configuration
+                return this.serverApiService.getConfiguration()
+            } )
+        ).subscribe(( configuration: Configuration ) => {
 
-                // Function to load values
-                this.configurationForm.patchValue( {
-                    googleClientId: configuration.googleClientId,
-                    paypalEnvironment: configuration.paypalEnvironment,
-                    paypalClientId: configuration.paypalClientId,
-                    paypalClientSecret: configuration.paypalClientSecret,
-                    paypalInvoiceIdTemplate: configuration.paypalInvoiceIdTemplate,
-                    paypalCurrency: configuration.paypalCurrency
-                } )
+            // Function to load values
+            this.configurationForm.patchValue( {
+                googleClientId: configuration.googleClientId,
+                paypalEnvironment: configuration.paypalEnvironment,
+                paypalClientId: configuration.paypalClientId,
+                paypalClientSecret: configuration.paypalClientSecret,
+                paypalInvoiceIdTemplate: configuration.paypalInvoiceIdTemplate,
+                paypalCurrency: configuration.paypalCurrency
+            } )
 
-                // Load the administrators
+            // Load the administrators
+            if ( configuration.administrators ) {
                 configuration.administrators.forEach(( admin: Administrator ) => {
                     this.addAdministrator( admin.googleId, admin.notes )
                 } )
+            }
 
-                // Show configuration
-                this.isHide = false
-
-            }, this.handleError() )
-        } )
+            // Show configuration
+            this.isHide = false
+        }, this.alertService.handleError() )
     }
 
     getAdministrators(): AbstractControl[] {
@@ -88,7 +97,6 @@ export class ConfigureComponent implements OnInit {
     }
 
     updateConfiguration() {
-        // Update the configuration
         this.isSaving = true
         const form = this.configurationForm.value
         this.serverApiService.updateConfiguration( {
@@ -99,24 +107,11 @@ export class ConfigureComponent implements OnInit {
             paypalClientSecret: form.paypalClientSecret,
             paypalInvoiceIdTemplate: form.paypalInvoiceIdTemplate,
             paypalCurrency: form.paypalCurrency,
-        } ).subscribe(() => {
-            this.isSaving = false
+        } ).pipe(
+            finalize(() => this.isSaving = false ),
+        ).subscribe(() => {
             this.alertService.success( 'Successfully updated configuration' )
-        }, this.handleError() )
-    }
-
-    private handleError(): ( error: any ) => void {
-        return ( error ) => {
-
-            // Ensure put into state to display error
-            this.isSaving = false
-
-            // Flag to hide
-            this.isHide = true
-
-            // Alert regarding failure
-            this.alertService.error( error )
-        }
+        }, this.alertService.handleError() )
     }
 
 }

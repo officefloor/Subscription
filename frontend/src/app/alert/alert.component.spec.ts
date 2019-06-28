@@ -20,10 +20,10 @@ describe( 'AlertComponent', () => {
 
     beforeEach(() => {
         fixture = TestBed.createComponent( AlertComponent )
+        fixture.detectChanges()
         component = fixture.componentInstance
         dom = fixture.nativeElement
         alertService = TestBed.get( AlertService )
-        component.ngOnInit()
     } )
 
     it( 'success alert', () => {

@@ -46,7 +46,6 @@ export class MainComponent implements OnInit {
     ngOnInit() {
         this.authentication.authenticationState().pipe(
             concatFMap(( user: SocialUser ) => user ? this.serverApiService.getDomains() : of( [] ) ),
-            this.alertService.alertError()
         ).subscribe(( domains: Domain[] ) => {
 
             // Load the new domains
@@ -69,10 +68,13 @@ export class MainComponent implements OnInit {
             // Track new domains
             this.sortedDomains = this.domains.slice()
 
-        }, () => {
+        }, (error) => {
             // Error, so no domains
             this.domains = []
             this.sortedDomains = []
+            
+            // Notify of the error
+            this.alertService.error(error)
         } )
     }
 
