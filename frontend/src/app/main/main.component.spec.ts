@@ -1,10 +1,8 @@
 import { MainComponent } from './main.component'
+import { Component } from '@angular/core'
 import { async, ComponentFixture, TestBed } from '@angular/core/testing'
 import { HttpClientTestingModule, HttpTestingController } from '@angular/common/http/testing'
 import { HttpClient, HttpErrorResponse } from '@angular/common/http'
-import { ReactiveFormsModule } from '@angular/forms'
-import { Router } from '@angular/router'
-import { RouterTestingModule } from '@angular/router/testing'
 import { AuthenticationService } from '../authentication.service'
 import { SocialUser } from "angularx-social-login"
 import { of } from 'rxjs'
@@ -12,6 +10,7 @@ import { Domain } from '../server-api.service'
 import * as moment from 'moment'
 import { formatDate, parseDate } from '../server-api.service'
 import { Array } from 'core-js'
+import { RouterTestingModule } from '@angular/router/testing'
 
 describe( 'MainComponent', () => {
 
@@ -19,14 +18,22 @@ describe( 'MainComponent', () => {
     let httpClient: HttpClient
     let httpTestingController: HttpTestingController
 
+    @Component( {
+        selector: 'app-register',
+        template: '<p>Mock Register Component</p>'
+    } )
+    class MockRegisterComponent { }
+
     beforeEach( async(() => {
         authenticationServiceSpy = jasmine.createSpyObj( 'AuthenticationService', ['initialise', 'readyState', 'authenticationState'] )
 
         TestBed.configureTestingModule( {
-            declarations: [MainComponent],
+            declarations: [
+                MainComponent,
+                MockRegisterComponent
+            ],
             imports: [
-                ReactiveFormsModule,
-                RouterTestingModule.withRoutes( [{ path: '', component: MainComponent }] ),
+                RouterTestingModule,
                 HttpClientTestingModule
             ],
             providers: [

@@ -19,7 +19,8 @@ import { InitialiseService } from './initialise.service'
 import { Initialisation } from './server-api.service'
 import { AuthenticationService } from './authentication.service';
 import { AlertComponent } from './alert/alert.component'
-import { Promise, Error} from 'core-js'
+import { Promise, Error } from 'core-js';
+import { RegisterComponent } from './register/register.component'
 
 /**
  * Override initialise to enable loading configuration form server.
@@ -27,7 +28,7 @@ import { Promise, Error} from 'core-js'
 function setupLoginProvider( loginProvider: any, initialiseService: InitialiseService ) {
     const initialise = loginProvider.initialize
     loginProvider.initialize = () => new Promise(( resolve, reject ) => {
-        initialiseService.initialisation().then(( initialisation: Initialisation ) => {
+        initialiseService.initialisation().subscribe(( initialisation: Initialisation ) => {
 
             // Determine if authentication required
             if ( !initialisation.isAuthenticationRequired ) {
@@ -38,7 +39,7 @@ function setupLoginProvider( loginProvider: any, initialiseService: InitialiseSe
             // Authentication required (so setup)
             loginProvider.clientId = initialisation.googleClientId
             initialise.call( loginProvider ).then(( result ) => resolve( result ) ).catch( reject )
-        } ).catch( reject )
+        }, reject )
     } )
     return loginProvider
 }
@@ -59,6 +60,7 @@ export function provideAuthServiceConfig( initialiseService: InitialiseService )
         MainComponent,
         DomainComponent,
         AlertComponent,
+        RegisterComponent,
     ],
     imports: [
         BrowserModule,

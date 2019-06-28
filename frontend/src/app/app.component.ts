@@ -26,7 +26,7 @@ export class AppComponent implements OnInit {
         this.authenticationService.authenticationState().subscribe(( user ) => this.user = user )
 
         // Initialise authentication
-        this.authenticationService.initialise()
+        this.authenticationService.initialise().subscribe()
     }
 
 }

@@ -4,7 +4,6 @@ import { SocialUser } from "angularx-social-login"
 import { ServerApiService, parseDate, isExpired, isExpireSoon, Domain } from '../server-api.service'
 import * as moment from 'moment'
 import { Sort } from '@angular/material/sort'
-import { FormGroup, FormControl, ValidationErrors, FormBuilder } from '@angular/forms'
 import { Router } from '@angular/router'
 import { AlertService } from '../alert.service'
 import { of } from 'rxjs'
@@ -22,26 +21,11 @@ export class MainComponent implements OnInit {
 
     sortedDomains: Array<DomainRow> = []
 
-    isValidDomainName: boolean = false
-
-    registerDomainNameError: string = null
-
-    registerDomainForm: FormGroup
-
     constructor(
         private authentication: AuthenticationService,
         private serverApiService: ServerApiService,
-        private router: Router,
         private alertService: AlertService,
-        private formBuilder: FormBuilder,
-    ) {
-        this.registerDomainForm = this.formBuilder.group( {
-            domainName: this.formBuilder.control( '', ( formControl ) => {
-                this.registerDomainNameError = this.checkDomainName( formControl.value )
-                return {}
-            } )
-        } )
-    }
+    ) {}
 
     ngOnInit() {
         this.authentication.authenticationState().pipe(
@@ -98,41 +82,6 @@ export class MainComponent implements OnInit {
 
     compare( a: number | string, b: number | string, isAsc: boolean ) {
         return ( a < b ? -1 : 1 ) * ( isAsc ? 1 : -1 )
-    }
-
-    checkDomainName( name: string ): string {
-        this.isValidDomainName = false
-        name = name.trim()
-        if ( name.length == 0 ) {
-            return null // only invalid on submitting
-        } else if ( name.match( /\s/ ) ) {
-            return 'May not contain spaces'
-        } else if ( name.startsWith( '.' ) ) {
-            return "May not start with '.'"
-        } else if ( name.endsWith( '.' ) ) {
-            return "May not end with '.'"
-        } else if ( !name.includes( '.' ) ) {
-            return "Must contain at least one '.' (e.g. domain.com)"
-        }
-        this.isValidDomainName = true
-        return null // valid domain name            
-    }
-
-    registerDomain() {
-        const domainName: string = this.registerDomainForm.value.domainName
-
-        // Ensure valid domain name
-        if ( domainName.trim().length === 0 ) {
-            this.registerDomainNameError = "Must provide domain name"
-            return
-        }
-        this.registerDomainNameError = this.checkDomainName( domainName )
-        if ( this.registerDomainNameError ) {
-            return
-        }
-
-        // Route to domain
-        this.router.navigate( ["domain", domainName] )
     }
 }
 

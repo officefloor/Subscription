@@ -37,7 +37,7 @@ describe( 'AppComponent', () => {
     function newApp( isReady: boolean = true, user: SocialUser = null ): { app: AppComponent, fixture: ComponentFixture<AppComponent>, dom: HTMLElement } {
         authenticationServiceSpy.readyState.and.returnValue( of( isReady ) )
         authenticationServiceSpy.authenticationState.and.returnValue( of( user ) )
-        authenticationServiceSpy.initialise
+        authenticationServiceSpy.initialise.and.returnValue( of( 'initialised' ) )
         const fixture = TestBed.createComponent( AppComponent )
         const app = fixture.debugElement.componentInstance
         const dom = fixture.debugElement.nativeElement
