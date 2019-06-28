@@ -15,6 +15,42 @@ export function expectVisible( dom: HTMLElement, selector: string, isVisible: bo
     expect( element.hasAttribute( 'hidden' ) ).toEqual( !isVisible, ( isVisible ? 'Visible ' : 'Hidden ' ) + selector )
 }
 
+export function expectValue( dom: HTMLElement, selector: string, value: string ) {
+    const node = dom.querySelector( selector )
+    expect( node instanceof HTMLInputElement ).toEqual( true )
+    const input: HTMLInputElement = node as HTMLInputElement
+    expect( input.value ).toEqual( value, 'wrong value for ' + selector )
+}
+
+export function expectChecked( dom: HTMLElement, selector: string, checked: boolean ) {
+    const node = dom.querySelector( selector )
+    expect( node instanceof HTMLInputElement ).toEqual( true )
+    const input: HTMLInputElement = node as HTMLInputElement
+    expect( input.checked ).toEqual( checked, 'incorrect checked' )
+}
+
+export function expectText( dom: HTMLElement, selector: string, value: string ) {
+    const node = dom.querySelector( selector )
+    expect( node ).toBeTruthy()
+    expect( node.textContent ).toEqual( value, 'wrong value for ' + selector )
+}
+
+export function setValue( dom: HTMLElement, selector: string, value: string ) {
+    const node = dom.querySelector( selector )
+    expect( node instanceof HTMLInputElement ).toEqual( true )
+    const input: HTMLInputElement = node as HTMLInputElement
+    input.value = value
+    input.dispatchEvent( new Event( 'input' ) )
+}
+
+export function setChecked( dom: HTMLElement, selector: string ) {
+    const node = dom.querySelector( selector )
+    expect( node instanceof HTMLInputElement ).toEqual( true )
+    const input: HTMLInputElement = node as HTMLInputElement
+    input.dispatchEvent( new Event( 'change' ) )
+}
+
+
 describe( 'AppComponent', () => {
 
     let authenticationServiceSpy: any

@@ -8,35 +8,7 @@ import { SocialUser } from "angularx-social-login"
 import { of } from 'rxjs'
 import { AlertService, AlertListener } from '../alert.service'
 import { Configuration, Administrator } from '../server-api.service'
-
-export function expectValue( dom: HTMLElement, selector: string, value: string ) {
-    const node = dom.querySelector( selector )
-    expect( node instanceof HTMLInputElement ).toEqual( true )
-    const input: HTMLInputElement = node as HTMLInputElement
-    expect( input.value ).toEqual( value, 'wrong value for ' + selector )
-}
-
-export function expectChecked( dom: HTMLElement, selector: string, checked: boolean ) {
-    const node = dom.querySelector( selector )
-    expect( node instanceof HTMLInputElement ).toEqual( true )
-    const input: HTMLInputElement = node as HTMLInputElement
-    expect( input.checked ).toEqual( checked, 'incorrect checked' )
-}
-
-export function setValue( dom: HTMLElement, selector: string, value: string ) {
-    const node = dom.querySelector( selector )
-    expect( node instanceof HTMLInputElement ).toEqual( true )
-    const input: HTMLInputElement = node as HTMLInputElement
-    input.value = value
-    input.dispatchEvent( new Event( 'input' ) )
-}
-
-export function setChecked( dom: HTMLElement, selector: string ) {
-    const node = dom.querySelector( selector )
-    expect( node instanceof HTMLInputElement ).toEqual( true )
-    const input: HTMLInputElement = node as HTMLInputElement
-    input.dispatchEvent( new Event( 'change' ) )
-}
+import { expectValue, expectChecked, setValue, setChecked } from '../app.component.spec'
 
 describe( 'ConfigureComponent', () => {
 
