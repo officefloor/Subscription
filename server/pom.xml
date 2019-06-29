@@ -80,6 +80,11 @@
 									<fileset
 										dir="../frontend/dist/officefloor-subscription" />
 								</copy>
+								<!-- Optionally include initialisation -->
+								<mkdir dir="./target/classes/config" />
+								<copy file="${user.home}/subscription.prod"
+									tofile="./target/classes/config/subscription.prod"
+									overwrite="true" failonerror="false" />
 							</tasks>
 						</configuration>
 						<goals>
