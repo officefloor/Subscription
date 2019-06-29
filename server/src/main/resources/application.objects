@@ -1,7 +1,7 @@
 <objects>
 
 	<managed-object source="net.officefloor.identity.google.GoogleIdTokenVerifierManagedObjectSource">
-		<property name="google.client.id" value="443132781504-19vekci7r4t2qvqpbg9q1s32kjnp1c7t.apps.googleusercontent.com" />
+		<property name="google.client.id" value="1011336589071-br4rv9uqmt5readqvim261797d7ih1cl.apps.googleusercontent.com" />
 	</managed-object>
 
 	<managed-object source="net.officefloor.web.jwt.authority.JwtAuthorityManagedObjectSource">
