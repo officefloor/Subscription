@@ -1,7 +1,6 @@
 import { Injectable } from '@angular/core'
 import { Observable, OperatorFunction, throwError, ObservedValueOf } from 'rxjs'
 import { catchError } from 'rxjs/operators'
-import { Array } from 'core-js'
 
 export interface AlertListener {
     success( message: string )

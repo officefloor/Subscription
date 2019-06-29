@@ -8,7 +8,6 @@ import { Router } from '@angular/router'
 import { AlertService } from '../alert.service'
 import { of } from 'rxjs'
 import { concatFMap } from '../rxjs.util'
-import { Array } from 'core-js'
 
 @Component( {
     selector: 'app-main',

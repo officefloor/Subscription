@@ -4,7 +4,6 @@ import { ServerApiService, Initialisation, DomainPayments } from '../server-api.
 import { environment } from '../../environments/environment'
 import { LatestDomainPaymentsService } from '../latest-domain-payments.service'
 import { AlertService } from '../alert.service'
-import { Promise } from 'core-js'
 import { map } from 'rxjs/operators'
 
 // Loaded via PayPal script

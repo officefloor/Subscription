@@ -5,7 +5,7 @@ import { map, finalize, catchError } from 'rxjs/operators';
 import { concatFMap } from './rxjs.util'
 import { AuthenticationService } from './authentication.service';
 import { AccessTokenResponse } from './server-api.service';
-
+import { environment } from '../environments/environment'
 
 declare let JSON: any
 
@@ -36,8 +36,10 @@ export class JwtHttpInterceptor implements HttpInterceptor {
 
         // Create HTTP request/response log
         const logInteraction = ( logger: ( message: string ) => void, request: HttpRequest<any>, resultType: string, result: any ) => {
-            const authorization = request.headers ? request.headers.get( 'Authorization' ) : '[None]'
-            logger( 'HttpRequest (Authorization: ' + authorization + '): ' + JSON.stringify( request, null, 2 ) + "\n\n" + resultType + ': ' + JSON.stringify( result, null, 2 ) )
+            if ( environment.isLogHttp ) {
+                const authorization = request.headers ? request.headers.get( 'Authorization' ) : '[None]'
+                logger( 'HttpRequest (Authorization: ' + authorization + '): ' + JSON.stringify( request, null, 2 ) + "\n\n" + resultType + ': ' + JSON.stringify( result, null, 2 ) )
+            }
         }
 
         // Obtain the authentication service

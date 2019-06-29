@@ -10,6 +10,7 @@ import * as moment from 'moment'
 
 export const environment = {
     production: false,
+    isLogHttp: true,
 
     createOrder: (
         domainName: string,

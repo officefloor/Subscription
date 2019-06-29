@@ -11,7 +11,6 @@ import { AlertService } from '../alert.service'
 import { concatFMap } from '../rxjs.util'
 import { of, throwError } from 'rxjs'
 import { catchError } from 'rxjs/operators'
-import { Array } from 'core-js'
 
 @Component( {
     selector: 'app-domain',
@@ -162,7 +161,7 @@ export class DomainComponent implements OnInit, OnDestroy, DomainPaymentsListene
             payment.subscriptionStartDate = startDate
 
             // Specify start date for next row
-            startDate = payment.extendsToDate
+            startDate = payment.subscriptionEndDate
         }
 
         // Sort payments (with first being subscription completion)

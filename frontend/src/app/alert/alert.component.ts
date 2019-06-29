@@ -1,6 +1,5 @@
 import { Component, OnInit, OnDestroy } from '@angular/core'
 import { AlertService, AlertListener } from '../alert.service'
-import { Array, String } from 'core-js'
 import { HttpErrorResponse } from '@angular/common/http'
 
 export class Alert {

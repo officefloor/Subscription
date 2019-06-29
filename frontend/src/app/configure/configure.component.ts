@@ -4,7 +4,6 @@ import { ServerApiService, Configuration, Administrator } from '../server-api.se
 import { SocialUser } from "angularx-social-login"
 import { AuthenticationService } from '../authentication.service'
 import { AlertService } from '../alert.service'
-import { JSON, Error } from 'core-js'
 import { of, throwError } from 'rxjs'
 import { finalize } from 'rxjs/operators'
 import { concatFMap } from '../rxjs.util'

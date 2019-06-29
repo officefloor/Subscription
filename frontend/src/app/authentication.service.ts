@@ -7,7 +7,6 @@ import { map, catchError } from 'rxjs/operators'
 import { concatFMap } from './rxjs.util'
 import { InitialiseService } from './initialise.service'
 import { AlertService } from './alert.service'
-import { Array } from 'core-js'
 
 @Injectable( {
     providedIn: 'root'

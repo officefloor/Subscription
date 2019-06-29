@@ -1,7 +1,6 @@
 import { AlertService, AlertListener } from './alert.service'
 import { TestBed } from '@angular/core/testing'
 import { Observable, BehaviorSubject, of } from 'rxjs'
-import { Error } from 'core-js'
 
 describe( 'AlertService', () => {
 

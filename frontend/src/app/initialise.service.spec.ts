@@ -4,7 +4,6 @@ import { HttpClientTestingModule, HttpTestingController } from '@angular/common/
 import { HttpClient, HttpErrorResponse } from '@angular/common/http'
 import { AlertService } from './alert.service'
 import { Initialisation } from './server-api.service'
-import { Array } from 'core-js'
 
 describe( 'InitialiseService', () => {
 
@@ -61,8 +60,7 @@ describe( 'InitialiseService', () => {
             () => fail( 'Should not be successful' ),
             ( ex: HttpErrorResponse ) => {
                 expect( ex.error ).toEqual( 'Test' )
-                expect( errorAlerts[0] ).toEqual( 'Failed to initialise. Please refresh page.' )
-                expect( errorAlerts[1] ).toEqual( ex )
+                expect( errorAlerts[0] ).toEqual( ex )
                 done()
             } )
         const req = httpTestingController.expectOne( "/initialise" )

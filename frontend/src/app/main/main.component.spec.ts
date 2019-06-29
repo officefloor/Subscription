@@ -9,7 +9,6 @@ import { of } from 'rxjs'
 import { Domain } from '../server-api.service'
 import * as moment from 'moment'
 import { formatDate, parseDate } from '../server-api.service'
-import { Array } from 'core-js'
 import { RouterTestingModule } from '@angular/router/testing'
 
 describe( 'MainComponent', () => {

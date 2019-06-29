@@ -10,7 +10,6 @@ import { AuthenticationService } from '../authentication.service'
 import { ActivatedRoute } from '@angular/router'
 import { DomainPayments, Subscription, formatDate, parseDate } from '../server-api.service'
 import * as moment from 'moment'
-import { Array } from 'core-js'
 
 describe( 'DomainComponent', () => {
 

@@ -2,7 +2,6 @@ import { async, ComponentFixture, TestBed, tick, fakeAsync } from '@angular/core
 import { AlertComponent } from './alert.component'
 import { AlertService } from '../alert.service'
 import { HttpErrorResponse } from '@angular/common/http'
-import { Error } from 'core-js'
 
 describe( 'AlertComponent', () => {
 

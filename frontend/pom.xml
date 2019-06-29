@@ -27,7 +27,6 @@
 							<goal>install-node-and-npm</goal>
 						</goals>
 						<configuration>
-							<!-- https://nodejs.org/en/download/ -->
 							<nodeVersion>v10.14.2</nodeVersion>
 							<npmVersion>6.4.1</npmVersion>
 						</configuration>
@@ -40,6 +39,17 @@
 						</goals>
 						<configuration>
 							<arguments>install</arguments>
+						</configuration>
+					</execution>
+
+					<execution>
+						<id>javascript tests</id>
+						<goals>
+							<goal>npm</goal>
+						</goals>
+						<phase>test</phase>
+						<configuration>
+							<arguments>run ci-test</arguments>
 						</configuration>
 					</execution>
 
