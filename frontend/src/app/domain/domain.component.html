@@ -11,7 +11,8 @@
 			</h2>
 		</div>
 		<div class="col-xs-12 col-lg-8 jumbotron">
-			<app-checkout [domain]="domainName" [isShowReset]="isViewDomain && isExpired"></app-checkout>
+			<app-checkout [domain]="domainName"
+				[isShowReset]="isViewDomain && isExpired"></app-checkout>
 		</div>
 	</div>
 	<div class="row" [hidden]="!isViewDomain">
@@ -20,7 +21,7 @@
 				<th scope="col">Start</th>
 				<th scope="col">End</th>
 				<th scope="col">Paid&nbsp;By</th>
-				<th scope="col">Order&nbsp;#</th>
+				<th scope="col">Payment</th>
 				<th scope="col">Paid&nbsp;on</th>
 			</thead>
 			<tbody>
@@ -30,7 +31,10 @@
 					<td
 						[class.subscription-complete-date]="payment.isSubscriptionCompletion">{{payment.subscriptionEndDate}}</td>
 					<td [class.payer]="payment.isPaidByYou">{{payment.paidBy}}</td>
-					<td>{{payment.paymentOrderId}}</td>
+					<td><div [hidden]="!payment.paymentOrderId">
+							Order#:&nbsp;{{payment.paymentOrderId}}<br />Receipt#:&nbsp;{{payment.paymentReceipt}}<br />Amount:&nbsp;{{payment.paymentAmount
+							| currency:paymentCurrency}}
+						</div></td>
 					<td>{{payment.paymentDate}}</td>
 				</tr>
 			</tbody>

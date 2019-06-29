@@ -75,11 +75,15 @@
 						<phase>prepare-package</phase>
 						<configuration>
 							<tasks>
-								<mkdir dir="./target/classes/PUBLIC" />
-								<copy todir="./target/classes/PUBLIC">
+								<copy todir="./target/classes/PUBLIC" overwrite="true">
 									<fileset
 										dir="../frontend/dist/officefloor-subscription" />
 								</copy>
+								<!-- Optionally include initialisation -->
+								<mkdir dir="./target/classes/config" />
+								<copy file="${user.home}/subscription.prod"
+									tofile="./target/classes/config/subscription.prod"
+									overwrite="true" failonerror="false" />
 							</tasks>
 						</configuration>
 						<goals>
@@ -92,6 +96,10 @@
 				<groupId>com.google.cloud.tools</groupId>
 				<artifactId>appengine-maven-plugin</artifactId>
 				<version>${google.appengine.version}</version>
+				<configuration>
+					<deploy.projectId>officefloor</deploy.projectId>
+					<deploy.version>1</deploy.version>
+				</configuration>
 			</plugin>
 		</plugins>
 	</build>

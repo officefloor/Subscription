@@ -23,8 +23,6 @@ import lombok.RequiredArgsConstructor;
 @RequiredArgsConstructor
 public class Invoice {
 
-	public static final String PRODUCT_TYPE_DOMAIN = "domain";
-
 	@Id
 	private Long id;
 
@@ -38,8 +36,11 @@ public class Invoice {
 	@NonNull
 	private String productReference;
 
+	@NonNull
+	private Boolean isRestartSubscription;
+
 	@Index
 	private String paymentOrderId;
 
-	private Date timestamp = new Date(System.currentTimeMillis());
+	private Date timestamp = ObjectifyEntities.getCreationTimestamp();
 }

@@ -2,7 +2,6 @@ package net.officefloor.app.subscription.store;
 
 import java.util.Date;
 
-import com.googlecode.objectify.Ref;
 import com.googlecode.objectify.annotation.Entity;
 import com.googlecode.objectify.annotation.Id;
 import com.googlecode.objectify.annotation.Index;
@@ -23,6 +22,8 @@ import lombok.RequiredArgsConstructor;
 @RequiredArgsConstructor
 public class Domain {
 
+	public static final String PRODUCT_TYPE = "domain";
+
 	@Id
 	private Long id;
 
@@ -32,11 +33,8 @@ public class Domain {
 
 	@Index
 	@NonNull
-	private Ref<User> user;
-	
-	@Index
-	@NonNull
-	private Ref<Invoice> invoice;
+	private Date expires;
 
-	private Date timestamp = new Date(System.currentTimeMillis());
+	private Date timestamp = ObjectifyEntities.getCreationTimestamp();
+
 }

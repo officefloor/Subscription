@@ -8,20 +8,27 @@ module.exports = (req, res, next) => {
 			accessToken: 'MOCK_ACCESS_TOKEN',
 			refreshToken: 'MOCK_REFRESH_TOKEN'
 		})
-		break;
+		return
+		
 	case '/refreshAccessToken':
 		res.send({
 			accessToken: 'MOCK_ACCESS_TOKEN'
 		})
-		break
+		return
+		
 	case '/configuration':
 		configurationCount++;		
-		if (configurationCount % 3 === 0) {
+		if (configurationCount % 5 === 0) {
 			res.sendStatus(403)
 			return
 		}
 		next()
-		break
+		return
+		
+	case '/payments/domain/no.access':
+		res.sendStatus(403)
+		return
+		
 	default:
 		next()
 	}

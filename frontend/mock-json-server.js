@@ -72,6 +72,7 @@ module.exports = () => {
 			payDetails = [{}]
 		}
 		let orderId = 1
+		let receiptId = 1
 		for (let i = 0; i < numberOfYears; i++) {
 			paymentDate.add(365 - (Math.floor(Math.random() * 50)), 'day')
 			extendsToDate.add(1, 'year')
@@ -89,6 +90,8 @@ module.exports = () => {
 				paidByName: details.name,
 				paidByEmail: details.email,
 				paymentOrderId: details.email ? 'ORDER-' + (orderId++) : undefined,
+				paymentReceipt: details.email ? 'RECEIPT-' + (receiptId++) : undefined,
+				paymentAmount: details.email ? (isRestartSubscription ? 2500 : 500) : undefined,
 			})
 		}
 		return {
@@ -116,14 +119,14 @@ module.exports = () => {
 			domainName: 'officefloor.org',
 			expiresDate: nextYear
 		}],
-		domainPayments: [
+		domainSubscriptions: [
 			createPayments('activicy.com', 10, 5, false, createDetails(2)),
 			createPayments('officefloor.org', 8, 10, true, createDetails(2)),
 			createPayments('officefloor.net', 15, 15, false, createDetails(2)),
 			{ domainName: 'sagenschneider.net' }
 		]
 	}
-	data.domainPayments.forEach((domain) => {
+	data.domainSubscriptions.forEach((domain) => {
 		domain.id = domain.domainName
 		if ('officefloor.net' === domain.domainName) {
 			domain.expiresDate = soon

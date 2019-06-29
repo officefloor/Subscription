@@ -4,4 +4,6 @@
 	<runtime>java8</runtime>
 	<threadsafe>true</threadsafe>
 	<warmup-requests-enabled>false</warmup-requests-enabled>
+	<!-- <env-variables> <env-var name="initialise_file_path" value="classpath://config/subscription.prod" 
+		/> </env-variables> -->
 </appengine-web-app>

@@ -1,9 +1,11 @@
-import { Injectable } from '@angular/core';
+import { Injectable, Injector } from '@angular/core';
 import { HttpInterceptor, HttpRequest, HttpResponse, HttpHandler, HttpEvent, HttpErrorResponse } from '@angular/common/http';
 import { Observable, BehaviorSubject, throwError } from 'rxjs';
-import { map, switchMap, filter, take, finalize, catchError } from 'rxjs/operators';
+import { map, finalize, catchError } from 'rxjs/operators';
+import { concatFMap } from './rxjs.util'
 import { AuthenticationService } from './authentication.service';
 import { AccessTokenResponse } from './server-api.service';
+import { environment } from '../environments/environment'
 
 declare let JSON: any
 
@@ -14,7 +16,7 @@ export class JwtHttpInterceptor implements HttpInterceptor {
     private refreshedAccessToken: BehaviorSubject<string> = null;
 
     constructor(
-        private authenticationService: AuthenticationService
+        private injector: Injector,
     ) { }
 
     intercept( req: HttpRequest<any>, next: HttpHandler ): Observable<HttpEvent<any>> {
@@ -28,18 +30,30 @@ export class JwtHttpInterceptor implements HttpInterceptor {
                     }
                 } )
             } else {
-                return req;
+                return req
             }
         }
 
+        // Create HTTP request/response log
+        const logInteraction = ( logger: ( message: string ) => void, request: HttpRequest<any>, resultType: string, result: any ) => {
+            if ( environment.isLogHttp ) {
+                const authorization = request.headers ? request.headers.get( 'Authorization' ) : '[None]'
+                logger( 'HttpRequest (Authorization: ' + authorization + '): ' + JSON.stringify( request, null, 2 ) + "\n\n" + resultType + ': ' + JSON.stringify( result, null, 2 ) )
+            }
+        }
+
+        // Obtain the authentication service
+        const authenticationService: AuthenticationService = this.injector.get( AuthenticationService )
+
         // Undertake the request
-        return next.handle( jwtRequest( req, this.authenticationService ? this.authenticationService.getAccessToken() : null ) ).pipe(
+        let authRequest = jwtRequest( req, authenticationService ? authenticationService.getAccessToken() : null )
+        return next.handle( authRequest ).pipe(
 
             // Handle failures
             catchError(( error ) => {
 
                 // Log failure
-                console.error( "HttpRequest: " + JSON.stringify( req, null, 2 ) + '\n\nError: ' + JSON.stringify( error, null, 2 ) );
+                logInteraction( console.error, authRequest, 'Error', error )
 
                 // Handle possible failure
                 if ( error instanceof HttpErrorResponse ) {
@@ -50,67 +64,64 @@ export class JwtHttpInterceptor implements HttpInterceptor {
 
                         // Do not refresh if authenticate/refresh access token requests
                         if ( req.url.includes( '/authenticate' ) || req.url.includes( '/refreshAccessToken' ) ) {
-                            return throwError( error );
+                            return throwError( error )
                         }
 
                         // Determine if refreshing access token
-                        if ( !this.refreshedAccessToken ) {
+                        let refreshTokenObservable: Observable<string | Observable<never>>
+                        if ( this.refreshedAccessToken ) {
+                            refreshTokenObservable = this.refreshedAccessToken
 
-                            // Create the refresh to block multiple requests
-                            this.refreshedAccessToken = new BehaviorSubject<string>( null );
+                        } else {
+                            // Create the refresh for concurrent requests
+                            this.refreshedAccessToken = new BehaviorSubject<string>( null )
 
                             // Attempt to refresh access token
-                            let isRefreshed: boolean = false;
-                            this.authenticationService.refreshAccessToken().pipe(
+                            refreshTokenObservable = authenticationService.refreshAccessToken().pipe(
                                 map(( refreshResponse: AccessTokenResponse ) => {
+                                    const accessToken = refreshResponse.accessToken
+                                    this.refreshedAccessToken.next( accessToken )
+                                    return accessToken
+                                } ),
+                                catchError(( authError ) => {
+                                    // Not refreshed, so log out
+                                    authenticationService.signOut()
 
-                                    // Notify of refreshed access token
-                                    if ( refreshResponse.accessToken ) {
-                                        this.refreshedAccessToken.next( refreshResponse.accessToken );
-                                        isRefreshed = true;
-                                    }
-
-                                    return refreshResponse;
+                                    // Fail with original error
+                                    this.refreshedAccessToken.error( error )
+                                    return throwError( error )
                                 } ),
                                 finalize(() => {
                                     // Clear to allow refresh again
-                                    // Note; if failure then existing requests are not made
                                     this.refreshedAccessToken = null;
-
-                                    // Determine if refreshed
-                                    if ( !isRefreshed ) {
-                                        // Not refreshed, so log out
-                                        this.authenticationService.signOut();
-                                    }
                                 } )
-                            ).subscribe();
+                            )
                         }
 
                         // Wait on refreshed access token
-                        return this.refreshedAccessToken.pipe(
-                            filter(( token ) => token != null ),
-                            take( 1 ),
-                            switchMap(( accessToken: string ) => {
+                        return refreshTokenObservable.pipe(
+                            concatFMap(( accessToken: string ) => {
 
-                                // Retry with the refresh access token
-                                return next.handle( jwtRequest( req, accessToken ) );
+                                // Retry with the refreshed access token
+                                authRequest = jwtRequest( req, accessToken )
+                                return next.handle( authRequest )
                             } )
-                        );
+                        )
                     }
                 }
 
                 // Propagate the failure
-                return throwError( error );
+                return throwError( error )
             } ),
 
             // Log the response
             map(( event: HttpEvent<any> ) => {
                 if ( event instanceof HttpResponse ) {
-                    console.log( "HttpRequest: " + JSON.stringify( req, null, 2 ) + "\n\nHttpResponse: " + JSON.stringify( event, null, 2 ) );
+                    logInteraction( console.log, req, 'HttpResponse', event )
                 }
                 return event;
             } )
-        );
+        )
     }
 
 }

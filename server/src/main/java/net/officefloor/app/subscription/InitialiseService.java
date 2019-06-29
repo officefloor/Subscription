@@ -40,7 +40,7 @@ import net.officefloor.web.ObjectResponse;
  * 
  * @author Daniel Sagenschneider
  */
-public class InitialiseLogic {
+public class InitialiseService {
 
 	public static final String PROPERTY_INITIALISE_FILE_PATH = "initialise.file.path";
 
@@ -54,7 +54,7 @@ public class InitialiseLogic {
 		private String paypalCurrency;
 	}
 
-	public void getInitialisation(Objectify objectify, ObjectResponse<Initialisation> response) throws IOException {
+	public static Administration getAdministration(Objectify objectify) throws IOException {
 
 		// Retrieve the administration
 		Administration administration = objectify.load().type(Administration.class).first().now();
@@ -74,7 +74,7 @@ public class InitialiseLogic {
 				if (initialiseFilePath.startsWith(CLASSPATH_PREFIX)) {
 					// Load from class path
 					String resourcePath = initialiseFilePath.substring(CLASSPATH_PREFIX.length());
-					initialiseInputStream = this.getClass().getClassLoader().getResourceAsStream(resourcePath);
+					initialiseInputStream = InitialiseService.class.getClassLoader().getResourceAsStream(resourcePath);
 
 				} else {
 					// Load from file system
@@ -97,6 +97,16 @@ public class InitialiseLogic {
 				throw new HttpException(HttpStatus.NOT_FOUND, "Application not configured");
 			}
 		}
+
+		// Return the administration
+		return administration;
+	}
+
+	public static void getInitialisation(Objectify objectify, ObjectResponse<Initialisation> response)
+			throws IOException {
+
+		// Obtain the administration
+		Administration administration = getAdministration(objectify);
 
 		// Response with the initialisation details
 		response.send(new Initialisation(true, administration.getGoogleClientId(), administration.getPaypalClientId(),

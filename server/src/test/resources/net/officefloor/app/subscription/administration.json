@@ -1,7 +1,18 @@
 {
 	"googleClientId": "MOCK_GOOGLE_CLIENT_ID",
+	"administrators": [
+		{
+			"googleId": "MOCK_ADMIN_1",
+			"notes": "MOCK_NOTES_1"
+		},
+		{
+			"googleId": "MOCK_ADMIN_2",
+			"notes": "MOCK_NOTES_2"
+		}
+	],
 	"paypalEnvironment": "sandbox",
 	"paypalClientId": "MOCK_PAYPAL_CLIENT_ID",
 	"paypalClientSecret": "MOCK_PAYPAL_CLIENT_SECRET",
+	"paypalInvoiceIdTemplate": "MOCK_INVOICE_{id}_{timestamp}",
 	"paypalCurrency": "MOCK_PAYPAL_CURRENCY"
 }

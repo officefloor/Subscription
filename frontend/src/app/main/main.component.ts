@@ -4,8 +4,10 @@ import { SocialUser } from "angularx-social-login"
 import { ServerApiService, parseDate, isExpired, isExpireSoon, Domain } from '../server-api.service'
 import * as moment from 'moment'
 import { Sort } from '@angular/material/sort'
-import { FormGroup, FormControl, ValidationErrors } from '@angular/forms'
 import { Router } from '@angular/router'
+import { AlertService } from '../alert.service'
+import { of } from 'rxjs'
+import { concatFMap } from '../rxjs.util'
 
 @Component( {
     selector: 'app-main',
@@ -14,61 +16,48 @@ import { Router } from '@angular/router'
 } )
 export class MainComponent implements OnInit {
 
-    domains: DomainRow[] = []
+    domains: Array<DomainRow> = []
 
-    sortedDomains: DomainRow[] = []
-
-    isValidDomainName: boolean = false
-
-    registerDomainNameError: string = null
-
-    registerDomainForm = new FormGroup( {
-        domainName: new FormControl( '', ( formControl ) => {
-            this.registerDomainNameError = this.checkDomainName( formControl.value )
-            return {}
-        } )
-    } )
+    sortedDomains: Array<DomainRow> = []
 
     constructor(
         private authentication: AuthenticationService,
         private serverApiService: ServerApiService,
-        private router: Router,
-    ) { }
+        private alertService: AlertService,
+    ) {}
 
     ngOnInit() {
-        this.authentication.authenticationState().subscribe(( user: SocialUser ) => {
+        this.authentication.authenticationState().pipe(
+            concatFMap(( user: SocialUser ) => user ? this.serverApiService.getDomains() : of( [] ) ),
+        ).subscribe(( domains: Domain[] ) => {
 
-            // Nothing further if not logged in
-            if ( !user ) {
-                return
+            // Load the new domains
+            this.domains = []
+            for ( let domain of domains ) {
+                const expireMoment = parseDate( domain.expiresDate )
+
+                // Create the domain row
+                const domainRow: DomainRow = {
+                    ...domain,
+                    localExpires: expireMoment.format( "D MMM YYYY" ),
+                    sortExpires: expireMoment.unix(),
+                    timeAgo: expireMoment.fromNow(),
+                    isExpired: isExpired( expireMoment ),
+                    isExpireSoon: isExpireSoon( expireMoment ),
+                }
+                this.domains.push( domainRow )
             }
 
-            // Load the domains
-            this.serverApiService.getDomains().subscribe(( domains: Domain[] ) => {
+            // Track new domains
+            this.sortedDomains = this.domains.slice()
 
-                // Load the new domains
-                this.domains = []
-                for ( let domain of domains ) {
-                    const expireMoment = parseDate( domain.expiresDate )
-
-                    // Create the domain row
-                    const domainRow: DomainRow = {
-                        ...domain,
-                        localExpires: expireMoment.format( "D MMM YYYY" ),
-                        sortExpires: expireMoment.unix(),
-                        timeAgo: expireMoment.fromNow(),
-                        isExpired: isExpired( expireMoment ),
-                        isExpireSoon: isExpireSoon( expireMoment ),
-                    }
-                    this.domains.push( domainRow )
-                }
-
-                // Track new domains
-                this.sortedDomains = this.domains.slice()
-
-            }, ( error: any ) => {
-                console.log( 'TODO handle error', error )
-            } )
+        }, (error) => {
+            // Error, so no domains
+            this.domains = []
+            this.sortedDomains = []
+            
+            // Notify of the error
+            this.alertService.error(error)
         } )
     }
 
@@ -92,41 +81,6 @@ export class MainComponent implements OnInit {
 
     compare( a: number | string, b: number | string, isAsc: boolean ) {
         return ( a < b ? -1 : 1 ) * ( isAsc ? 1 : -1 )
-    }
-
-    checkDomainName( name: string ): string {
-        this.isValidDomainName = false
-        name = name.trim()
-        if ( name.length == 0 ) {
-            return null // only invalid on submitting
-        } else if ( name.match( /\s/ ) ) {
-            return 'May not contain spaces'
-        } else if ( name.startsWith( '.' ) ) {
-            return "May not start with '.'"
-        } else if ( name.endsWith( '.' ) ) {
-            return "May not end with '.'"
-        } else if ( !name.includes( '.' ) ) {
-            return "Must contain at least one '.' (e.g. domain.com)"
-        }
-        this.isValidDomainName = true
-        return null // valid domain name            
-    }
-
-    registerDomain() {
-        const domainName: string = this.registerDomainForm.value.domainName
-
-        // Ensure valid domain name
-        if ( domainName.trim().length === 0 ) {
-            this.registerDomainNameError = "Must provide domain name"
-            return
-        }
-        this.registerDomainNameError = this.checkDomainName( domainName )
-        if ( this.registerDomainNameError ) {
-            return
-        }
-
-        // Route to domain
-        this.router.navigate( ["domain", domainName] )
     }
 }
 

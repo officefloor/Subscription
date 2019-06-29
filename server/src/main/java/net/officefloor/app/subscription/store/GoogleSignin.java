@@ -1,5 +1,7 @@
 package net.officefloor.app.subscription.store;
 
+import java.util.Date;
+
 import com.googlecode.objectify.Ref;
 import com.googlecode.objectify.annotation.Entity;
 import com.googlecode.objectify.annotation.Id;
@@ -39,5 +41,7 @@ public class GoogleSignin {
 	private String name;
 
 	private String photoUrl;
+
+	private Date timestamp = ObjectifyEntities.getCreationTimestamp();
 
 }

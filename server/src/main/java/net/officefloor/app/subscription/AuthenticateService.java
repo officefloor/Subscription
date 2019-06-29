@@ -1,6 +1,8 @@
 package net.officefloor.app.subscription;
 
 import java.util.List;
+import java.util.Optional;
+import java.util.stream.Stream;
 
 import com.google.api.client.googleapis.auth.oauth2.GoogleIdToken;
 import com.google.api.client.googleapis.auth.oauth2.GoogleIdToken.Payload;
@@ -9,6 +11,8 @@ import com.googlecode.objectify.Objectify;
 import com.googlecode.objectify.Ref;
 
 import lombok.Value;
+import net.officefloor.app.subscription.store.Administration;
+import net.officefloor.app.subscription.store.Administration.Administrator;
 import net.officefloor.app.subscription.store.GoogleSignin;
 import net.officefloor.app.subscription.store.User;
 import net.officefloor.server.http.HttpException;
@@ -21,7 +25,7 @@ import net.officefloor.web.jwt.authority.JwtAuthority;
 /**
  * Provides authentication.
  */
-public class AuthenticateLogic {
+public class AuthenticateService {
 
 	@Value
 	@HttpObject
@@ -61,6 +65,18 @@ public class AuthenticateLogic {
 		// Determine if the user exists
 		List<GoogleSignin> logins = objectify.load().type(GoogleSignin.class).filter("googleId", googleId).list();
 
+		// Load the administration details
+		Administration administration = objectify.load().type(Administration.class).first().now();
+		if (administration == null) {
+			throw new HttpException(HttpStatus.SERVICE_UNAVAILABLE, "Server not initialised");
+		}
+
+		// Determines roles
+		Administrator[] administrators = administration.getAdministrators();
+		boolean isAdministrator = Stream.of(Optional.ofNullable(administrators).orElse(new Administrator[0]))
+				.anyMatch((admin) -> googleId.equals(admin.getGoogleId()));
+		String[] roles = isAdministrator ? new String[] { User.ROLE_ADMIN } : new String[0];
+
 		// Update or create the user
 		User loggedInUser = objectify.transact(() -> {
 
@@ -83,9 +99,10 @@ public class AuthenticateLogic {
 					user = login.getUser().get();
 					isNewUser = false;
 				}
-				user.setEmail(login.getEmail());
+				user.setEmail(email);
 				user.setName(name);
 				user.setPhotoUrl(photoUrl);
+				user.setRoles(roles);
 				if (isNewUser) {
 					// Save the user (to obtain identifier)
 					objectify.save().entities(user).now();
@@ -102,6 +119,7 @@ public class AuthenticateLogic {
 				user = new User(email);
 				user.setName(name);
 				user.setPhotoUrl(photoUrl);
+				user.setRoles(roles);
 				objectify.save().entity(user).now();
 				login = new GoogleSignin(googleId, email);
 				login.setUser(Ref.create(user));

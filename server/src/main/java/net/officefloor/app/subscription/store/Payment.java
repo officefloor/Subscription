@@ -34,6 +34,16 @@ public class Payment {
 	@NonNull
 	private Ref<Invoice> invoice;
 
+	@NonNull
+	private String productType;
+
+	@Index
+	@NonNull
+	private String productReference;
+
+	@NonNull
+	private Boolean isRestartSubscription;
+
 	/**
 	 * Amount in cents.
 	 */
@@ -43,5 +53,8 @@ public class Payment {
 	@NonNull
 	private String receipt;
 
-	private Date timestamp = new Date(System.currentTimeMillis());
+	private Ref<Refund> refund = null;
+
+	private Date timestamp = ObjectifyEntities.getCreationTimestamp();
+
 }
