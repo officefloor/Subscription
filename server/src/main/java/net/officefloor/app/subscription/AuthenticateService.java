@@ -20,7 +20,9 @@ import net.officefloor.server.http.HttpStatus;
 import net.officefloor.server.http.ServerHttpConnection;
 import net.officefloor.web.HttpObject;
 import net.officefloor.web.ObjectResponse;
+import net.officefloor.web.jwt.authority.AccessToken;
 import net.officefloor.web.jwt.authority.JwtAuthority;
+import net.officefloor.web.jwt.authority.RefreshToken;
 
 /**
  * Provides authentication.
@@ -131,11 +133,11 @@ public class AuthenticateService {
 		});
 
 		// Create the JWT refresh and access token
-		String refreshToken = authority.createRefreshToken(loggedInUser);
-		String accessToken = authority.createAccessToken(loggedInUser);
+		RefreshToken refreshToken = authority.createRefreshToken(loggedInUser);
+		AccessToken accessToken = authority.createAccessToken(loggedInUser);
 
 		// Send back the tokens
-		response.send(new AuthenticateResponse(refreshToken, accessToken));
+		response.send(new AuthenticateResponse(refreshToken.getToken(), accessToken.getToken()));
 	}
 
 	@Value
@@ -156,10 +158,10 @@ public class AuthenticateService {
 		User user = authority.decodeRefreshToken(refreshRequest.getRefreshToken());
 
 		// Create new access token
-		String accessToken = authority.createAccessToken(user);
+		AccessToken accessToken = authority.createAccessToken(user);
 
 		// Send back the access token
-		response.send(new RefreshResponse(accessToken));
+		response.send(new RefreshResponse(accessToken.getToken()));
 	}
 
 }
