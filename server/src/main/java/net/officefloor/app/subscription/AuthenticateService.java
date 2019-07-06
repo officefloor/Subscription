@@ -1,5 +1,7 @@
 package net.officefloor.app.subscription;
 
+import java.time.Instant;
+import java.time.ZonedDateTime;
 import java.util.List;
 import java.util.Optional;
 import java.util.stream.Stream;
@@ -20,7 +22,9 @@ import net.officefloor.server.http.HttpStatus;
 import net.officefloor.server.http.ServerHttpConnection;
 import net.officefloor.web.HttpObject;
 import net.officefloor.web.ObjectResponse;
+import net.officefloor.web.jwt.authority.AccessToken;
 import net.officefloor.web.jwt.authority.JwtAuthority;
+import net.officefloor.web.jwt.authority.RefreshToken;
 
 /**
  * Provides authentication.
@@ -36,7 +40,9 @@ public class AuthenticateService {
 	@Value
 	public static class AuthenticateResponse {
 		private String refreshToken;
+		private String refreshExpireTime;
 		private String accessToken;
+		private String accessExpireTime;
 	}
 
 	public void authenticate(AuthenticateRequest idTokenInput, GoogleIdTokenVerifier verifier, Objectify objectify,
@@ -131,11 +137,18 @@ public class AuthenticateService {
 		});
 
 		// Create the JWT refresh and access token
-		String refreshToken = authority.createRefreshToken(loggedInUser);
-		String accessToken = authority.createAccessToken(loggedInUser);
+		RefreshToken refreshToken = authority.createRefreshToken(loggedInUser);
+		AccessToken accessToken = authority.createAccessToken(loggedInUser);
+
+		// Calculate expire times
+		String refreshExpireTime = ResponseUtil.toText(
+				ZonedDateTime.ofInstant(Instant.ofEpochSecond(refreshToken.getExpireTime()), ResponseUtil.ZONE));
+		String accessExpireTime = ResponseUtil
+				.toText(ZonedDateTime.ofInstant(Instant.ofEpochSecond(accessToken.getExpireTime()), ResponseUtil.ZONE));
 
 		// Send back the tokens
-		response.send(new AuthenticateResponse(refreshToken, accessToken));
+		response.send(new AuthenticateResponse(refreshToken.getToken(), refreshExpireTime, accessToken.getToken(),
+				accessExpireTime));
 	}
 
 	@Value
@@ -147,6 +160,7 @@ public class AuthenticateService {
 	@Value
 	public static class RefreshResponse {
 		private String accessToken;
+		private String accessExpireTime;
 	}
 
 	public void refreshAccessToken(RefreshRequest refreshRequest, JwtAuthority<User> authority,
@@ -156,10 +170,12 @@ public class AuthenticateService {
 		User user = authority.decodeRefreshToken(refreshRequest.getRefreshToken());
 
 		// Create new access token
-		String accessToken = authority.createAccessToken(user);
+		AccessToken accessToken = authority.createAccessToken(user);
+		String accessExpireTime = ResponseUtil
+				.toText(ZonedDateTime.ofInstant(Instant.ofEpochSecond(accessToken.getExpireTime()), ResponseUtil.ZONE));
 
 		// Send back the access token
-		response.send(new RefreshResponse(accessToken));
+		response.send(new RefreshResponse(accessToken.getToken(), accessExpireTime));
 	}
 
 }

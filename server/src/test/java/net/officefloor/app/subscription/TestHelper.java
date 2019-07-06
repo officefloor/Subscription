@@ -49,7 +49,7 @@ public class TestHelper {
 	 * @return Current time.
 	 */
 	public static ZonedDateTime now() {
-		return ZonedDateTime.now(ResponseUtil.ZONE);
+		return ZonedDateTime.now(ResponseUtil.ZONE).truncatedTo(ChronoUnit.MILLIS);
 	}
 
 	/**
