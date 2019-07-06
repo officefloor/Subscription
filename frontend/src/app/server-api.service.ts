@@ -95,6 +95,10 @@ export class ServerApiService {
         private http: HttpClient
     ) { }
 
+    public isServerUrl( url: string ): boolean {
+        return true
+    }
+
     public authenticate( idToken: string ): Observable<AuthenticateResponse> {
         return this.http.post<AuthenticateResponse>( `${this.serverUrl}/authenticate`, {
             idToken: idToken

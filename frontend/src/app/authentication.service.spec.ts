@@ -4,10 +4,11 @@ import { HttpClientTestingModule, HttpTestingController } from '@angular/common/
 import { HttpClient, HttpErrorResponse } from '@angular/common/http'
 import { AuthService, SocialUser } from 'angularx-social-login'
 import { InitialiseService } from './initialise.service'
-import { Initialisation } from './server-api.service'
+import { Initialisation, formatDate } from './server-api.service'
 import { of, BehaviorSubject } from 'rxjs'
 import { concatFMap } from './rxjs.util'
 import { catchError, concatAll } from 'rxjs/operators'
+import * as moment from 'moment'
 
 describe( 'AuthenticationService', () => {
 
@@ -40,6 +41,11 @@ describe( 'AuthenticationService', () => {
         httpTestingController = TestBed.get( HttpTestingController )
 
         service = TestBed.get( AuthenticationService )
+
+        localStorage.removeItem( AuthenticationService.REFRESH_TOKEN )
+        localStorage.removeItem( AuthenticationService.REFRESH_EXPIRE )
+        localStorage.removeItem( AuthenticationService.ACCESS_TOKEN )
+        localStorage.removeItem( AuthenticationService.ACCESS_EXPIRE )
     } )
 
     afterEach(() => httpTestingController.verify() )
@@ -108,6 +114,42 @@ describe( 'AuthenticationService', () => {
         ).subscribe(( authUser: SocialUser ) => {
             expect( authUser ).toEqual( user, 'Should be logged in' )
             expect( service.getAccessToken() ).toEqual( 'MOCK_ACCESS_TOKEN' )
+            done()
+        }, fail )
+        const req = httpTestingController.expectOne( "/authenticate" )
+        expect( req.request.method ).toEqual( 'POST' )
+        req.flush( {
+            accessToken: 'MOCK_ACCESS_TOKEN',
+            refreshToken: 'MOCK_REFRESH_TOKEN'
+        } )
+    } )
+
+    it( 'cached authentication', ( done: DoneFn ) => {
+        localStorage.setItem( AuthenticationService.REFRESH_TOKEN, 'MOCK_REFRESH_TOKEN' )
+        localStorage.setItem( AuthenticationService.REFRESH_EXPIRE, formatDate( moment().add( 8, 'hours' ) ) )
+        const user = new SocialUser()
+        initialisationServiceSpy.initialisation.and.returnValue( of( newInitialisation() ) )
+        readyState.next( ['GOOGLE'] )
+        authState.next( user )
+        service.initialise().pipe(
+            concatFMap(( init ) => service.authenticationState() ),
+        ).subscribe(( authUser: SocialUser ) => {
+            expect( authUser ).toEqual( user, 'Should be logged in' )
+            done()
+        }, fail )
+    } )
+
+    it( 'expired cached authentication', ( done: DoneFn ) => {
+        localStorage.setItem( AuthenticationService.REFRESH_TOKEN, 'MOCK_REFRESH_TOKEN' )
+        localStorage.setItem( AuthenticationService.REFRESH_EXPIRE, formatDate( moment().subtract( 1, 'minute' ) ) )
+        const user = new SocialUser()
+        initialisationServiceSpy.initialisation.and.returnValue( of( newInitialisation() ) )
+        readyState.next( ['GOOGLE'] )
+        authState.next( user )
+        service.initialise().pipe(
+            concatFMap(( init ) => service.authenticationState() ),
+        ).subscribe(( authUser: SocialUser ) => {
+            expect( authUser ).toEqual( user, 'Should be logged in' )
             done()
         }, fail )
         const req = httpTestingController.expectOne( "/authenticate" )

@@ -22,4 +22,9 @@ describe( 'ServerApiService', () => {
         const service: ServerApiService = TestBed.get( ServerApiService )
         expect( service ).toBeTruthy()
     } )
+
+    it( 'Check server url', () => {
+        fail( 'todo' )
+    } )
+    
 } )

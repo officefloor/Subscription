@@ -4,7 +4,7 @@ import { Observable, BehaviorSubject, throwError } from 'rxjs';
 import { map, finalize, catchError } from 'rxjs/operators';
 import { concatFMap } from './rxjs.util'
 import { AuthenticationService } from './authentication.service';
-import { AccessTokenResponse } from './server-api.service';
+import { AccessTokenResponse, ServerApiService } from './server-api.service';
 import { environment } from '../environments/environment'
 
 declare let JSON: any
@@ -22,8 +22,8 @@ export class JwtHttpInterceptor implements HttpInterceptor {
     intercept( req: HttpRequest<any>, next: HttpHandler ): Observable<HttpEvent<any>> {
 
         // Create request with JWT
-        const jwtRequest: ( req: HttpRequest<any>, accessToken: string ) => HttpRequest<any> = ( req: HttpRequest<any>, accessToken: string ) => {
-            if ( accessToken ) {
+        const jwtRequest: ( req: HttpRequest<any>, isServerUrl: boolean, accessToken: string ) => HttpRequest<any> = ( req: HttpRequest<any>, isServerUrl: boolean, accessToken: string ) => {
+            if ( isServerUrl && accessToken ) {
                 return req.clone( {
                     setHeaders: {
                         Authorization: `Bearer ${accessToken}`
@@ -37,16 +37,22 @@ export class JwtHttpInterceptor implements HttpInterceptor {
         // Create HTTP request/response log
         const logInteraction = ( logger: ( message: string ) => void, request: HttpRequest<any>, resultType: string, result: any ) => {
             if ( environment.isLogHttp ) {
-                const authorization = request.headers ? request.headers.get( 'Authorization' ) : '[None]'
+                const AUTHORIZATION = 'Authorization'
+                const authorization = request.headers && request.headers.has( AUTHORIZATION ) ? request.headers.get( AUTHORIZATION ) : '[None]'
                 logger( 'HttpRequest (Authorization: ' + authorization + '): ' + JSON.stringify( request, null, 2 ) + "\n\n" + resultType + ': ' + JSON.stringify( result, null, 2 ) )
             }
         }
 
-        // Obtain the authentication service
+        // Obtain the authorization
         const authenticationService: AuthenticationService = this.injector.get( AuthenticationService )
+        const authorization = authenticationService ? authenticationService.getAccessToken() : null
+
+        // Determine if server request
+        const serverApiService: ServerApiService = this.injector.get( ServerApiService )
+        const isServerUrl: boolean = serverApiService ? serverApiService.isServerUrl( req.url ) : false
 
         // Undertake the request
-        let authRequest = jwtRequest( req, authenticationService ? authenticationService.getAccessToken() : null )
+        let authRequest = jwtRequest( req, isServerUrl, authorization )
         return next.handle( authRequest ).pipe(
 
             // Handle failures
@@ -63,7 +69,7 @@ export class JwtHttpInterceptor implements HttpInterceptor {
                     if ( response.status === 401 ) {
 
                         // Do not refresh if authenticate/refresh access token requests
-                        if ( req.url.includes( '/authenticate' ) || req.url.includes( '/refreshAccessToken' ) ) {
+                        if ( !isServerUrl || req.url.includes( '/authenticate' ) || req.url.includes( '/refreshAccessToken' ) ) {
                             return throwError( error )
                         }
 
@@ -100,10 +106,10 @@ export class JwtHttpInterceptor implements HttpInterceptor {
 
                         // Wait on refreshed access token
                         return refreshTokenObservable.pipe(
-                            concatFMap(( accessToken: string ) => {
+                            concatFMap(( refreshedAccessToken: string ) => {
 
                                 // Retry with the refreshed access token
-                                authRequest = jwtRequest( req, accessToken )
+                                authRequest = jwtRequest( req, isServerUrl, refreshedAccessToken )
                                 return next.handle( authRequest )
                             } )
                         )
@@ -117,7 +123,7 @@ export class JwtHttpInterceptor implements HttpInterceptor {
             // Log the response
             map(( event: HttpEvent<any> ) => {
                 if ( event instanceof HttpResponse ) {
-                    logInteraction( console.log, req, 'HttpResponse', event )
+                    logInteraction( console.log, authRequest, 'HttpResponse', event )
                 }
                 return event;
             } )

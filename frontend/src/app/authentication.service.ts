@@ -1,27 +1,32 @@
 import { Injectable } from '@angular/core'
 import { AuthService, SocialUser } from "angularx-social-login"
 import { GoogleLoginProvider } from "angularx-social-login"
-import { ServerApiService, AuthenticateResponse, AccessTokenResponse, Initialisation } from './server-api.service'
+import { ServerApiService, AuthenticateResponse, AccessTokenResponse, Initialisation, parseDate } from './server-api.service'
 import { Observable, BehaviorSubject, of, throwError } from 'rxjs'
 import { map, catchError } from 'rxjs/operators'
 import { concatFMap } from './rxjs.util'
 import { InitialiseService } from './initialise.service'
 import { AlertService } from './alert.service'
+import * as moment from 'moment'
 
 @Injectable( {
     providedIn: 'root'
 } )
 export class AuthenticationService {
 
-    private static readonly REFRESH_TOKEN = "refreshToken"
+    public static readonly REFRESH_TOKEN = "refreshToken"
 
-    private static readonly ACCESS_TOKEN = "accessToken"
+    public static readonly REFRESH_EXPIRE = "refreshExpire"
+
+    public static readonly ACCESS_TOKEN = "accessToken"
+
+    public static readonly ACCESS_EXPIRE = "accessExpire"
 
     // Login state
-    private state: BehaviorSubject<SocialUser> = new BehaviorSubject<SocialUser>( null );
+    private state: BehaviorSubject<SocialUser> = new BehaviorSubject<SocialUser>( null )
 
     // Ready state
-    private ready: BehaviorSubject<boolean> = new BehaviorSubject<boolean>( false );
+    private ready: BehaviorSubject<boolean> = new BehaviorSubject<boolean>( false )
 
     constructor(
         private initialiseService: InitialiseService,
@@ -67,6 +72,21 @@ export class AuthenticationService {
                                 // Ensure logged in
                                 if ( !user ) {
                                     return of( initialisation )
+                                }
+
+                                // Determine if cached refresh token
+                                const refreshToken = localStorage.getItem( AuthenticationService.REFRESH_TOKEN )
+                                if ( refreshToken ) {
+
+                                    // Determine if expired
+                                    const refreshExpire = localStorage.getItem( AuthenticationService.REFRESH_EXPIRE )
+                                    const expire = parseDate( refreshExpire )
+                                    if ( expire.isValid() && ( moment().isBefore( expire ) ) ) {
+
+                                        // Flag authenticated
+                                        this.state.next( user )
+                                        return of( initialisation )
+                                    }
                                 }
 
                                 // User logged in
@@ -128,14 +148,15 @@ export class AuthenticationService {
         }
 
         // Undertake refreshing the access token
-        return this.serverApiService.refreshAccessToken( refreshToken ).pipe( map(( response: AccessTokenResponse ) => {
+        return this.serverApiService.refreshAccessToken( refreshToken ).pipe(
+            map(( response: AccessTokenResponse ) => {
 
-            // Capture the new access token
-            localStorage.setItem( AuthenticationService.ACCESS_TOKEN, response.accessToken )
+                // Capture the new access token
+                localStorage.setItem( AuthenticationService.ACCESS_TOKEN, response.accessToken )
 
-            // Return the response
-            return response
-        } ) )
+                // Return the response
+                return response
+            } ) )
     }
 
     public getAccessToken(): string {
