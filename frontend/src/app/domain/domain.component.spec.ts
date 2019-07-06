@@ -10,6 +10,7 @@ import { AuthenticationService } from '../authentication.service'
 import { ActivatedRoute } from '@angular/router'
 import { DomainPayments, Subscription, formatDate, parseDate } from '../server-api.service'
 import * as moment from 'moment'
+import { MatLinkPreviewModule } from '@angular-material-extensions/link-preview'
 
 describe( 'DomainComponent', () => {
 
@@ -28,7 +29,7 @@ describe( 'DomainComponent', () => {
 
         TestBed.configureTestingModule( {
             declarations: [DomainComponent, CheckoutComponent],
-            imports: [HttpClientTestingModule],
+            imports: [HttpClientTestingModule, MatLinkPreviewModule.forRoot()],
             providers: [
                 { provide: InitialiseService, useValue: initialiseServiceSpy },
                 { provide: AuthenticationService, useValue: authenticationServiceSpy },
@@ -131,12 +132,18 @@ describe( 'DomainComponent', () => {
     it( 'correct domain', () => {
         const { component } = newComponent()
         expect( component.domainName ).toEqual( 'officefloor.org' )
+
+        // Ignore loading link previews
+        httpTestingController.match(( req ) => req.url === 'https://api.linkpreview.net/' )
     } )
 
     it( 'paypal currency', () => {
         const { component } = newComponent()
         expect( component ).toBeTruthy()
         expect( component.paymentCurrency ).toEqual( 'AUD' )
+
+        // Ignore loading link previews
+        httpTestingController.match(( req ) => req.url === 'https://api.linkpreview.net/' )
     } )
 
     function testSubscriptions( paymentRows: Array<PaymentRow> ): void {
@@ -146,6 +153,10 @@ describe( 'DomainComponent', () => {
         const req = httpTestingController.expectOne( '/subscriptions/domain/officefloor.org' )
         expect( req.request.method ).toEqual( 'GET' )
         req.flush( newDomainPayments( paymentRows.map(( payment: PaymentRow ) => {
+            // Ignore loading link previews
+            httpTestingController.match(( req ) => req.url === 'https://api.linkpreview.net/' )
+            
+            // Return the subscription
             const clone: Subscription = {
                 paymentDate: payment.paymentDate,
                 extendsToDate: payment.extendsToDate,
