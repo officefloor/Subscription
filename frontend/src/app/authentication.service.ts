@@ -87,11 +87,15 @@ export class AuthenticationService {
 
                                 // Capture the tokens
                                 const refreshToken: string = response.refreshToken
+                                const refreshExpire: string = response.refreshExpireTime
                                 const accessToken: string = response.accessToken
+                                const accessExpire: string = response.accessExpireTime
 
                                 // Store the tokens
                                 localStorage.setItem( AuthenticationService.REFRESH_TOKEN, refreshToken )
+                                localStorage.setItem( AuthenticationService.REFRESH_EXPIRE, refreshExpire )
                                 localStorage.setItem( AuthenticationService.ACCESS_TOKEN, accessToken )
+                                localStorage.setItem( AuthenticationService.ACCESS_EXPIRE, accessExpire )
 
                                 // Notify logged in
                                 this.state.next( user )
