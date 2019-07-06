@@ -7,7 +7,7 @@ import { InitialiseService } from './initialise.service'
 import { Initialisation, formatDate } from './server-api.service'
 import { of, BehaviorSubject } from 'rxjs'
 import { concatFMap } from './rxjs.util'
-import { catchError, concatAll } from 'rxjs/operators'
+import { catchError, concatAll, filter } from 'rxjs/operators'
 import * as moment from 'moment'
 
 describe( 'AuthenticationService', () => {
@@ -124,6 +124,8 @@ describe( 'AuthenticationService', () => {
     } )
 
     it( 'authenticated', ( done: DoneFn ) => {
+        const refreshExpire = formatDate( moment().add( 8, 'hour' ) )
+        const accessExpire = formatDate( moment().add( 20, 'minute' ) )
         const user = new SocialUser()
         initialisationServiceSpy.initialisation.and.returnValue( of( newInitialisation() ) )
         readyState.next( ['GOOGLE'] )
@@ -133,25 +135,34 @@ describe( 'AuthenticationService', () => {
         ).subscribe(( authUser: SocialUser ) => {
             expect( authUser ).toEqual( user, 'Should be logged in' )
             expect( service.getAccessToken() ).toEqual( 'MOCK_ACCESS_TOKEN' )
+
+            // Ensure stored state
+            expect( localStorage.getItem( AuthenticationService.REFRESH_TOKEN ) ).toEqual( 'MOCK_REFRESH_TOKEN' )
+            expect( localStorage.getItem( AuthenticationService.REFRESH_EXPIRE ) ).toEqual( refreshExpire )
+            expect( localStorage.getItem( AuthenticationService.ACCESS_TOKEN ) ).toEqual( 'MOCK_ACCESS_TOKEN' )
+            expect( localStorage.getItem( AuthenticationService.ACCESS_EXPIRE ) ).toEqual( accessExpire )
             done()
         }, fail )
         const req = httpTestingController.expectOne( "/authenticate" )
         expect( req.request.method ).toEqual( 'POST' )
         req.flush( {
             accessToken: 'MOCK_ACCESS_TOKEN',
-            refreshToken: 'MOCK_REFRESH_TOKEN'
+            accessExpireTime: accessExpire,
+            refreshToken: 'MOCK_REFRESH_TOKEN',
+            refreshExpireTime: refreshExpire,
         } )
     } )
 
     it( 'cached authentication', ( done: DoneFn ) => {
-        setItemInLocalStorage( AuthenticationService.REFRESH_EXPIRE, formatDate( moment().add( 8, 'hours' ) ) )
-        setItemInLocalStorage( AuthenticationService.REFRESH_TOKEN, 'MOCK_REFRESH_TOKEN' )
         initialisationServiceSpy.initialisation.and.returnValue( of( newInitialisation() ) )
         readyState.next( ['GOOGLE'] )
         const user = new SocialUser()
         authState.next( user )
+        setItemInLocalStorage( AuthenticationService.REFRESH_EXPIRE, formatDate( moment().add( 8, 'hours' ) ) )
+        setItemInLocalStorage( AuthenticationService.REFRESH_TOKEN, 'MOCK_REFRESH_TOKEN' )
         service.initialise().pipe(
             concatFMap(( init ) => service.authenticationState() ),
+            filter(( user ) => user !== null ),
         ).subscribe(( authUser: SocialUser ) => {
             expect( authUser ).toEqual( user, 'Should be logged in' )
             done()

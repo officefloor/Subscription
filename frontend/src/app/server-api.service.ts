@@ -25,7 +25,9 @@ export function isExpireSoon( date: moment.Moment ): boolean {
 
 export interface AuthenticateResponse {
     refreshToken: string
+    refreshExpireTime: string
     accessToken: string
+    accessExpireTime: string
 }
 
 export interface AccessTokenResponse {
