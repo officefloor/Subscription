@@ -5,7 +5,7 @@ import { HttpClient, HttpErrorResponse } from '@angular/common/http'
 import { ReactiveFormsModule } from '@angular/forms'
 import { AuthenticationService } from '../authentication.service'
 import { SocialUser } from "angularx-social-login"
-import { of } from 'rxjs'
+import { Observable, BehaviorSubject, of } from 'rxjs'
 import { AlertService, AlertListener } from '../alert.service'
 import { Configuration, Administrator } from '../server-api.service'
 import { expectValue, expectChecked, setValue, setChecked } from '../app.component.spec'
@@ -37,7 +37,7 @@ describe( 'ConfigureComponent', () => {
     }
 
     beforeEach( async(() => {
-        authenticationServiceSpy = jasmine.createSpyObj( 'AuthenticationService', ['authenticationState'] )
+        authenticationServiceSpy = jasmine.createSpyObj( 'AuthenticationService', ['readyState', 'authenticationState'] )
         TestBed.configureTestingModule( {
             declarations: [ConfigureComponent],
             imports: [ReactiveFormsModule, HttpClientTestingModule],
@@ -70,8 +70,9 @@ describe( 'ConfigureComponent', () => {
         expect( errorAlert ).toBeNull( 'should not end in error' )
     } )
 
-    function newComponent( user: SocialUser = null ): { component: ConfigureComponent, fixture: ComponentFixture<ConfigureComponent>, dom: HTMLElement } {
-        authenticationServiceSpy.authenticationState.and.returnValue( of( user ) )
+    function newComponent( user: Observable<SocialUser> = of( null ), isReady: Observable<boolean> = of( true ) ): { component: ConfigureComponent, fixture: ComponentFixture<ConfigureComponent>, dom: HTMLElement } {
+        authenticationServiceSpy.readyState.and.returnValue( isReady )
+        authenticationServiceSpy.authenticationState.and.returnValue( user )
         const fixture = TestBed.createComponent( ConfigureComponent )
         fixture.detectChanges()
         const component = fixture.componentInstance
@@ -91,7 +92,7 @@ describe( 'ConfigureComponent', () => {
     } )
 
     it( 'display configuration', ( done: DoneFn ) => {
-        const { component, fixture, dom } = newComponent( new SocialUser() )
+        const { component, fixture, dom } = newComponent( of( new SocialUser() ) )
         const req = httpTestingController.expectOne( '/configuration' )
         expect( req.request.method ).toEqual( 'GET' )
         req.flush( configuration )
@@ -101,7 +102,30 @@ describe( 'ConfigureComponent', () => {
             expectValue( dom, '.googleId', 'GOOGLE_ADMIN_ID' )
             expectValue( dom, '.notes', 'MOCK_NOTES' )
             expectChecked( dom, '#paypalEnvironmentSandbox', true )
-            expectChecked( dom, '#paypalEnvironmentProduction', false )
+            expectChecked( dom, '#paypalEnvironmentLive', false )
+            expectValue( dom, '#paypalClientId', 'PAYPAL_CLIENT_ID' )
+            expectValue( dom, '#paypalClientSecret', 'PAYPAL_CLIENT_SECRET' )
+            expectValue( dom, '#paypalInvoiceIdTemplate', 'template' )
+            done()
+        }, fail )
+    } )
+
+    it( 'take time to load', ( done: DoneFn ) => {
+        const isReady = new BehaviorSubject<boolean>( false )
+        const { component, fixture, dom } = newComponent( of( new SocialUser() ), isReady )
+        fixture.detectChanges()
+        expect( component.isHide ).toEqual( true, 'not yet ready' )
+        isReady.next( true )
+        const req = httpTestingController.expectOne( '/configuration' )
+        expect( req.request.method ).toEqual( 'GET' )
+        req.flush( configuration )
+        fixture.detectChanges()
+        fixture.whenStable().then(() => {
+            expectValue( dom, '#googleClientId', 'GOOGLE_CLIENT_ID' )
+            expectValue( dom, '.googleId', 'GOOGLE_ADMIN_ID' )
+            expectValue( dom, '.notes', 'MOCK_NOTES' )
+            expectChecked( dom, '#paypalEnvironmentSandbox', true )
+            expectChecked( dom, '#paypalEnvironmentLive', false )
             expectValue( dom, '#paypalClientId', 'PAYPAL_CLIENT_ID' )
             expectValue( dom, '#paypalClientSecret', 'PAYPAL_CLIENT_SECRET' )
             expectValue( dom, '#paypalInvoiceIdTemplate', 'template' )
@@ -110,14 +134,14 @@ describe( 'ConfigureComponent', () => {
     } )
 
     it( 'update configuration', ( done: DoneFn ) => {
-        const { component, fixture, dom } = newComponent( new SocialUser() )
+        const { component, fixture, dom } = newComponent( of( new SocialUser() ) )
         httpTestingController.expectOne( '/configuration' ).flush( configuration )
         fixture.detectChanges()
         fixture.whenStable().then(() => {
             setValue( dom, '#googleClientId', 'CHANGE_GOOGLE_CLIENT_ID' )
             setValue( dom, '.googleId', 'CHANGE_GOOGLE_ADMIN_ID' )
             setValue( dom, '.notes', 'CHANGE_MOCK_NOTES' )
-            setChecked( dom, '#paypalEnvironmentProduction' )
+            setChecked( dom, '#paypalEnvironmentLive' )
             setValue( dom, '#paypalClientId', 'CHANGE_PAYPAL_CLIENT_ID' )
             setValue( dom, '#paypalClientSecret', 'CHANGE_PAYPAL_CLIENT_SECRET' )
             setValue( dom, '#paypalInvoiceIdTemplate', 'change_template' )
@@ -133,7 +157,7 @@ describe( 'ConfigureComponent', () => {
             expect( update.googleClientId ).toEqual( 'CHANGE_GOOGLE_CLIENT_ID' )
             expect( update.administrators[0].googleId ).toEqual( 'CHANGE_GOOGLE_ADMIN_ID' )
             expect( update.administrators[0].notes ).toEqual( 'CHANGE_MOCK_NOTES' )
-            expect( update.paypalEnvironment ).toEqual( 'production' )
+            expect( update.paypalEnvironment ).toEqual( 'live' )
             expect( update.paypalClientId ).toEqual( 'CHANGE_PAYPAL_CLIENT_ID' )
             expect( update.paypalClientSecret ).toEqual( 'CHANGE_PAYPAL_CLIENT_SECRET' )
             expect( update.paypalInvoiceIdTemplate ).toEqual( 'change_template' )
