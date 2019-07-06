@@ -4,6 +4,10 @@
 	<runtime>java8</runtime>
 	<threadsafe>true</threadsafe>
 	<warmup-requests-enabled>false</warmup-requests-enabled>
+	<automatic-scaling>
+		<min-instances>0</min-instances>
+		<max-concurrent-requests>50</max-concurrent-requests>
+	</automatic-scaling>
 	<!-- <env-variables> <env-var name="initialise_file_path" value="classpath://config/subscription.prod" 
 		/> </env-variables> -->
 </appengine-web-app>

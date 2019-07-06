@@ -3,6 +3,10 @@ package net.officefloor.app.subscription;
 import static org.junit.Assert.assertArrayEquals;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertTrue;
+
+import java.time.ZonedDateTime;
+import java.time.temporal.ChronoUnit;
 
 import org.junit.Rule;
 import org.junit.Test;
@@ -90,6 +94,13 @@ public class AuthenticateServiceTest {
 		this.authenticateResponse = mapper.readValue(entity, AuthenticateResponse.class);
 		assertNotNull("Should have refresh token", this.authenticateResponse.getRefreshToken());
 		assertNotNull("Should have access token", this.authenticateResponse.getAccessToken());
+
+		// Ensure valid expire times
+		ZonedDateTime now = ZonedDateTime.now(ResponseUtil.ZONE);
+		ZonedDateTime refreshExpireTime = TestHelper.toZonedDateTime(this.authenticateResponse.getRefreshExpireTime());
+		assertApproximateTime("Incorrect refresh expire time ", now.plus(8, ChronoUnit.HOURS), refreshExpireTime);
+		ZonedDateTime accessExpireTime = TestHelper.toZonedDateTime(this.authenticateResponse.getAccessExpireTime());
+		assertApproximateTime("Incorrect access expire time ", now.plus(20, ChronoUnit.MINUTES), accessExpireTime);
 	}
 
 	@Test
@@ -171,6 +182,8 @@ public class AuthenticateServiceTest {
 		// As using same keys, should be same access token (times to second)
 		assertEquals("Should be same token", this.authenticateResponse.getAccessToken(),
 				refreshResponse.getAccessToken());
+		assertEquals("Incorrect expire time", this.authenticateResponse.getAccessExpireTime(),
+				refreshResponse.getAccessExpireTime());
 	}
 
 	private String getGoogleUserId(String name) {
@@ -183,4 +196,12 @@ public class AuthenticateServiceTest {
 				"name", name, "picture", user.getPhotoUrl());
 	}
 
+	private static void assertApproximateTime(String message, ZonedDateTime expected, ZonedDateTime actual) {
+		ZonedDateTime start = expected.minus(1, ChronoUnit.MINUTES);
+		ZonedDateTime end = expected.plus(1, ChronoUnit.MINUTES);
+		assertTrue(message + ResponseUtil.toText(actual) + " is before " + ResponseUtil.toText(start),
+				actual.isAfter(start));
+		assertTrue(message + ResponseUtil.toText(actual) + " is after " + ResponseUtil.toText(end),
+				actual.isBefore(end));
+	}
 }

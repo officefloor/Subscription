@@ -1,8 +1,7 @@
 <objects>
 
-	<managed-object source="net.officefloor.identity.google.GoogleIdTokenVerifierManagedObjectSource">
-		<property name="google.client.id" value="1011336589071-br4rv9uqmt5readqvim261797d7ih1cl.apps.googleusercontent.com" />
-	</managed-object>
+	<managed-object source="net.officefloor.identity.google.GoogleIdTokenVerifierManagedObjectSource" />
+	<managed-object class="net.officefloor.app.subscription.google.GoogleIdTokenVerifierConfiguration" />
 
 	<managed-object source="net.officefloor.web.jwt.authority.JwtAuthorityManagedObjectSource">
 		<property name="identity.class" value="net.officefloor.app.subscription.store.User" />
