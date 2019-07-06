@@ -6,6 +6,9 @@
     <http-continuation path="/configure" secure="false" x="989" y="482">
       <resource path="/index.html"/>
     </http-continuation>
+    <http-continuation path="/domain/{domainName}" secure="false" x="915" y="538">
+      <resource path="/index.html"/>
+    </http-continuation>
     <http-continuation path="/domains" secure="false" x="158" y="493">
       <section name="Domain" input="getDomains"/>
     </http-continuation>
@@ -124,7 +127,7 @@
   <governances>
   </governances>
   <resources>
-    <resource path="/index.html" x="1186" y="479"/>
+    <resource path="/index.html" x="1187" y="506"/>
   </resources>
   <exceptions>
   </exceptions>
