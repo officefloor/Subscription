@@ -8,6 +8,7 @@ describe( 'ServerApiService', () => {
 
     let httpClient: HttpClient
     let httpTestingController: HttpTestingController
+    let service: ServerApiService
 
     beforeEach(() => {
         TestBed.configureTestingModule( {
@@ -16,10 +17,24 @@ describe( 'ServerApiService', () => {
 
         httpClient = TestBed.get( HttpClient )
         httpTestingController = TestBed.get( HttpTestingController )
+
+        service = TestBed.get( ServerApiService )
     } )
 
     it( 'should be created (tested by other tests)', () => {
-        const service: ServerApiService = TestBed.get( ServerApiService )
         expect( service ).toBeTruthy()
     } )
+
+    it( 'Check relative url', () => {
+        expect( service.isServerUrl( '/relative/url' ) ).toEqual( true )
+    } )
+
+    it( 'Check server url', () => {
+        expect( service.isServerUrl( window.location.href ) ).toEqual( true )
+    } )
+
+    it( 'Check non-server url', () => {
+        expect( service.isServerUrl( 'http://not.server' ) ).toEqual( false )
+    } )
+
 } )
