@@ -13,13 +13,14 @@ import { MainComponent } from './main/main.component'
 import { NgbModule } from '@ng-bootstrap/ng-bootstrap'
 import { ReactiveFormsModule } from '@angular/forms'
 import { BrowserAnimationsModule } from '@angular/platform-browser/animations'
-import { MatSortModule } from '@angular/material';
 import { DomainComponent } from './domain/domain.component'
 import { InitialiseService } from './initialise.service'
 import { Initialisation } from './server-api.service'
-import { AuthenticationService } from './authentication.service';
+import { AuthenticationService } from './authentication.service'
 import { AlertComponent } from './alert/alert.component'
 import { RegisterComponent } from './register/register.component'
+import { MatSortModule } from '@angular/material'
+import { MatLinkPreviewModule } from '@angular-material-extensions/link-preview'
 
 /**
  * Override initialise to enable loading configuration form server.
@@ -70,6 +71,7 @@ export function provideAuthServiceConfig( initialiseService: InitialiseService )
         SocialLoginModule,
         AppRoutingModule,
         MatSortModule,
+        MatLinkPreviewModule.forRoot(),
     ],
     providers: [{
         provide: AuthServiceConfig,

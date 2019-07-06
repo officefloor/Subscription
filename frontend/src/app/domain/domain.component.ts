@@ -1,4 +1,4 @@
-import { Component, OnInit, OnDestroy } from '@angular/core'
+import { Component, OnInit, OnDestroy, ViewChild, ElementRef } from '@angular/core'
 import { ActivatedRoute, ParamMap } from '@angular/router'
 import { ServerApiService, parseDate, isExpired, isExpireSoon, DomainPayments, Subscription, Initialisation } from '../server-api.service'
 import { InitialiseService } from '../initialise.service'
@@ -11,6 +11,7 @@ import { AlertService } from '../alert.service'
 import { concatFMap } from '../rxjs.util'
 import { of, throwError } from 'rxjs'
 import { catchError } from 'rxjs/operators'
+import { Link } from 'ngx-linkifyjs'
 
 @Component( {
     selector: 'app-domain',
@@ -28,6 +29,8 @@ export class DomainComponent implements OnInit, OnDestroy, DomainPaymentsListene
     paymentCurrency: string
 
     domainName: string
+
+    domainLink: Link
 
     isViewDomain: boolean = false
 
@@ -62,6 +65,13 @@ export class DomainComponent implements OnInit, OnDestroy, DomainPaymentsListene
         // Specify the domain
         this.domainName = this.route.snapshot.paramMap.get( 'domain' )
 
+        // Specify the domain link
+        this.domainLink = {
+            type: 'web',
+            value: 'domain',
+            href: 'http://' + this.domainName
+        }
+
         // Register for latest domain payments
         this.latestDomainPaymentsService.addListener( this )
 
@@ -91,7 +101,6 @@ export class DomainComponent implements OnInit, OnDestroy, DomainPaymentsListene
             this.latestDomainPayments( domainPayments )
         }, this.alertService.handleError() )
     }
-
 
     ngOnDestroy(): void {
         this.latestDomainPaymentsService.removeListener( this )

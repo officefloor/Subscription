@@ -2,6 +2,10 @@
 	background-color: LightSteelBlue;
 }
 
+.officefloor-banner img {
+	height: 3em;
+}
+
 .login {
 	margin-top: 0.5em;
 }
