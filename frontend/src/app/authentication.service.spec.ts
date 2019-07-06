@@ -42,13 +42,32 @@ describe( 'AuthenticationService', () => {
 
         service = TestBed.get( AuthenticationService )
 
-        localStorage.removeItem( AuthenticationService.REFRESH_TOKEN )
-        localStorage.removeItem( AuthenticationService.REFRESH_EXPIRE )
-        localStorage.removeItem( AuthenticationService.ACCESS_TOKEN )
-        localStorage.removeItem( AuthenticationService.ACCESS_EXPIRE )
+        removeItemFromLocalStorage( AuthenticationService.REFRESH_TOKEN )
+        removeItemFromLocalStorage( AuthenticationService.REFRESH_EXPIRE )
+        removeItemFromLocalStorage( AuthenticationService.ACCESS_TOKEN )
+        removeItemFromLocalStorage( AuthenticationService.ACCESS_EXPIRE )
+
     } )
 
     afterEach(() => httpTestingController.verify() )
+
+    function removeItemFromLocalStorage( key: string ) {
+        localStorage.removeItem( key )
+        waitUntil( ' removing storage of ' + key, () => localStorage.getItem( key ) === null )
+    }
+
+    function setItemInLocalStorage( key: string, value: string ) {
+        localStorage.setItem( key, value )
+        waitUntil( ' setting ' + key + '=' + value, () => localStorage.getItem( key ) === value )
+    }
+
+    function waitUntil( message: string, predicate: () => boolean, timeout: moment.Moment = moment().add( 1, 'second' ) ): void {
+        while ( !predicate() ) {
+            if ( moment().isAfter( timeout ) ) {
+                throw Error( 'Timed out waiting on ' + message )
+            }
+        }
+    }
 
     function newInitialisation( isAuthenticationRequired: boolean = true ): Initialisation {
         return {
@@ -125,11 +144,11 @@ describe( 'AuthenticationService', () => {
     } )
 
     it( 'cached authentication', ( done: DoneFn ) => {
-        localStorage.setItem( AuthenticationService.REFRESH_TOKEN, 'MOCK_REFRESH_TOKEN' )
-        localStorage.setItem( AuthenticationService.REFRESH_EXPIRE, formatDate( moment().add( 8, 'hours' ) ) )
-        const user = new SocialUser()
+        setItemInLocalStorage( AuthenticationService.REFRESH_EXPIRE, formatDate( moment().add( 8, 'hours' ) ) )
+        setItemInLocalStorage( AuthenticationService.REFRESH_TOKEN, 'MOCK_REFRESH_TOKEN' )
         initialisationServiceSpy.initialisation.and.returnValue( of( newInitialisation() ) )
         readyState.next( ['GOOGLE'] )
+        const user = new SocialUser()
         authState.next( user )
         service.initialise().pipe(
             concatFMap(( init ) => service.authenticationState() ),
@@ -140,8 +159,8 @@ describe( 'AuthenticationService', () => {
     } )
 
     it( 'expired cached authentication', ( done: DoneFn ) => {
-        localStorage.setItem( AuthenticationService.REFRESH_TOKEN, 'MOCK_REFRESH_TOKEN' )
-        localStorage.setItem( AuthenticationService.REFRESH_EXPIRE, formatDate( moment().subtract( 1, 'minute' ) ) )
+        setItemInLocalStorage( AuthenticationService.REFRESH_TOKEN, 'MOCK_REFRESH_TOKEN' )
+        setItemInLocalStorage( AuthenticationService.REFRESH_EXPIRE, formatDate( moment().subtract( 1, 'minute' ) ) )
         const user = new SocialUser()
         initialisationServiceSpy.initialisation.and.returnValue( of( newInitialisation() ) )
         readyState.next( ['GOOGLE'] )

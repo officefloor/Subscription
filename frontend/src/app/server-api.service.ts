@@ -96,7 +96,15 @@ export class ServerApiService {
     ) { }
 
     public isServerUrl( url: string ): boolean {
-        return true
+
+        // Determine the server URL
+        let onlyServerUrl = this.serverUrl
+        if ( !onlyServerUrl ) {
+            onlyServerUrl = window.location.protocol + '//' + window.location.host
+        }
+
+        // Flag whether server URL
+        return url.startsWith( '/' ) || url.startsWith( onlyServerUrl )
     }
 
     public authenticate( idToken: string ): Observable<AuthenticateResponse> {
