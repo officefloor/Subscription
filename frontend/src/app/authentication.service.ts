@@ -3,7 +3,7 @@ import { AuthService, SocialUser } from "angularx-social-login"
 import { GoogleLoginProvider } from "angularx-social-login"
 import { ServerApiService, AuthenticateResponse, AccessTokenResponse, Initialisation, parseDate } from './server-api.service'
 import { Observable, BehaviorSubject, of, throwError } from 'rxjs'
-import { map, catchError } from 'rxjs/operators'
+import { map, catchError, filter } from 'rxjs/operators'
 import { concatFMap } from './rxjs.util'
 import { InitialiseService } from './initialise.service'
 import { AlertService } from './alert.service'
@@ -51,63 +51,53 @@ export class AuthenticationService {
 
                 // Determine when ready
                 return this.authService.readyState.pipe(
-                    map(( ready: any ) => {
+                    filter(( ready: any ) => {
                         const isReady: boolean = ready[0] && ( ready[0] === 'GOOGLE' )
                         if ( isReady ) {
                             this.ready.next( isReady ) // flag ready
                         }
                         return isReady
                     } ),
-                    concatFMap(( isReady: boolean ) => {
+                    concatFMap(( isReady: boolean ) => this.authService.authState ),
+                    concatFMap(( user: SocialUser ) => {
 
-                        // Ensure ready
-                        if ( !isReady ) {
+                        // Ensure logged in
+                        if ( !user ) {
                             return of( initialisation )
                         }
 
-                        // Authentication ready so determine login
-                        return this.authService.authState.pipe(
-                            concatFMap(( user: SocialUser ) => {
+                        // Determine if cached refresh token
+                        const refreshToken = localStorage.getItem( AuthenticationService.REFRESH_TOKEN )
+                        if ( refreshToken ) {
 
-                                // Ensure logged in
-                                if ( !user ) {
-                                    return of( initialisation )
-                                }
+                            // Determine if expired
+                            const refreshExpire = localStorage.getItem( AuthenticationService.REFRESH_EXPIRE )
+                            const expire = parseDate( refreshExpire )
+                            if ( expire.isValid() && ( moment().isBefore( expire ) ) ) {
 
-                                // Determine if cached refresh token
-                                const refreshToken = localStorage.getItem( AuthenticationService.REFRESH_TOKEN )
-                                if ( refreshToken ) {
+                                // Flag authenticated
+                                this.state.next( user )
+                                return of( initialisation )
+                            }
+                        }
 
-                                    // Determine if expired
-                                    const refreshExpire = localStorage.getItem( AuthenticationService.REFRESH_EXPIRE )
-                                    const expire = parseDate( refreshExpire )
-                                    if ( expire.isValid() && ( moment().isBefore( expire ) ) ) {
+                        // User logged in
+                        return this.serverApiService.authenticate( user.idToken ).pipe(
+                            concatFMap(( response: AuthenticateResponse ) => {
 
-                                        // Flag authenticated
-                                        this.state.next( user )
-                                        return of( initialisation )
-                                    }
-                                }
+                                // Capture the tokens
+                                const refreshToken: string = response.refreshToken
+                                const accessToken: string = response.accessToken
 
-                                // User logged in
-                                return this.serverApiService.authenticate( user.idToken ).pipe(
-                                    concatFMap(( response: AuthenticateResponse ) => {
+                                // Store the tokens
+                                localStorage.setItem( AuthenticationService.REFRESH_TOKEN, refreshToken )
+                                localStorage.setItem( AuthenticationService.ACCESS_TOKEN, accessToken )
 
-                                        // Capture the tokens
-                                        const refreshToken: string = response.refreshToken
-                                        const accessToken: string = response.accessToken
+                                // Notify logged in
+                                this.state.next( user )
 
-                                        // Store the tokens
-                                        localStorage.setItem( AuthenticationService.REFRESH_TOKEN, refreshToken )
-                                        localStorage.setItem( AuthenticationService.ACCESS_TOKEN, accessToken )
-
-                                        // Notify logged in
-                                        this.state.next( user )
-
-                                        // Initialised
-                                        return of( initialisation )
-                                    } )
-                                )
+                                // Initialised
+                                return of( initialisation )
                             } )
                         )
                     } )
