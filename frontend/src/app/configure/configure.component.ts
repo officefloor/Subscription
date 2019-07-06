@@ -5,7 +5,7 @@ import { SocialUser } from "angularx-social-login"
 import { AuthenticationService } from '../authentication.service'
 import { AlertService } from '../alert.service'
 import { of, throwError } from 'rxjs'
-import { finalize } from 'rxjs/operators'
+import { finalize, filter } from 'rxjs/operators'
 import { concatFMap } from '../rxjs.util'
 
 
@@ -43,7 +43,8 @@ export class ConfigureComponent implements OnInit {
         } )
 
         // Load form
-        this.authenticationService.authenticationState().pipe(
+        this.authenticationService.initialise().pipe(
+            concatFMap(( init ) => this.authenticationService.authenticationState() ),
             concatFMap(( user: SocialUser ) => {
 
                 // Only load configuration if logged in user
@@ -106,11 +107,10 @@ export class ConfigureComponent implements OnInit {
             paypalClientSecret: form.paypalClientSecret,
             paypalInvoiceIdTemplate: form.paypalInvoiceIdTemplate,
             paypalCurrency: form.paypalCurrency,
-        } ).pipe(
-            finalize(() => this.isSaving = false ),
-        ).subscribe(() => {
-            this.alertService.success( 'Successfully updated configuration' )
-        }, this.alertService.handleError() )
+        } ).subscribe(
+            () => this.alertService.success( 'Successfully updated configuration' ),
+            this.alertService.handleError(),
+            () => this.isSaving = false )
     }
 
 }
