@@ -43,9 +43,8 @@ export class ConfigureComponent implements OnInit {
         } )
 
         // Load form
-        this.authenticationService.readyState().pipe(
-            filter(( isReady ) => isReady ),
-            concatFMap(( isReady ) => this.authenticationService.authenticationState() ),
+        this.authenticationService.initialise().pipe(
+            concatFMap(( init ) => this.authenticationService.authenticationState() ),
             concatFMap(( user: SocialUser ) => {
 
                 // Only load configuration if logged in user
