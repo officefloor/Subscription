@@ -80,7 +80,7 @@ public class InvoiceServiceTest {
 		User user = this.helper.setupUser("Daniel");
 		MockWoofResponse response = this.server
 				.send(this.jwt.authorize(user, MockWoofServer.mockRequest("/invoices/domain/officefloor.org"))
-						.method(HttpMethod.POST));
+						.secure(true).method(HttpMethod.POST));
 		response.assertJsonError(new HttpException(HttpStatus.SERVICE_UNAVAILABLE, "Server not initialised"));
 	}
 
@@ -94,7 +94,7 @@ public class InvoiceServiceTest {
 		Consumer<String> validate = (domainName) -> {
 			MockWoofResponse response = this.server
 					.send(this.jwt.authorize(user, MockWoofServer.mockRequest("/invoices/domain/" + domainName))
-							.method(HttpMethod.POST));
+							.secure(true).method(HttpMethod.POST));
 			response.assertJsonError(new HttpException(422, "Invalid domain " + domainName));
 		};
 
@@ -196,8 +196,9 @@ public class InvoiceServiceTest {
 
 		// Send request
 		User user = this.helper.setupUser("Daniel");
-		MockWoofResponse response = this.server.send(this.jwt
-				.authorize(user, MockWoofServer.mockRequest("/invoices/domain/" + urlSuffix)).method(HttpMethod.POST));
+		MockWoofResponse response = this.server
+				.send(this.jwt.authorize(user, MockWoofServer.mockRequest("/invoices/domain/" + urlSuffix)).secure(true)
+						.method(HttpMethod.POST));
 
 		// Ensure correct response
 		CreatedInvoice order = response.getJson(200, CreatedInvoice.class);

@@ -62,7 +62,7 @@ public class InitialiseServiceTest {
 
 		// Ensure able to obtain initialisation from configuration
 		MockWoofResponse response = this.server
-				.send(MockWoofServer.mockRequest("/initialise").header("Accept", "application/json"));
+				.send(MockWoofServer.mockRequest("/initialise").secure(true).header("Accept", "application/json"));
 		response.assertJson(200,
 				new Initialisation(true, "MOCK_GOOGLE_CLIENT_ID", "MOCK_PAYPAL_CLIENT_ID", "MOCK_PAYPAL_CURRENCY"));
 	}
@@ -70,7 +70,7 @@ public class InitialiseServiceTest {
 	@Test
 	public void notYetInitialised() throws Exception {
 		MockWoofResponse response = this.server
-				.send(MockWoofServer.mockRequest("/initialise").header("Accept", "application/json"));
+				.send(MockWoofServer.mockRequest("/initialise").secure(true).header("Accept", "application/json"));
 		response.assertJsonError(new HttpException(HttpStatus.NOT_FOUND, "Application not configured"));
 	}
 
@@ -99,7 +99,7 @@ public class InitialiseServiceTest {
 
 			// Ensure initialise from file
 			MockWoofResponse response = this.server
-					.send(MockWoofServer.mockRequest("/initialise").header("Accept", "application/json"));
+					.send(MockWoofServer.mockRequest("/initialise").secure(true).header("Accept", "application/json"));
 			response.assertJson(200,
 					new Initialisation(true, "MOCK_GOOGLE_CLIENT_ID", "MOCK_PAYPAL_CLIENT_ID", "MOCK_PAYPAL_CURRENCY"));
 

@@ -109,7 +109,7 @@ public class PaymentServiceTest {
 		// Send request
 		MockWoofResponse response = this.server
 				.send(this.jwt.authorize(this.user, MockWoofServer.mockRequest("/payments/domain/MOCK_ORDER_ID"))
-						.method(HttpMethod.POST));
+						.secure(true).method(HttpMethod.POST));
 		response.assertJsonError(
 				new net.officefloor.server.http.HttpException(HttpStatus.INTERNAL_SERVER_ERROR, description));
 	}
@@ -182,7 +182,7 @@ public class PaymentServiceTest {
 		// Send request
 		MockWoofResponse response = this.server
 				.send(this.jwt.authorize(this.user, MockWoofServer.mockRequest("/payments/domain/MOCK_ORDER_ID"))
-						.method(HttpMethod.POST));
+						.secure(true).method(HttpMethod.POST));
 
 		// Ensure only one invoice
 		this.objectify.get(Invoice.class, 1, (loader) -> loader);
