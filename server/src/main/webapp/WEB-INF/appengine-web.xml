@@ -8,6 +8,10 @@
 		<min-instances>0</min-instances>
 		<max-concurrent-requests>50</max-concurrent-requests>
 	</automatic-scaling>
+	<system-properties>
+		<property name="server.domain" value="officefloor.appspot.com" />
+		<property name="https.port" value="443" />
+	</system-properties>
 	<!-- <env-variables> <env-var name="initialise_file_path" value="classpath://config/subscription.prod" 
 		/> </env-variables> -->
 </appengine-web-app>
