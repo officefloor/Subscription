@@ -65,8 +65,9 @@ public class ConfigureServiceTest {
 		this.helper.setupAdministration();
 
 		// Ensure can obtain configuration
-		MockWoofResponse response = this.server.send(this.jwt
-				.authorize(user, MockWoofServer.mockRequest("/configuration")).header("Accept", "application/json"));
+		MockWoofResponse response = this.server
+				.send(this.jwt.authorize(user, MockWoofServer.mockRequest("/configuration"))
+						.header("Accept", "application/json").secure(true));
 		response.assertJson(200, new Configuration("MOCK_GOOGLE_CLIENT_ID",
 				new ConfigurationAdministrator[] { new ConfigurationAdministrator("MOCK_ADMIN_1", "MOCK_NOTES_1"),
 						new ConfigurationAdministrator("MOCK_ADMIN_2", "MOCK_NOTES_2") },
@@ -84,11 +85,11 @@ public class ConfigureServiceTest {
 		final String UPDATED_GOOGLE_ID = "CHANGE_GOOGLE_CLIENT_ID";
 		ConfigurationAdministrator[] configurationAdministrators = new ConfigurationAdministrator[] {
 				new ConfigurationAdministrator("CHANGE_ADMIN_1", "CHANGE_NOTES_1") };
-		MockWoofResponse response = this.server.send(this.jwt.authorize(user,
-				MockWoofServer.mockJsonRequest(HttpMethod.POST, "/configuration",
-						new Configuration(UPDATED_GOOGLE_ID, configurationAdministrators, "sandbox",
-								"CHANGE_CLIENT_PAYPAL_ID", "CHANGE_CLIENT_PAYPAL_SECRET",
-								"CHANGE_INVOICE_{id}_{template}", "CHANGE_CURRENCY"))));
+		MockWoofResponse response = this.server.send(this.jwt.authorize(user, MockWoofServer.mockJsonRequest(
+				HttpMethod.POST, "/configuration",
+				new Configuration(UPDATED_GOOGLE_ID, configurationAdministrators, "sandbox", "CHANGE_CLIENT_PAYPAL_ID",
+						"CHANGE_CLIENT_PAYPAL_SECRET", "CHANGE_INVOICE_{id}_{template}", "CHANGE_CURRENCY"))
+				.secure(true)));
 		response.assertJson(200, new Configured(true));
 
 		// Ensure configured
@@ -112,8 +113,9 @@ public class ConfigureServiceTest {
 
 		// Non-admin attempt to get configuration
 		User user = TestHelper.newUser("Daniel");
-		MockWoofResponse response = this.server.send(this.jwt
-				.authorize(user, MockWoofServer.mockRequest("/configuration")).header("Accept", "application/json"));
+		MockWoofResponse response = this.server
+				.send(this.jwt.authorize(user, MockWoofServer.mockRequest("/configuration")).secure(true)
+						.header("Accept", "application/json"));
 		response.assertJsonError(new HttpException(HttpStatus.FORBIDDEN, "Forbidden"));
 	}
 
@@ -127,14 +129,16 @@ public class ConfigureServiceTest {
 
 		// Non-admin attempt to configure
 		User user = TestHelper.newUser("Daniel");
-		MockWoofResponse response = this.server.send(this.jwt.authorize(user, MockWoofServer.mockJsonRequest(
-				HttpMethod.POST, "/configuration",
-				new Configuration("CHANGE_GOOGLE_ID",
-						new ConfigurationAdministrator[] {
-								new ConfigurationAdministrator("CHANGE_ADMIN_1", "CHANGE_NOTES_1"),
-								new ConfigurationAdministrator("CHANGE_ADMIN_2", "CHANGE_NOTES_2") },
-						"changed", "CHANGE_PAYPAL_ID", "CHANGE_PAYPAL_SECRET", "CHANGE_INVOICE_{id}",
-						"CHANGE_CURRENCY"))));
+		MockWoofResponse response = this.server.send(this.jwt.authorize(user, MockWoofServer
+				.mockJsonRequest(
+						HttpMethod.POST, "/configuration",
+						new Configuration("CHANGE_GOOGLE_ID",
+								new ConfigurationAdministrator[] {
+										new ConfigurationAdministrator("CHANGE_ADMIN_1", "CHANGE_NOTES_1"),
+										new ConfigurationAdministrator("CHANGE_ADMIN_2", "CHANGE_NOTES_2") },
+								"changed", "CHANGE_PAYPAL_ID", "CHANGE_PAYPAL_SECRET", "CHANGE_INVOICE_{id}",
+								"CHANGE_CURRENCY"))
+				.secure(true)));
 		response.assertJsonError(new HttpException(HttpStatus.FORBIDDEN, "Forbidden"));
 
 		// Ensure not changed

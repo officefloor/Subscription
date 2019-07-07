@@ -46,7 +46,8 @@ public class DomainServiceTest {
 		User user = this.helper.setupUser("Daniel");
 
 		// Obtain the domains
-		MockWoofResponse response = this.server.send(this.jwt.authorize(user, MockWoofServer.mockRequest("/domains")));
+		MockWoofResponse response = this.server
+				.send(this.jwt.authorize(user, MockWoofServer.mockRequest("/domains")).secure(true));
 		response.assertJson(200, new PaidDomain[0]);
 	}
 
@@ -82,7 +83,8 @@ public class DomainServiceTest {
 		this.objectify.store(domainOfficeFloor, domainActivicy, domainNotReturned);
 
 		// Obtain the domains
-		MockWoofResponse response = this.server.send(this.jwt.authorize(user, MockWoofServer.mockRequest("/domains")));
+		MockWoofResponse response = this.server
+				.send(this.jwt.authorize(user, MockWoofServer.mockRequest("/domains")).secure(true));
 		response.assertJson(200, new PaidDomain[] { new PaidDomain("officefloor.org", toText(expireOfficeFloor)),
 				new PaidDomain("activicy.com", toText(expireActivicy)) });
 	}

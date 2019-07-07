@@ -1,41 +1,44 @@
 <woof>
   <http-continuations>
-    <http-continuation path="/configuration" secure="false" x="916" y="645">
+    <http-continuation path="/" secure="true" x="1016" y="446">
+      <resource path="/index.html"/>
+    </http-continuation>
+    <http-continuation path="/configuration" secure="true" x="916" y="645">
       <section name="Configure" input="getConfiguration"/>
     </http-continuation>
-    <http-continuation path="/configure" secure="false" x="989" y="482">
+    <http-continuation path="/configure" secure="true" x="986" y="495">
       <resource path="/index.html"/>
     </http-continuation>
-    <http-continuation path="/domain/{domainName}" secure="false" x="915" y="538">
+    <http-continuation path="/domain/{domainName}" secure="true" x="912" y="551">
       <resource path="/index.html"/>
     </http-continuation>
-    <http-continuation path="/domains" secure="false" x="158" y="493">
+    <http-continuation path="/domains" secure="true" x="158" y="493">
       <section name="Domain" input="getDomains"/>
     </http-continuation>
-    <http-continuation path="/initialise" secure="false" x="930" y="793">
+    <http-continuation path="/initialise" secure="true" x="930" y="793">
       <section name="Initialise" input="getInitialisation"/>
     </http-continuation>
-    <http-continuation path="/subscriptions/domain/{domainName}" secure="false" x="55" y="624">
+    <http-continuation path="/subscriptions/domain/{domainName}" secure="true" x="55" y="624">
       <section name="Subsciption" input="getDomainPayments"/>
     </http-continuation>
   </http-continuations>
   <http-inputs>
-    <http-input path="{path}" method="OPTIONS" secure="false" x="937" y="371">
+    <http-input path="{path}" method="OPTIONS" secure="true" x="937" y="371">
       <section name="Cors" input="options"/>
     </http-input>
-    <http-input path="/authenticate" method="POST" secure="false" x="127" y="67">
+    <http-input path="/authenticate" method="POST" secure="true" x="127" y="67">
       <section name="Authenticate" input="authenticate"/>
     </http-input>
-    <http-input path="/configuration" method="POST" secure="false" x="896" y="691">
+    <http-input path="/configuration" method="POST" secure="true" x="896" y="691">
       <section name="Configure" input="updateConfiguration"/>
     </http-input>
-    <http-input path="/invoices/domain/{domain}" method="POST" secure="false" x="81" y="216">
+    <http-input path="/invoices/domain/{domain}" method="POST" secure="true" x="81" y="216">
       <section name="Invoice" input="createInvoice"/>
     </http-input>
-    <http-input path="/payments/domain/{orderId}" method="POST" secure="false" x="61" y="338">
+    <http-input path="/payments/domain/{orderId}" method="POST" secure="true" x="61" y="338">
       <section name="Payment" input="capturePayment"/>
     </http-input>
-    <http-input path="/refreshAccessToken" method="POST" secure="false" x="104" y="126">
+    <http-input path="/refreshAccessToken" method="POST" secure="true" x="104" y="126">
       <section name="Authenticate" input="refreshAccessToken"/>
     </http-input>
   </http-inputs>
@@ -127,7 +130,7 @@
   <governances>
   </governances>
   <resources>
-    <resource path="/index.html" x="1187" y="506"/>
+    <resource path="/index.html" x="1184" y="485"/>
   </resources>
   <exceptions>
   </exceptions>
