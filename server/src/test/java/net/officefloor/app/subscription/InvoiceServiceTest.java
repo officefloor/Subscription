@@ -159,7 +159,7 @@ public class InvoiceServiceTest {
 			List<PurchaseUnitRequest> purchaseUnits = order.purchaseUnits();
 			assertEquals("Should be one domain purchased", 1, purchaseUnits.size());
 			PurchaseUnitRequest purchase = purchaseUnits.get(0);
-			assertEquals("OfficeFloor domain subscription officefloor.org", purchase.description());
+			assertEquals("OfficeFloor 12 month subscription for officefloor.org", purchase.description());
 			assertEquals("OfficeFloor domain", purchase.softDescriptor());
 			assertTrue("PayPal invoice ID: " + purchase.invoiceId(),
 					purchase.invoiceId().matches("^MOCK_PAYPAL_INVOICE_\\d+$"));
@@ -172,7 +172,7 @@ public class InvoiceServiceTest {
 			assertEquals("Incorrect number of purchase items", isRestart ? 2 : 1, purchase.items().size());
 			Item item = purchase.items().get(0);
 			assertEquals("Subscription", item.name());
-			assertEquals("Domain subscription officefloor.org", item.description());
+			assertEquals("12 month subscription for officefloor.org", item.description());
 			assertEquals("4.54", item.unitAmount().value());
 			assertEquals(currency, item.unitAmount().currencyCode());
 			assertEquals("0.46", item.tax().value());
