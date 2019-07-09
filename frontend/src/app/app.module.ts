@@ -20,7 +20,8 @@ import { AuthenticationService } from './authentication.service'
 import { AlertComponent } from './alert/alert.component'
 import { RegisterComponent } from './register/register.component'
 import { MatSortModule } from '@angular/material'
-import { MatLinkPreviewModule } from '@angular-material-extensions/link-preview'
+import { MatLinkPreviewModule } from '@angular-material-extensions/link-preview';
+import { TermsConditionsPrivacyComponent } from './terms-conditions-privacy/terms-conditions-privacy.component'
 
 /**
  * Override initialise to enable loading configuration form server.
@@ -61,6 +62,7 @@ export function provideAuthServiceConfig( initialiseService: InitialiseService )
         DomainComponent,
         AlertComponent,
         RegisterComponent,
+        TermsConditionsPrivacyComponent,
     ],
     imports: [
         BrowserModule,

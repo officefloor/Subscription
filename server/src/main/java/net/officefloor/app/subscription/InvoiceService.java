@@ -121,7 +121,7 @@ public class InvoiceService {
 
 		// Load the items
 		List<Item> items = new ArrayList<>(2);
-		items.add(new Item().name("Subscription").description("Domain subscription " + domainName)
+		items.add(new Item().name("Subscription").description("12 month subscription for " + domainName)
 				.unitAmount(newMoney.apply(SUBSCRIPTION_VALUE)).tax(newMoney.apply(SUBSCRIPTION_TAX)).quantity("1")
 				.category("DIGITAL_GOODS").url("http://" + domainName));
 		if (isRestart) {
@@ -137,7 +137,7 @@ public class InvoiceService {
 								new ApplicationContext().shippingPreference("NO_SHIPPING").userAction("PAY_NOW"))
 						.purchaseUnits(Arrays.asList(new PurchaseUnitRequest()
 								.invoiceId(paypalInvoiceId).description(
-										"OfficeFloor domain subscription " + domainName)
+										"OfficeFloor 12 month subscription for " + domainName)
 								.softDescriptor("OfficeFloor domain")
 								.amount(new AmountWithBreakdown()
 										.value(amount.apply(SUBSCRIPTION_VALUE
