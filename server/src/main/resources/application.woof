@@ -21,6 +21,9 @@
     <http-continuation path="/subscriptions/domain/{domainName}" secure="true" x="55" y="624">
       <section name="Subsciption" input="getDomainPayments"/>
     </http-continuation>
+    <http-continuation path="/terms_conditions_privacy" secure="true" x="893" y="590">
+      <resource path="/index.html"/>
+    </http-continuation>
   </http-continuations>
   <http-inputs>
     <http-input path="{path}" method="OPTIONS" secure="true" x="937" y="371">
