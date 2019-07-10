@@ -29,7 +29,7 @@ H 2 * * *
 	        steps {
 	        	sh 'mvn -version'
 	        	echo "JAVA_HOME = ${env.JAVA_HOME}"
-	        	sh 'mvn clean install site'
+	        	sh 'mvn clean install'
 	        }
 		    post {
 			    always {
@@ -45,7 +45,7 @@ H 2 * * *
    		always {
             script {
    				if (currentBuild.result != 'ABORTED') {
-	    			emailext to: "${RESULTS_EMAIL}", replyTo: "${REPLY_TO_EMAIL}", subject: 'OoFunImpRct ${BUILD_STATUS}! (${BRANCH_NAME} ${BUILD_NUMBER})', body: '''
+	    			emailext to: "${RESULTS_EMAIL}", replyTo: "${REPLY_TO_EMAIL}", subject: 'Subscription ${BUILD_STATUS}! (${BRANCH_NAME} ${BUILD_NUMBER})', body: '''
 ${PROJECT_NAME} - ${BUILD_NUMBER} - ${BUILD_STATUS}
 
 Tests:
