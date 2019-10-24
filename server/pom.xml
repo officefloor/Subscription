@@ -17,7 +17,7 @@
 	<packaging>war</packaging>
 
 	<properties>
-		<google.appengine.version>2.1.0</google.appengine.version>
+		<google.appengine.version>2.2.0</google.appengine.version>
 	</properties>
 
 	<dependencies>
