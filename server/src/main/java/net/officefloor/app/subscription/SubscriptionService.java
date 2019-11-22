@@ -32,8 +32,6 @@ import net.officefloor.app.subscription.SubscriptionCalculator.Subscription;
 import net.officefloor.app.subscription.store.Domain;
 import net.officefloor.app.subscription.store.Payment;
 import net.officefloor.app.subscription.store.User;
-import net.officefloor.plugin.managedfunction.clazz.NonFunctionMethod;
-import net.officefloor.plugin.section.clazz.Next;
 import net.officefloor.plugin.section.clazz.Parameter;
 import net.officefloor.server.http.HttpException;
 import net.officefloor.server.http.HttpStatus;
@@ -68,7 +66,6 @@ public class SubscriptionService {
 		private Integer paymentAmount;
 	}
 
-	@Next("UsePayments")
 	public static Payment[] getDomainPayments(User user, @HttpPathParameter(DOMAIN_PATH_PARAMETER) String domainName,
 			Objectify objectify) throws IOException {
 
@@ -103,7 +100,6 @@ public class SubscriptionService {
 		return payments.toArray(new Payment[payments.size()]);
 	}
 
-	@NonFunctionMethod
 	public static DomainPayments translateToDomainPayments(@Parameter Subscription[] subscriptions) {
 
 		// Create domain payments from subscriptions

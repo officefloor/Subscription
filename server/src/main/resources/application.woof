@@ -4,7 +4,7 @@
       <resource path="/index.html"/>
     </http-continuation>
     <http-continuation path="/configuration" secure="true" x="916" y="645">
-      <section name="Configure" input="getConfiguration"/>
+      <procedure name="getConfiguration"/>
     </http-continuation>
     <http-continuation path="/configure" secure="true" x="986" y="495">
       <resource path="/index.html"/>
@@ -13,13 +13,13 @@
       <resource path="/index.html"/>
     </http-continuation>
     <http-continuation path="/domains" secure="true" x="158" y="493">
-      <section name="Domain" input="getDomains"/>
+      <procedure name="getDomains"/>
     </http-continuation>
     <http-continuation path="/initialise" secure="true" x="930" y="793">
-      <section name="Initialise" input="getInitialisation"/>
+      <procedure name="getInitialisation"/>
     </http-continuation>
     <http-continuation path="/subscriptions/domain/{domainName}" secure="true" x="55" y="624">
-      <section name="Subsciption" input="getDomainPayments"/>
+      <procedure name="getDomainPayments"/>
     </http-continuation>
     <http-continuation path="/terms_conditions_privacy" secure="true" x="893" y="590">
       <resource path="/index.html"/>
@@ -27,89 +27,107 @@
   </http-continuations>
   <http-inputs>
     <http-input path="{path}" method="OPTIONS" secure="true" x="937" y="371">
-      <section name="Cors" input="options"/>
+      <procedure name="options"/>
     </http-input>
     <http-input path="/authenticate" method="POST" secure="true" x="127" y="67">
-      <section name="Authenticate" input="authenticate"/>
+      <procedure name="authenticate"/>
     </http-input>
     <http-input path="/configuration" method="POST" secure="true" x="896" y="691">
-      <section name="Configure" input="updateConfiguration"/>
+      <procedure name="updateConfiguration"/>
     </http-input>
     <http-input path="/invoices/domain/{domain}" method="POST" secure="true" x="81" y="216">
-      <section name="Invoice" input="createInvoice"/>
+      <procedure name="createInvoice"/>
     </http-input>
-    <http-input path="/payments/domain/{orderId}" method="POST" secure="true" x="61" y="338">
-      <section name="Payment" input="capturePayment"/>
+    <http-input path="/payments/domain/{orderId}" method="POST" secure="true" x="64" y="286">
+      <procedure name="capturePayment"/>
     </http-input>
     <http-input path="/refreshAccessToken" method="POST" secure="true" x="104" y="126">
-      <section name="Authenticate" input="refreshAccessToken"/>
+      <procedure name="refreshAccessToken"/>
     </http-input>
   </http-inputs>
   <templates>
   </templates>
   <sections>
-    <section name="Authenticate" source="net.officefloor.plugin.section.clazz.ClassSectionSource" location="net.officefloor.app.subscription.AuthenticateService" x="443" y="65">
-      <input name="authenticate" parameter-type=""/>
-      <input name="refreshAccessToken" parameter-type=""/>
-    </section>
-    <section name="Configure" source="net.officefloor.plugin.section.clazz.ClassSectionSource" location="net.officefloor.app.subscription.ConfigureService" x="1170" y="646">
-      <input name="getConfiguration" parameter-type=""/>
-      <input name="updateConfiguration" parameter-type=""/>
-    </section>
-    <section name="Cors" source="net.officefloor.plugin.section.clazz.ClassSectionSource" location="net.officefloor.app.subscription.cors.Cors" x="1188" y="355">
-      <input name="options" parameter-type=""/>
-    </section>
-    <section name="Domain" source="net.officefloor.plugin.section.clazz.ClassSectionSource" location="net.officefloor.app.subscription.DomainService" x="426" y="471">
-      <input name="getDomains" parameter-type=""/>
-      <input name="updateDomain" parameter-type="[Lnet.officefloor.app.subscription.SubscriptionCalculator$Subscription;"/>
-      <output name="DomainUpdated" argument-type="[Lnet.officefloor.app.subscription.SubscriptionCalculator$Subscription;">
-        <section name="Payment" input="sendPayment"/>
-      </output>
-    </section>
-    <section name="ExpiryCalculator" source="net.officefloor.plugin.section.clazz.ClassSectionSource" location="net.officefloor.app.subscription.SubscriptionCalculator" x="496" y="404">
-      <input name="calculateSubscriptions" parameter-type="[Lnet.officefloor.app.subscription.store.Payment;"/>
-      <output name="Subscription" argument-type="[Lnet.officefloor.app.subscription.SubscriptionCalculator$Subscription;">
-        <section name="Domain" input="updateDomain"/>
-      </output>
-    </section>
-    <section name="Initialise" source="net.officefloor.plugin.section.clazz.ClassSectionSource" location="net.officefloor.app.subscription.InitialiseService" x="1172" y="779">
-      <input name="getInitialisation" parameter-type=""/>
-    </section>
-    <section name="Invoice" source="net.officefloor.plugin.section.clazz.ClassSectionSource" location="net.officefloor.app.subscription.InvoiceService" x="450" y="194">
-      <input name="createInvoice" parameter-type=""/>
-    </section>
     <section name="JwtChallenge" source="net.officefloor.web.jwt.DefaultJwtChallengeSectionSource" location="" x="1180" y="34">
       <input name="EXPIRED_JWT" parameter-type=""/>
       <input name="INVALID_JWT" parameter-type=""/>
       <input name="NO_JWT" parameter-type=""/>
     </section>
-    <section name="Payment" source="net.officefloor.plugin.section.clazz.ClassSectionSource" location="net.officefloor.app.subscription.PaymentService" x="434" y="317">
-      <input name="capturePayment" parameter-type=""/>
-      <input name="sendPayment" parameter-type="[Lnet.officefloor.app.subscription.SubscriptionCalculator$Subscription;"/>
-      <output name="UpdateDomain" argument-type="[Lnet.officefloor.app.subscription.store.Payment;">
-        <section name="ExpiryCalculator" input="calculateSubscriptions"/>
-      </output>
-    </section>
     <section name="RetrieveKeys" source="net.officefloor.web.jwt.authority.combined.CombinedServerRetrieveValidateKeysSectionSource" location="" x="1186" y="155">
       <input name="retrieveKeys" parameter-type="net.officefloor.web.jwt.validate.JwtValidateKeyCollector"/>
     </section>
-    <section name="RetrieveRoles" source="net.officefloor.plugin.section.clazz.ClassSectionSource" location="net.officefloor.app.subscription.jwt.RetrieveRoles" x="1189" y="232">
-      <input name="retrieveRoles" parameter-type="net.officefloor.web.jwt.role.JwtRoleCollector"/>
-    </section>
-    <section name="Subsciption" source="net.officefloor.plugin.section.clazz.ClassSectionSource" location="net.officefloor.app.subscription.SubscriptionService" x="426" y="602">
-      <input name="getDomainPayments" parameter-type=""/>
-      <input name="sendSubscriptions" parameter-type="[Lnet.officefloor.app.subscription.SubscriptionCalculator$Subscription;"/>
-      <output name="UsePayments" argument-type="[Lnet.officefloor.app.subscription.store.Payment;">
-        <section name="SubscriptionCalculcator" input="calculateSubscriptions"/>
-      </output>
-    </section>
-    <section name="SubscriptionCalculcator" source="net.officefloor.plugin.section.clazz.ClassSectionSource" location="net.officefloor.app.subscription.SubscriptionCalculator" x="498" y="724">
-      <input name="calculateSubscriptions" parameter-type="[Lnet.officefloor.app.subscription.store.Payment;"/>
-      <output name="Subscription" argument-type="[Lnet.officefloor.app.subscription.SubscriptionCalculator$Subscription;">
-        <section name="Subsciption" input="sendSubscriptions"/>
-      </output>
-    </section>
   </sections>
+  <procedures>
+    <procedure name="authenticate" resource="net.officefloor.app.subscription.AuthenticateService" source="Class" procedure="authenticate" x="357" y="63">
+      <next argument-type="">
+      </next>
+    </procedure>
+    <procedure name="calculateSubscriptionsForPayment" resource="net.officefloor.app.subscription.SubscriptionCalculator" source="Class" procedure="calculateSubscriptions" x="419" y="324">
+      <next argument-type="[Lnet.officefloor.app.subscription.SubscriptionCalculator$Subscription;">
+        <procedure name="updateDomain"/>
+      </next>
+    </procedure>
+    <procedure name="calculateSubscriptionsForDisplay" resource="net.officefloor.app.subscription.SubscriptionCalculator" source="Class" procedure="calculateSubscriptions" x="427" y="667">
+      <next argument-type="[Lnet.officefloor.app.subscription.SubscriptionCalculator$Subscription;">
+        <procedure name="sendSubscriptions"/>
+      </next>
+    </procedure>
+    <procedure name="capturePayment" resource="net.officefloor.app.subscription.PaymentService" source="Class" procedure="capturePayment" x="383" y="280">
+      <next argument-type="[Lnet.officefloor.app.subscription.store.Payment;">
+        <procedure name="calculateSubscriptionsForPayment"/>
+      </next>
+    </procedure>
+    <procedure name="createInvoice" resource="net.officefloor.app.subscription.InvoiceService" source="Class" procedure="createInvoice" x="386" y="210">
+      <next argument-type="">
+      </next>
+    </procedure>
+    <procedure name="getConfiguration" resource="net.officefloor.app.subscription.ConfigureService" source="Class" procedure="getConfiguration" x="1107" y="640">
+      <next argument-type="">
+      </next>
+    </procedure>
+    <procedure name="getDomainPayments" resource="net.officefloor.app.subscription.SubscriptionService" source="Class" procedure="getDomainPayments" x="398" y="618">
+      <next argument-type="[Lnet.officefloor.app.subscription.store.Payment;">
+        <procedure name="calculateSubscriptionsForDisplay"/>
+      </next>
+    </procedure>
+    <procedure name="getDomains" resource="net.officefloor.app.subscription.DomainService" source="Class" procedure="getDomains" x="293" y="483">
+      <next argument-type="">
+      </next>
+    </procedure>
+    <procedure name="getInitialisation" resource="net.officefloor.app.subscription.InitialiseService" source="Class" procedure="getInitialisation" x="1070" y="788">
+      <next argument-type="">
+      </next>
+    </procedure>
+    <procedure name="options" resource="net.officefloor.app.subscription.cors.Cors" source="Class" procedure="options" x="1122" y="362">
+      <next argument-type="">
+      </next>
+    </procedure>
+    <procedure name="refreshAccessToken" resource="net.officefloor.app.subscription.AuthenticateService" source="Class" procedure="refreshAccessToken" x="363" y="121">
+      <next argument-type="">
+      </next>
+    </procedure>
+    <procedure name="retrieveRoles" resource="net.officefloor.app.subscription.jwt.RetrieveRoles" source="Class" procedure="retrieveRoles" x="1188" y="226">
+      <next argument-type="">
+      </next>
+    </procedure>
+    <procedure name="sendPayment" resource="net.officefloor.app.subscription.PaymentService" source="Class" procedure="sendPayment" x="508" y="411">
+      <next argument-type="">
+      </next>
+    </procedure>
+    <procedure name="sendSubscriptions" resource="net.officefloor.app.subscription.SubscriptionService" source="Class" procedure="sendSubscriptions" x="478" y="717">
+      <next argument-type="">
+      </next>
+    </procedure>
+    <procedure name="updateConfiguration" resource="net.officefloor.app.subscription.ConfigureService" source="Class" procedure="updateConfiguration" x="1103" y="693">
+      <next argument-type="">
+      </next>
+    </procedure>
+    <procedure name="updateDomain" resource="net.officefloor.app.subscription.DomainService" source="Class" procedure="updateDomain" x="460" y="370">
+      <next argument-type="[Lnet.officefloor.app.subscription.SubscriptionCalculator$Subscription;">
+        <procedure name="sendPayment"/>
+      </next>
+    </procedure>
+  </procedures>
   <securities>
     <security name="JWT" source="net.officefloor.web.jwt.JwtHttpSecuritySource" timeout="5000" x="951" y="36">
       <property name="claims.class" value="net.officefloor.app.subscription.store.User"/>
@@ -126,7 +144,7 @@
         <section name="RetrieveKeys" input="retrieveKeys"/>
       </output>
       <output name="RETRIEVE_ROLES" argument-type="net.officefloor.web.jwt.role.JwtRoleCollector">
-        <section name="RetrieveRoles" input="retrieveRoles"/>
+        <procedure name="retrieveRoles"/>
       </output>
     </security>
   </securities>

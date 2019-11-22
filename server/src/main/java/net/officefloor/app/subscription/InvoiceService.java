@@ -123,32 +123,30 @@ public class InvoiceService {
 		List<Item> items = new ArrayList<>(2);
 		items.add(new Item().name("Subscription").description("12 month subscription for " + domainName)
 				.unitAmount(newMoney.apply(SUBSCRIPTION_VALUE)).tax(newMoney.apply(SUBSCRIPTION_TAX)).quantity("1")
-				.category("DIGITAL_GOODS").url("http://" + domainName));
+				.category("DIGITAL_GOODS"));
 		if (isRestart) {
-			items.add(new Item().name("Restart").description("Restart domain subscription")
+			items.add(new Item().name("Restart").description("Restart domain subscription for " + domainName)
 					.unitAmount(newMoney.apply(RESTART_VALUE)).tax(newMoney.apply(RESTART_TAX)).quantity("1")
-					.category("DIGITAL_GOODS").url("http://" + domainName));
+					.category("DIGITAL_GOODS"));
 		}
 
 		// Create order for the domain
-		HttpResponse<Order> orderResponse = paypal
-				.execute(new OrdersCreateRequest().requestBody(new OrderRequest().intent("CAPTURE")
-						.applicationContext(
-								new ApplicationContext().shippingPreference("NO_SHIPPING").userAction("PAY_NOW"))
-						.purchaseUnits(Arrays.asList(new PurchaseUnitRequest()
-								.invoiceId(paypalInvoiceId).description(
-										"OfficeFloor 12 month subscription for " + domainName)
-								.softDescriptor("OfficeFloor domain")
-								.amount(new AmountWithBreakdown()
-										.value(amount.apply(SUBSCRIPTION_VALUE
-												+ SUBSCRIPTION_TAX + (isRestart ? RESTART_VALUE + RESTART_TAX : 0)))
-										.currencyCode(currency)
-										.breakdown(new AmountBreakdown()
-												.itemTotal(newMoney
-														.apply(SUBSCRIPTION_VALUE + (isRestart ? RESTART_VALUE : 0)))
-												.taxTotal(newMoney
-														.apply(SUBSCRIPTION_TAX + (isRestart ? RESTART_TAX : 0)))))
-								.items(items)))));
+		HttpResponse<Order> orderResponse = paypal.execute(new OrdersCreateRequest().requestBody(new OrderRequest()
+				.checkoutPaymentIntent("CAPTURE")
+				.applicationContext(new ApplicationContext().shippingPreference("NO_SHIPPING").userAction("PAY_NOW"))
+				.purchaseUnits(Arrays.asList(new PurchaseUnitRequest()
+						.invoiceId(
+								paypalInvoiceId)
+						.description("OfficeFloor 12 month subscription for " + domainName)
+						.softDescriptor("OfficeFloor domain")
+						.amountWithBreakdown(new AmountWithBreakdown()
+								.value(amount.apply(SUBSCRIPTION_VALUE
+										+ SUBSCRIPTION_TAX + (isRestart ? RESTART_VALUE + RESTART_TAX : 0)))
+								.currencyCode(currency)
+								.amountBreakdown(new AmountBreakdown()
+										.itemTotal(newMoney.apply(SUBSCRIPTION_VALUE + (isRestart ? RESTART_VALUE : 0)))
+										.taxTotal(newMoney.apply(SUBSCRIPTION_TAX + (isRestart ? RESTART_TAX : 0)))))
+						.items(items)))));
 		Order order = orderResponse.result();
 
 		// Update the invoice with the order
