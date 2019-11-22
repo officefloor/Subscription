@@ -63,7 +63,6 @@ public class SubscriptionCalculator {
 		private ZonedDateTime extendsToDate = null;
 	}
 
-	@Next("Subscription")
 	public static Subscription[] calculateSubscriptions(User user, @Parameter Payment... payments) {
 
 		// Ensure have payments

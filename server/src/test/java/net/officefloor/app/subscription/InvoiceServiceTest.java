@@ -146,13 +146,10 @@ public class InvoiceServiceTest {
 		Administration admin = this.helper.setupAdministration();
 		String currency = admin.getPaypalCurrency();
 
-		// Obtain domain URL
-		String domainUrl = "http://" + urlSuffix.split("\\?")[0];
-
 		// Record
 		this.payPal.addOrdersCreateResponse(new Order().id("MOCK_ORDER_ID").status("CREATED")).validate((request) -> {
 			OrderRequest order = (OrderRequest) request.requestBody();
-			assertEquals("CAPTURE", order.intent());
+			assertEquals("CAPTURE", order.checkoutPaymentIntent());
 			ApplicationContext appContext = order.applicationContext();
 			assertEquals("NO_SHIPPING", appContext.shippingPreference());
 			assertEquals("PAY_NOW", appContext.userAction());
@@ -163,12 +160,14 @@ public class InvoiceServiceTest {
 			assertEquals("OfficeFloor domain", purchase.softDescriptor());
 			assertTrue("PayPal invoice ID: " + purchase.invoiceId(),
 					purchase.invoiceId().matches("^MOCK_PAYPAL_INVOICE_\\d+$"));
-			assertEquals(isRestart ? "25.00" : "5.00", purchase.amount().value());
-			assertEquals(currency, purchase.amount().currencyCode());
-			assertEquals(isRestart ? "22.72" : "4.54", purchase.amount().breakdown().itemTotal().value());
-			assertEquals(currency, purchase.amount().breakdown().itemTotal().currencyCode());
-			assertEquals(isRestart ? "2.28" : "0.46", purchase.amount().breakdown().taxTotal().value());
-			assertEquals(currency, purchase.amount().breakdown().taxTotal().currencyCode());
+			assertEquals(isRestart ? "25.00" : "5.00", purchase.amountWithBreakdown().value());
+			assertEquals(currency, purchase.amountWithBreakdown().currencyCode());
+			assertEquals(isRestart ? "22.72" : "4.54",
+					purchase.amountWithBreakdown().amountBreakdown().itemTotal().value());
+			assertEquals(currency, purchase.amountWithBreakdown().amountBreakdown().itemTotal().currencyCode());
+			assertEquals(isRestart ? "2.28" : "0.46",
+					purchase.amountWithBreakdown().amountBreakdown().taxTotal().value());
+			assertEquals(currency, purchase.amountWithBreakdown().amountBreakdown().taxTotal().currencyCode());
 			assertEquals("Incorrect number of purchase items", isRestart ? 2 : 1, purchase.items().size());
 			Item item = purchase.items().get(0);
 			assertEquals("Subscription", item.name());
@@ -179,18 +178,16 @@ public class InvoiceServiceTest {
 			assertEquals(currency, item.tax().currencyCode());
 			assertEquals("1", item.quantity());
 			assertEquals("DIGITAL_GOODS", item.category());
-			assertEquals(domainUrl, item.url());
 			if (isRestart) {
 				item = purchase.items().get(1);
 				assertEquals("Restart", item.name());
-				assertEquals("Restart domain subscription", item.description());
+				assertEquals("Restart domain subscription for officefloor.org", item.description());
 				assertEquals("18.18", item.unitAmount().value());
 				assertEquals(currency, item.unitAmount().currencyCode());
 				assertEquals("1.82", item.tax().value());
 				assertEquals(currency, item.tax().currencyCode());
 				assertEquals("1", item.quantity());
 				assertEquals("DIGITAL_GOODS", item.category());
-				assertEquals(domainUrl, item.url());
 			}
 		});
 

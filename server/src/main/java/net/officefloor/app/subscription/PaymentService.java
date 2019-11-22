@@ -55,7 +55,6 @@ public class PaymentService {
 
 	private static ObjectMapper mapper = new ObjectMapper();
 
-	@Next("UpdateDomain")
 	public static Payment[] capturePayment(User user, @HttpPathParameter("orderId") String orderId, Objectify objectify,
 			PayPalHttpClient paypal) throws IOException {
 
