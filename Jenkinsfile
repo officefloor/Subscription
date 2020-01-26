@@ -1,6 +1,10 @@
 pipeline {
 	agent any
     
+    parameters {
+        choice(name: 'BUILD_TYPE', choices: [ 'TEST', 'DEPLOY' ], description: 'Indicates what type of build')
+    }
+    
     environment {
         RESULTS_EMAIL = credentials('results-email')
         REPLY_TO_EMAIL = credentials('reply-to-email')
@@ -8,7 +12,7 @@ pipeline {
     
     triggers {
         parameterizedCron('''
-H 2 * * * 
+H 2 * * * %BUILD_TYPE=TEST
 ''')
     }
     
@@ -24,6 +28,14 @@ H 2 * * *
 	}
 	
 	stages {
+
+		stage('Set build name') {
+			steps {
+				script {
+				    currentBuild.displayName = "#${BUILD_NUMBER} (${params.BUILD_TYPE})"
+				}
+			}
+		}
 	
 		stage('Build') {
 	        steps {
@@ -38,6 +50,20 @@ H 2 * * *
 			    }
 		    }
 		}
+
+	    stage('Deploy') {
+			when {
+				allOf {
+					expression { params.BUILD_TYPE == 'DEPLOY' }
+    				branch 'master'
+				}
+			}
+	        steps {
+	        	dir('server') {
+					sh 'mvn appengine:deploy'
+	        	}
+	        }
+	    } 
 
 	}
 	
