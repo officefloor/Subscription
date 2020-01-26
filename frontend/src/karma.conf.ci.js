@@ -8,9 +8,9 @@ module.exports = function(config) {
 	config.set({
 		singleRun : true,
 		autoWatch : false,
-		browsers : [ 'PhantomJS' ],
+		browsers : [ 'ChromeHeadless' ],
 		plugins : [ require('karma-jasmine'),
-				require('karma-phantomjs-launcher'),
+				require('karma-chrome-launcher'),
 				require('karma-coverage-istanbul-reporter'),
 				require('@angular-devkit/build-angular/plugins/karma') ],
 		reporters : [ 'progress' ],
