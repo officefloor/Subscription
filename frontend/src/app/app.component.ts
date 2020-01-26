@@ -1,6 +1,7 @@
 import { Component, OnInit } from '@angular/core'
 import { SocialUser } from 'angularx-social-login'
 import { AuthenticationService } from './authentication.service'
+import { Router, RoutesRecognized } from '@angular/router'
 
 @Component( {
     selector: 'app-root',
@@ -13,8 +14,11 @@ export class AppComponent implements OnInit {
 
     user: SocialUser = null
 
+    isSecure: boolean = true
+
     constructor(
-        private authenticationService: AuthenticationService
+        private authenticationService: AuthenticationService,
+		private router: Router
     ) { }
 
     ngOnInit(): void {
@@ -27,6 +31,14 @@ export class AppComponent implements OnInit {
 
         // Initialise authentication
         this.authenticationService.initialise().subscribe()
+
+		// Listen to routing to provide indicating if secure page
+		this.router.events.subscribe(event => {
+			if (event instanceof RoutesRecognized) {
+				const route = event.state.root.firstChild
+				this.isSecure = !route.data['insecure']
+			}
+		})
     }
 
 }

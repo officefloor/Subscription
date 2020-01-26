@@ -29,8 +29,8 @@ import org.junit.Rule;
 import org.junit.Test;
 import org.junit.rules.RuleChain;
 
-import com.braintreepayments.http.exceptions.HttpException;
 import com.googlecode.objectify.Ref;
+import com.paypal.http.exceptions.HttpException;
 import com.paypal.orders.Capture;
 import com.paypal.orders.Money;
 import com.paypal.orders.Order;

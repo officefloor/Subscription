@@ -8,7 +8,7 @@ import { TermsConditionsPrivacyComponent } from './terms-conditions-privacy/term
 const routes: Routes = [
     { path: 'configure', component: ConfigureComponent },
     { path: 'domain/:domain', component: DomainComponent },
-    { path: 'terms_conditions_privacy', component: TermsConditionsPrivacyComponent },
+    { path: 'terms_conditions_privacy', component: TermsConditionsPrivacyComponent, data: { insecure: true } },
     { path: '', component: MainComponent }
 ];
 

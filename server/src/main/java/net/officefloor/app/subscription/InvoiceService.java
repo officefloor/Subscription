@@ -25,10 +25,10 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.function.Function;
 
-import com.braintreepayments.http.HttpResponse;
 import com.googlecode.objectify.Objectify;
 import com.googlecode.objectify.Ref;
 import com.paypal.core.PayPalHttpClient;
+import com.paypal.http.HttpResponse;
 import com.paypal.orders.AmountBreakdown;
 import com.paypal.orders.AmountWithBreakdown;
 import com.paypal.orders.ApplicationContext;

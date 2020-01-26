@@ -24,10 +24,10 @@
 	</div>
 </div>
 <div [hidden]="!isInitialised" class="ready">
-	<div [hidden]="!user" class="container" class="content">
+	<div [hidden]="!user && isSecure" class="container" class="content">
 		<router-outlet></router-outlet>
 	</div>
-	<div [hidden]="user" class="container" class="login-content">
+	<div [hidden]="user || !isSecure" class="container" class="login-content">
 		<p>Welcome to OfficeFloor subscription</p>
 		<div>
 			Please
