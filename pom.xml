@@ -56,13 +56,14 @@
 	<properties>
 		<maven.compiler.source>1.8</maven.compiler.source>
 		<maven.compiler.target>1.8</maven.compiler.target>
+		<officefloor.version>3.19.0</officefloor.version>
 	</properties>
 	<dependencyManagement>
 		<dependencies>
 			<dependency>
 				<groupId>net.officefloor</groupId>
 				<artifactId>bom</artifactId>
-				<version>3.19.0</version>
+				<version>${officefloor.version}</version>
 				<type>pom</type>
 				<scope>import</scope>
 			</dependency>
