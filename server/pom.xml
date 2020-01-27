@@ -98,12 +98,31 @@
 				</executions>
 			</plugin>
 			<plugin>
+				<groupId>org.codehaus.mojo</groupId>
+				<artifactId>build-helper-maven-plugin</artifactId>
+				<version>3.0.0</version>
+				<executions>
+					<execution>
+						<id>provide-app-version</id>
+						<goals>
+							<goal>regex-property</goal>
+						</goals>
+						<configuration>
+							<name>subscription.version</name>
+							<value>${officefloor.version}</value>
+							<regex>\.</regex>
+							<replacement>-</replacement>
+						</configuration>
+					</execution>
+				</executions>
+			</plugin>
+			<plugin>
 				<groupId>com.google.cloud.tools</groupId>
 				<artifactId>appengine-maven-plugin</artifactId>
 				<version>${google.appengine.version}</version>
 				<configuration>
 					<deploy.projectId>officefloor</deploy.projectId>
-					<deploy.version>${officefloor.version}</deploy.version>
+					<deploy.version>${subscription.version}</deploy.version>
 				</configuration>
 			</plugin>
 		</plugins>

@@ -60,7 +60,7 @@ H 2 * * * %BUILD_TYPE=TEST
 			}
 	        steps {
 	        	dir('server') {
-					sh 'mvn appengine:deploy'
+					sh 'mvn validate appengine:deploy'
 	        	}
 	        }
 	    } 
