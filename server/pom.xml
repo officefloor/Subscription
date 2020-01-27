@@ -103,7 +103,7 @@
 				<version>${google.appengine.version}</version>
 				<configuration>
 					<deploy.projectId>officefloor</deploy.projectId>
-					<deploy.version>1</deploy.version>
+					<deploy.version>${officefloor.version}</deploy.version>
 				</configuration>
 			</plugin>
 		</plugins>
