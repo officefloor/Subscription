@@ -29,7 +29,6 @@ import lombok.Value;
 import net.officefloor.app.subscription.SubscriptionService.DomainPayments;
 import net.officefloor.app.subscription.store.Payment;
 import net.officefloor.app.subscription.store.User;
-import net.officefloor.plugin.section.clazz.Next;
 import net.officefloor.plugin.section.clazz.Parameter;
 
 /**

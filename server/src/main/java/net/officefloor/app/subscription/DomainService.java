@@ -16,7 +16,6 @@ import net.officefloor.app.subscription.SubscriptionCalculator.Subscription;
 import net.officefloor.app.subscription.store.Domain;
 import net.officefloor.app.subscription.store.Payment;
 import net.officefloor.app.subscription.store.User;
-import net.officefloor.plugin.section.clazz.Next;
 import net.officefloor.plugin.section.clazz.Parameter;
 import net.officefloor.web.ObjectResponse;
 
