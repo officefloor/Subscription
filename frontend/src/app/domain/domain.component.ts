@@ -1,17 +1,15 @@
-import { Component, OnInit, OnDestroy, ViewChild, ElementRef } from '@angular/core'
-import { ActivatedRoute, ParamMap } from '@angular/router'
-import { ServerApiService, parseDate, isExpired, isExpireSoon, DomainPayments, Subscription, Initialisation } from '../server-api.service'
+import { Component, OnInit, OnDestroy } from '@angular/core'
+import { ActivatedRoute } from '@angular/router'
+import { ServerApiService, parseDate, isExpired, isExpireSoon, DomainPayments, Initialisation } from '../server-api.service'
 import { InitialiseService } from '../initialise.service'
 import { AuthenticationService } from '../authentication.service'
 import { SocialUser } from "angularx-social-login"
-import * as moment from 'moment'
 import { Sort } from '@angular/material/sort'
 import { LatestDomainPaymentsService, DomainPaymentsListener } from '../latest-domain-payments.service'
 import { AlertService } from '../alert.service'
 import { concatFMap } from '../rxjs.util'
 import { of, throwError } from 'rxjs'
 import { catchError } from 'rxjs/operators'
-import { Link } from 'ngx-linkifyjs'
 
 @Component( {
     selector: 'app-domain',
@@ -30,7 +28,7 @@ export class DomainComponent implements OnInit, OnDestroy, DomainPaymentsListene
 
     domainName: string
 
-    domainLink: Link
+    domainLink: string
 
     isViewDomain: boolean = false
 
@@ -66,11 +64,7 @@ export class DomainComponent implements OnInit, OnDestroy, DomainPaymentsListene
         this.domainName = this.route.snapshot.paramMap.get( 'domain' )
 
         // Specify the domain link
-        this.domainLink = {
-            type: 'web',
-            value: 'domain',
-            href: 'http://' + this.domainName
-        }
+        this.domainLink = 'http://' + this.domainName
 
         // Register for latest domain payments
         this.latestDomainPaymentsService.addListener( this )

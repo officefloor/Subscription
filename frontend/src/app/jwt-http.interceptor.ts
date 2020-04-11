@@ -9,14 +9,16 @@ import { environment } from '../environments/environment'
 
 declare let JSON: any
 
-@Injectable()
+@Injectable({
+	providedIn: 'root'
+})
 export class JwtHttpInterceptor implements HttpInterceptor {
 
     // Enable only one refresh access token request
     private refreshedAccessToken: BehaviorSubject<string> = null;
 
     constructor(
-        private injector: Injector,
+		private injector: Injector,
     ) { }
 
     intercept( req: HttpRequest<any>, next: HttpHandler ): Observable<HttpEvent<any>> {
@@ -43,12 +45,17 @@ export class JwtHttpInterceptor implements HttpInterceptor {
             }
         }
 
-        // Obtain the authorization
-        const authenticationService: AuthenticationService = this.injector.get( AuthenticationService )
+        // Obtain the authorization (ignore initially on cyclic dependency)
+		let authenticationService = null
+		try {
+			authenticationService = this.injector.get(AuthenticationService)		
+		} catch (e) {
+			authenticationService = null
+		}
         const authorization = authenticationService ? authenticationService.getAccessToken() : null
 
         // Determine if server request
-        const serverApiService: ServerApiService = this.injector.get( ServerApiService )
+		const serverApiService = this.injector.get(ServerApiService)
         const isServerUrl: boolean = serverApiService ? serverApiService.isServerUrl( req.url ) : false
 
         // Undertake the request

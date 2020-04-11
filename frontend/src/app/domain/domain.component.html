@@ -9,7 +9,7 @@
 					[class.badge-success]="!isExpired && !isExpireSoon">{{isExpired
 					? 'Expired' : 'Expires'}} {{localExpire}}</span>
 			</h2>
-			<mat-link-preview [link]="domainLink"></mat-link-preview>
+			<a [href]="domainLink" target="_blank">{{domainLink}}</a>
 		</div>
 		<div class="col-xs-12 col-lg-6 jumbotron">
 			<app-checkout [domain]="domainName"
