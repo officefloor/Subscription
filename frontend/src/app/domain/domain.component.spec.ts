@@ -10,7 +10,6 @@ import { AuthenticationService } from '../authentication.service'
 import { ActivatedRoute } from '@angular/router'
 import { DomainPayments, Subscription, formatDate, parseDate } from '../server-api.service'
 import * as moment from 'moment'
-import { MatLinkPreviewModule } from '@angular-material-extensions/link-preview'
 
 describe( 'DomainComponent', () => {
 
@@ -29,7 +28,7 @@ describe( 'DomainComponent', () => {
 
         TestBed.configureTestingModule( {
             declarations: [DomainComponent, CheckoutComponent],
-            imports: [HttpClientTestingModule, MatLinkPreviewModule.forRoot()],
+            imports: [HttpClientTestingModule],
             providers: [
                 { provide: InitialiseService, useValue: initialiseServiceSpy },
                 { provide: AuthenticationService, useValue: authenticationServiceSpy },
@@ -108,7 +107,7 @@ describe( 'DomainComponent', () => {
             const payment: PaymentRow = payments[rowIndex]
 
             // Confirm row for the subscription
-            const row = tableBody.childNodes[rowIndex + 1] // +1 avoid #comment
+            const row = tableBody.childNodes[rowIndex]
             expect( row ).toBeTruthy( 'Missing row ' + rowIndex + ': ' + row )
             expect( row.nodeName ).toEqual( 'TR', row )
 
@@ -153,9 +152,6 @@ describe( 'DomainComponent', () => {
         const req = httpTestingController.expectOne( '/subscriptions/domain/officefloor.org' )
         expect( req.request.method ).toEqual( 'GET' )
         req.flush( newDomainPayments( paymentRows.map(( payment: PaymentRow ) => {
-            // Ignore loading link previews
-            httpTestingController.match(( req ) => req.url === 'https://api.linkpreview.net/' )
-            
             // Return the subscription
             const clone: Subscription = {
                 paymentDate: payment.paymentDate,

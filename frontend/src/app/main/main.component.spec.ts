@@ -84,7 +84,7 @@ describe( 'MainComponent', () => {
         for ( let rowIndex = 0; rowIndex < domains.length; rowIndex++ ) {
 
             // Confirm row for the domain
-            const row = tableBody.childNodes[rowIndex + 1] // +1 avoid #comment
+            const row = tableBody.childNodes[rowIndex]
             expect( row ).toBeTruthy( 'Missing row ' + rowIndex + ': ' + row )
             expect( row.nodeName ).toEqual( 'TR', row )
 

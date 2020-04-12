@@ -16,11 +16,9 @@ import { BrowserAnimationsModule } from '@angular/platform-browser/animations'
 import { DomainComponent } from './domain/domain.component'
 import { InitialiseService } from './initialise.service'
 import { Initialisation } from './server-api.service'
-import { AuthenticationService } from './authentication.service'
 import { AlertComponent } from './alert/alert.component'
 import { RegisterComponent } from './register/register.component'
-import { MatSortModule } from '@angular/material'
-import { MatLinkPreviewModule } from '@angular-material-extensions/link-preview';
+import { MatSortModule } from '@angular/material/sort'
 import { TermsConditionsPrivacyComponent } from './terms-conditions-privacy/terms-conditions-privacy.component'
 
 /**
@@ -73,7 +71,6 @@ export function provideAuthServiceConfig( initialiseService: InitialiseService )
         SocialLoginModule,
         AppRoutingModule,
         MatSortModule,
-        MatLinkPreviewModule.forRoot(),
     ],
     providers: [{
         provide: AuthServiceConfig,
