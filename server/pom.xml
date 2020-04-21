@@ -83,7 +83,7 @@
 					<execution>
 						<phase>prepare-package</phase>
 						<configuration>
-							<tasks>
+							<target>
 								<copy todir="./target/classes/PUBLIC" overwrite="true">
 									<fileset
 										dir="../frontend/dist/officefloor-subscription" />
@@ -93,7 +93,7 @@
 								<copy file="${user.home}/subscription.prod"
 									tofile="./target/classes/config/subscription.prod"
 									overwrite="true" failonerror="false" />
-							</tasks>
+							</target>
 						</configuration>
 						<goals>
 							<goal>run</goal>
