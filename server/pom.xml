@@ -17,7 +17,7 @@
 	<packaging>war</packaging>
 
 	<properties>
-		<google.appengine.version>2.2.0</google.appengine.version>
+		<google.appengine.version>2.3.0</google.appengine.version>
 	</properties>
 
 	<dependencies>
@@ -104,7 +104,7 @@
 			<plugin>
 				<groupId>org.codehaus.mojo</groupId>
 				<artifactId>build-helper-maven-plugin</artifactId>
-				<version>3.1.0</version>
+				<version>3.2.0</version>
 				<executions>
 					<execution>
 						<id>provide-app-version</id>
