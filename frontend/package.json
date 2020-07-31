@@ -4,6 +4,7 @@
 	"scripts": {
 		"ng": "ng",
 		"lint": "ng lint",
+		"postinstall": "ngcc",
 		"test": "ng test",
 		"ci-test": "ng test --karmaConfig=src/karma.conf.ci.js",
 		"mock-server": "json-server --watch --routes mock-json-routes.json --middlewares mock-json-middleware.js --port 8080 mock-json-server.js",

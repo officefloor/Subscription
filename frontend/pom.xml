@@ -27,8 +27,8 @@
 							<goal>install-node-and-npm</goal>
 						</goals>
 						<configuration>
-							<nodeVersion>v13.7.0</nodeVersion>
-							<npmVersion>6.13.6</npmVersion>
+							<nodeVersion>v14.7.0</nodeVersion>
+							<npmVersion>6.14.7</npmVersion>
 						</configuration>
 					</execution>
 
