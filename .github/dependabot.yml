@@ -1,0 +1,18 @@
+version: 2
+updates:
+- package-ecosystem: npm
+  directory: "/frontend"
+  schedule:
+    interval: daily
+    time: "04:00"
+    timezone: Australia/Perth
+  open-pull-requests-limit: 10
+  rebase-strategy: disabled
+- package-ecosystem: maven
+  directory: "/"
+  schedule:
+    interval: daily
+    time: "04:00"
+    timezone: Australia/Perth
+  open-pull-requests-limit: 10
+  rebase-strategy: disabled
