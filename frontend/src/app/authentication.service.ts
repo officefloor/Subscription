@@ -1,5 +1,5 @@
 import { Injectable } from '@angular/core'
-import { AuthService, SocialUser } from "angularx-social-login"
+import { SocialAuthService, SocialUser } from "angularx-social-login"
 import { GoogleLoginProvider } from "angularx-social-login"
 import { ServerApiService, AuthenticateResponse, AccessTokenResponse, Initialisation, parseDate } from './server-api.service'
 import { Observable, BehaviorSubject, of, throwError } from 'rxjs'
@@ -30,7 +30,7 @@ export class AuthenticationService {
 
     constructor(
         private initialiseService: InitialiseService,
-        private authService: AuthService,
+        private authService: SocialAuthService,
         private serverApiService: ServerApiService,
         private alertService: AlertService,
     ) { }
@@ -50,7 +50,7 @@ export class AuthenticationService {
                 }
 
                 // Determine when ready
-                return this.authService.readyState.pipe(
+                return this.authService.initState.pipe(
                     filter(( ready: any ) => {
                         const isReady: boolean = ready[0] && ( ready[0] === 'GOOGLE' )
                         if ( isReady ) {

@@ -2,7 +2,7 @@ import { AuthenticationService } from './authentication.service'
 import { TestBed } from '@angular/core/testing'
 import { HttpClientTestingModule, HttpTestingController } from '@angular/common/http/testing'
 import { HttpClient, HttpErrorResponse } from '@angular/common/http'
-import { AuthService, SocialUser } from 'angularx-social-login'
+import { SocialAuthService, SocialUser } from 'angularx-social-login'
 import { InitialiseService } from './initialise.service'
 import { Initialisation, formatDate } from './server-api.service'
 import { of, BehaviorSubject } from 'rxjs'
@@ -18,13 +18,13 @@ describe( 'AuthenticationService', () => {
     let authServiceMock: any
     let httpClient: HttpClient
     let httpTestingController: HttpTestingController
-    let readyState = new BehaviorSubject<[string]>( null )
+    let initState = new BehaviorSubject<[string]>( null )
     let authState = new BehaviorSubject<SocialUser>( null )
 
     beforeEach(() => {
         initialisationServiceSpy = jasmine.createSpyObj( 'InitialiseService', ['initialisation'] )
         authServiceMock = {
-            readyState: readyState,
+            initState: initState,
             authState: authState
         }
         localStorage.removeItem( "accessToken" )
@@ -33,7 +33,7 @@ describe( 'AuthenticationService', () => {
             imports: [HttpClientTestingModule],
             providers: [
                 { provide: InitialiseService, useValue: initialisationServiceSpy },
-                { provide: AuthService, useValue: authServiceMock },
+                { provide: SocialAuthService, useValue: authServiceMock },
             ]
         } )
 
@@ -101,7 +101,7 @@ describe( 'AuthenticationService', () => {
 
     it( 'should be ready', ( done: DoneFn ) => {
         initialisationServiceSpy.initialisation.and.returnValue( of( newInitialisation() ) )
-        readyState.next( ['GOOGLE'] )
+        initState.next( ['GOOGLE'] )
         authState.next( null )
         service.initialise().pipe(
             concatFMap(( init ) => service.readyState() ),
@@ -113,7 +113,7 @@ describe( 'AuthenticationService', () => {
 
     it( 'not authenticated', ( done: DoneFn ) => {
         initialisationServiceSpy.initialisation.and.returnValue( of( newInitialisation() ) )
-        readyState.next( ['GOOGLE'] )
+        initState.next( ['GOOGLE'] )
         authState.next( null )
         service.initialise().pipe(
             concatFMap(( init ) => service.authenticationState() ),
@@ -128,7 +128,7 @@ describe( 'AuthenticationService', () => {
         const accessExpire = formatDate( moment().add( 20, 'minute' ) )
         const user = new SocialUser()
         initialisationServiceSpy.initialisation.and.returnValue( of( newInitialisation() ) )
-        readyState.next( ['GOOGLE'] )
+        initState.next( ['GOOGLE'] )
         authState.next( user )
         service.initialise().pipe(
             concatFMap(( init ) => service.authenticationState() ),
@@ -155,7 +155,7 @@ describe( 'AuthenticationService', () => {
 
     it( 'cached authentication', ( done: DoneFn ) => {
         initialisationServiceSpy.initialisation.and.returnValue( of( newInitialisation() ) )
-        readyState.next( ['GOOGLE'] )
+        initState.next( ['GOOGLE'] )
         const user = new SocialUser()
         authState.next( user )
         setItemInLocalStorage( AuthenticationService.REFRESH_EXPIRE, formatDate( moment().add( 8, 'hours' ) ) )
@@ -174,7 +174,7 @@ describe( 'AuthenticationService', () => {
         setItemInLocalStorage( AuthenticationService.REFRESH_EXPIRE, formatDate( moment().subtract( 1, 'minute' ) ) )
         const user = new SocialUser()
         initialisationServiceSpy.initialisation.and.returnValue( of( newInitialisation() ) )
-        readyState.next( ['GOOGLE'] )
+        initState.next( ['GOOGLE'] )
         authState.next( user )
         service.initialise().pipe(
             concatFMap(( init ) => service.authenticationState() ),
@@ -192,7 +192,7 @@ describe( 'AuthenticationService', () => {
 
     it( 'authentication error', ( done: DoneFn ) => {
         initialisationServiceSpy.initialisation.and.returnValue( of( newInitialisation() ) )
-        readyState.next( ['GOOGLE'] )
+        initState.next( ['GOOGLE'] )
         authState.next( new SocialUser() )
         service.initialise().pipe(
             catchError(( init ) => service.authenticationState() )
