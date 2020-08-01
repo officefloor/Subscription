@@ -9,7 +9,7 @@ import com.googlecode.objectify.Objectify;
 import lombok.Value;
 import net.officefloor.app.subscription.store.AccessKey;
 import net.officefloor.app.subscription.store.RefreshKey;
-import net.officefloor.plugin.managedobject.clazz.Dependency;
+import net.officefloor.plugin.clazz.Dependency;
 import net.officefloor.web.jwt.authority.repository.JwtAccessKey;
 import net.officefloor.web.jwt.authority.repository.JwtAuthorityRepository;
 import net.officefloor.web.jwt.authority.repository.JwtRefreshKey;
@@ -21,8 +21,7 @@ import net.officefloor.web.jwt.authority.repository.JwtRefreshKey;
  */
 public class JwtAuthorityRepositoryImpl implements JwtAuthorityRepository {
 
-	@Dependency
-	private Objectify objectify;
+	private @Dependency Objectify objectify;
 
 	/*
 	 * ===================== JwtAuthorityRepository =======================
