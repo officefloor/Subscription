@@ -30,7 +30,7 @@ import com.googlecode.objectify.Objectify;
 import net.officefloor.app.subscription.InitialiseService;
 import net.officefloor.app.subscription.store.Administration;
 import net.officefloor.identity.google.GoogleIdTokenVerifierFactory;
-import net.officefloor.plugin.managedobject.clazz.Dependency;
+import net.officefloor.plugin.clazz.Dependency;
 
 /**
  * {@link GoogleIdTokenVerifierFactory} to load {@link GoogleIdTokenVerifier}
@@ -40,8 +40,7 @@ import net.officefloor.plugin.managedobject.clazz.Dependency;
  */
 public class GoogleIdTokenVerifierConfiguration implements GoogleIdTokenVerifierFactory {
 
-	@Dependency
-	private Objectify objectify;
+	private @Dependency Objectify objectify;
 
 	@Override
 	public GoogleIdTokenVerifier create() throws Exception {

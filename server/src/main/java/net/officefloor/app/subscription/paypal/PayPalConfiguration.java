@@ -25,7 +25,7 @@ import com.paypal.core.PayPalEnvironment;
 import net.officefloor.app.subscription.InitialiseService;
 import net.officefloor.app.subscription.store.Administration;
 import net.officefloor.pay.paypal.PayPalConfigurationRepository;
-import net.officefloor.plugin.managedobject.clazz.Dependency;
+import net.officefloor.plugin.clazz.Dependency;
 
 /**
  * Provides the PayPal configuration.
@@ -34,8 +34,7 @@ import net.officefloor.plugin.managedobject.clazz.Dependency;
  */
 public class PayPalConfiguration implements PayPalConfigurationRepository {
 
-	@Dependency
-	private Objectify objectify;
+	private @Dependency Objectify objectify;
 
 	@Override
 	public PayPalEnvironment createPayPalEnvironment() {
