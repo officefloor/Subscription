@@ -8,6 +8,9 @@ updates:
     timezone: Australia/Perth
   open-pull-requests-limit: 10
   rebase-strategy: disabled
+  labels:
+    - "dependencies"
+    - "automerge"
 - package-ecosystem: maven
   directory: "/"
   schedule:
@@ -16,3 +19,6 @@ updates:
     timezone: Australia/Perth
   open-pull-requests-limit: 10
   rebase-strategy: disabled
+  labels:
+    - "dependencies"
+    - "automerge"
