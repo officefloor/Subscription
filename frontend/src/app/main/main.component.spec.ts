@@ -1,6 +1,6 @@
 import { MainComponent } from './main.component'
 import { Component } from '@angular/core'
-import { async, ComponentFixture, TestBed } from '@angular/core/testing'
+import { ComponentFixture, TestBed, waitForAsync } from '@angular/core/testing'
 import { HttpClientTestingModule, HttpTestingController } from '@angular/common/http/testing'
 import { HttpClient, HttpErrorResponse } from '@angular/common/http'
 import { AuthenticationService } from '../authentication.service'
@@ -23,7 +23,7 @@ describe( 'MainComponent', () => {
     } )
     class MockRegisterComponent { }
 
-    beforeEach( async(() => {
+    beforeEach( waitForAsync(() => {
         authenticationServiceSpy = jasmine.createSpyObj( 'AuthenticationService', ['initialise', 'readyState', 'authenticationState'] )
 
         TestBed.configureTestingModule( {

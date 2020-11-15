@@ -1,5 +1,5 @@
 import { AppComponent } from './app.component'
-import { TestBed, async, ComponentFixture } from '@angular/core/testing'
+import { TestBed, ComponentFixture, waitForAsync } from '@angular/core/testing'
 import { of } from 'rxjs'
 import { RouterTestingModule } from '@angular/router/testing'
 import { HttpClientTestingModule, HttpTestingController } from '@angular/common/http/testing'
@@ -57,7 +57,7 @@ describe( 'AppComponent', () => {
     let httpClient: HttpClient
     let httpTestingController: HttpTestingController
 
-    beforeEach( async(() => {
+    beforeEach( waitForAsync(() => {
         authenticationServiceSpy = jasmine.createSpyObj( 'AuthenticationService', ['initialise', 'readyState', 'authenticationState'] )
 
         TestBed.configureTestingModule( {

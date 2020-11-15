@@ -1,5 +1,5 @@
 import { RegisterComponent } from './register.component'
-import { async, ComponentFixture, TestBed } from '@angular/core/testing'
+import { ComponentFixture, TestBed, waitForAsync } from '@angular/core/testing'
 import { ReactiveFormsModule } from '@angular/forms'
 import { Router } from '@angular/router'
 import { RouterTestingModule } from '@angular/router/testing'
@@ -11,7 +11,7 @@ describe( 'RegisterComponent', () => {
     let fixture: ComponentFixture<RegisterComponent>
     let dom: HTMLElement
 
-    beforeEach( async(() => {
+    beforeEach( waitForAsync(() => {
         TestBed.configureTestingModule( {
             declarations: [RegisterComponent],
             imports: [
