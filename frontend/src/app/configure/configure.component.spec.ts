@@ -1,5 +1,5 @@
 import { ConfigureComponent } from './configure.component'
-import { async, ComponentFixture, TestBed } from '@angular/core/testing'
+import { ComponentFixture, TestBed, waitForAsync } from '@angular/core/testing'
 import { HttpClientTestingModule, HttpTestingController } from '@angular/common/http/testing'
 import { HttpClient, HttpErrorResponse } from '@angular/common/http'
 import { ReactiveFormsModule } from '@angular/forms'
@@ -36,7 +36,7 @@ describe( 'ConfigureComponent', () => {
         paypalInvoiceIdTemplate: 'template'
     }
 
-    beforeEach( async(() => {
+    beforeEach( waitForAsync(() => {
         authenticationServiceSpy = jasmine.createSpyObj( 'AuthenticationService', ['initialise', 'authenticationState'] )
         TestBed.configureTestingModule( {
             declarations: [ConfigureComponent],

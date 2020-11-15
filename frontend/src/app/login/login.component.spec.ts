@@ -1,5 +1,5 @@
 import { LoginComponent } from './login.component'
-import { async, ComponentFixture, TestBed } from '@angular/core/testing'
+import { ComponentFixture, TestBed, waitForAsync } from '@angular/core/testing'
 import { HttpClientTestingModule, HttpTestingController } from '@angular/common/http/testing'
 import { HttpClient, HttpErrorResponse } from '@angular/common/http'
 import { AuthenticationService } from '../authentication.service'
@@ -15,7 +15,7 @@ describe( 'LoginComponent', () => {
     let httpClient: HttpClient
     let httpTestingController: HttpTestingController
 
-    beforeEach( async(() => {
+    beforeEach( waitForAsync(() => {
         initialiseServiceSpy = jasmine.createSpyObj( 'InitialiseService', ['initialisation'] )
         authenticationServiceSpy = jasmine.createSpyObj( 'AuthenticationService', ['authenticationState'] )
 

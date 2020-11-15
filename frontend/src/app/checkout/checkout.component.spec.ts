@@ -1,5 +1,5 @@
 import { CheckoutComponent } from './checkout.component'
-import { async, ComponentFixture, TestBed } from '@angular/core/testing'
+import { ComponentFixture, TestBed, waitForAsync } from '@angular/core/testing'
 import { HttpClientTestingModule, HttpTestingController } from '@angular/common/http/testing'
 import { HttpClient, HttpErrorResponse } from '@angular/common/http'
 
@@ -12,7 +12,7 @@ describe( 'CheckoutComponent', () => {
     let httpClient: HttpClient
     let httpTestingController: HttpTestingController
 
-    beforeEach( async(() => {
+    beforeEach( waitForAsync(() => {
         TestBed.configureTestingModule( {
             declarations: [CheckoutComponent],
             imports: [HttpClientTestingModule],
