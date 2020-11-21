@@ -1,6 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<project xmlns="http://maven.apache.org/POM/4.0.0"
-	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
 	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0
                       https://maven.apache.org/xsd/maven-4.0.0.xsd">
 	<modelVersion>4.0.0</modelVersion>
@@ -68,6 +67,11 @@
 			<scope>provided</scope>
 		</dependency>
 		<dependency>
+			<groupId>net.officefloor.maven</groupId>
+			<artifactId>officefloor-appengine-maven-plugin</artifactId>
+			<scope>test</scope>
+		</dependency>
+		<dependency>
 			<groupId>junit</groupId>
 			<artifactId>junit</artifactId>
 			<scope>test</scope>
@@ -85,13 +89,11 @@
 						<configuration>
 							<target>
 								<copy todir="./target/classes/PUBLIC" overwrite="true">
-									<fileset
-										dir="../frontend/dist/officefloor-subscription" />
+									<fileset dir="../frontend/dist/officefloor-subscription" />
 								</copy>
 								<!-- Optionally include initialisation -->
 								<mkdir dir="./target/classes/config" />
-								<copy file="${user.home}/subscription.prod"
-									tofile="./target/classes/config/subscription.prod"
+								<copy file="${user.home}/subscription.prod" tofile="./target/classes/config/subscription.prod"
 									overwrite="true" failonerror="false" />
 							</target>
 						</configuration>
@@ -129,35 +131,51 @@
 					<deploy.version>${subscription.version}</deploy.version>
 				</configuration>
 			</plugin>
+
+			<!-- TODO REMOVE -->
+			<plugin>
+				<groupId>org.apache.maven.plugins</groupId>
+				<artifactId>maven-surefire-plugin</artifactId>
+				<configuration>
+					<skip>true</skip>
+				</configuration>
+			</plugin>
+
+			<plugin>
+				<groupId>net.officefloor.maven</groupId>
+				<artifactId>officefloor-appengine-maven-plugin</artifactId>
+				<configuration>
+					<port>8181</port>
+				</configuration>
+				<executions>
+					<execution>
+						<id>start-gcp</id>
+						<phase>pre-integration-test</phase>
+						<goals>
+							<goal>start</goal>
+						</goals>
+					</execution>
+					<execution>
+						<id>stop-gcp</id>
+						<phase>post-integration-test</phase>
+						<goals>
+							<goal>stop</goal>
+						</goals>
+					</execution>
+				</executions>
+			</plugin>
+			<plugin>
+				<groupId>org.apache.maven.plugins</groupId>
+				<artifactId>maven-failsafe-plugin</artifactId>
+				<executions>
+					<execution>
+						<goals>
+							<goal>integration-test</goal>
+							<goal>verify</goal>
+						</goals>
+					</execution>
+				</executions>
+			</plugin>
 		</plugins>
 	</build>
-	<profiles>
-		<profile>
-			<!-- Active this profile for development testing due to AppEngine local 
-				development server not supporting HTTPS -->
-			<id>DevHttps</id>
-			<build>
-				<plugins>
-					<plugin>
-						<groupId>org.codehaus.mojo</groupId>
-						<artifactId>build-helper-maven-plugin</artifactId>
-						<executions>
-							<execution>
-								<id>add-source</id>
-								<phase>generate-sources</phase>
-								<goals>
-									<goal>add-source</goal>
-								</goals>
-								<configuration>
-									<sources>
-										<source>src/appengine/test</source>
-									</sources>
-								</configuration>
-							</execution>
-						</executions>
-					</plugin>
-				</plugins>
-			</build>
-		</profile>
-	</profiles>
 </project>

@@ -8,7 +8,7 @@ export DATASTORE_EMULATOR_HOST='localhost:18081'
 
 # Provide details for running
 cat << EnvInfo
-   Ensure the following environment variables configurd for IDE to run appengine:
+   Ensure the following environment variables configured for IDE to run appengine:
 
      DATASTORE_EMULATOR_HOST=${DATASTORE_EMULATOR_HOST}  # as per below
      GOOGLE_CLOUD_PROJECT=${CLOUDSDK_CORE_PROJECT}
