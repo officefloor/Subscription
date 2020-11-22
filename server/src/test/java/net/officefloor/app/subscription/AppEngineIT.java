@@ -65,6 +65,10 @@ public class AppEngineIT {
 	public void initialise() throws IOException {
 		HttpGet get = new HttpGet(this.client.url("/initialise"));
 		HttpResponse response = this.client.execute(get);
+		if (response.getStatusLine().getStatusCode() == 500) {
+			// Not yet consistent, so try again
+			response = this.client.execute(get);
+		}
 		String json = EntityUtils.toString(response.getEntity());
 		assertEquals("Should be successful: " + json, 200, response.getStatusLine().getStatusCode());
 		InitialisationResponse init = mapper.readValue(json, InitialisationResponse.class);

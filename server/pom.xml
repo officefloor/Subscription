@@ -52,8 +52,12 @@
 			<groupId>net.officefloor.server</groupId>
 			<artifactId>officeserver_servlet</artifactId>
 		</dependency>
+		<dependency>
+			<groupId>net.officefloor.web</groupId>
+			<artifactId>officeweb_openapi</artifactId>
+		</dependency>
 
-		<!-- <dependency> <groupId>net.officefloor.web</groupId> <artifactId>officeweb_openapi</artifactId> </dependency> -->
+		<!-- <dependency> <groupId>net.officefloor.server</groupId> <artifactId>officeserver_appengineemulator</artifactId> </dependency> -->
 
 		<dependency>
 			<groupId>org.projectlombok</groupId>
