@@ -39,8 +39,7 @@ public class AppEngineIT {
 		Datastore datastore = IntegrationAppEngine.getDatastore();
 
 		// Initialise datastore
-		ObjectifyFactory objectifyFactory = new ObjectifyFactory(datastore);
-		ObjectifyService.init(objectifyFactory);
+		ObjectifyService.init(new ObjectifyFactory(datastore));
 		ObjectifyService.register(Administration.class);
 		Administration admin = new Administration();
 		admin.setGoogleClientId("TEST CLIENT");
