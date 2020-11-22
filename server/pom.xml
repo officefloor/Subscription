@@ -52,10 +52,9 @@
 			<groupId>net.officefloor.server</groupId>
 			<artifactId>officeserver_servlet</artifactId>
 		</dependency>
-		<dependency>
-			<groupId>net.officefloor.web</groupId>
-			<artifactId>officeweb_openapi</artifactId>
-		</dependency>
+
+		<!-- <dependency> <groupId>net.officefloor.web</groupId> <artifactId>officeweb_openapi</artifactId> </dependency> -->
+
 		<dependency>
 			<groupId>org.projectlombok</groupId>
 			<artifactId>lombok</artifactId>
@@ -123,25 +122,6 @@
 				</executions>
 			</plugin>
 			<plugin>
-				<groupId>com.google.cloud.tools</groupId>
-				<artifactId>appengine-maven-plugin</artifactId>
-				<version>${google.appengine.version}</version>
-				<configuration>
-					<deploy.projectId>officefloor</deploy.projectId>
-					<deploy.version>${subscription.version}</deploy.version>
-				</configuration>
-			</plugin>
-
-			<!-- TODO REMOVE -->
-			<plugin>
-				<groupId>org.apache.maven.plugins</groupId>
-				<artifactId>maven-surefire-plugin</artifactId>
-				<configuration>
-					<skip>true</skip>
-				</configuration>
-			</plugin>
-
-			<plugin>
 				<groupId>net.officefloor.maven</groupId>
 				<artifactId>officefloor-appengine-maven-plugin</artifactId>
 				<configuration>
@@ -175,6 +155,15 @@
 						</goals>
 					</execution>
 				</executions>
+			</plugin>
+			<plugin>
+				<groupId>com.google.cloud.tools</groupId>
+				<artifactId>appengine-maven-plugin</artifactId>
+				<version>${google.appengine.version}</version>
+				<configuration>
+					<deploy.projectId>officefloor</deploy.projectId>
+					<deploy.version>${subscription.version}</deploy.version>
+				</configuration>
 			</plugin>
 		</plugins>
 	</build>
