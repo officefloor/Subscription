@@ -22,6 +22,7 @@ import java.io.InputStream;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.util.logging.Logger;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.databind.DeserializationFeature;
@@ -94,7 +95,7 @@ public class InitialiseService {
 
 			// Determine if application configured
 			if (administration == null) {
-				throw new HttpException(HttpStatus.NOT_FOUND, "Application not configured");
+				throw new HttpException(HttpStatus.INTERNAL_SERVER_ERROR, "Application not configured");
 			}
 		}
 
@@ -102,7 +103,7 @@ public class InitialiseService {
 		return administration;
 	}
 
-	public static void getInitialisation(Objectify objectify, ObjectResponse<Initialisation> response)
+	public static void getInitialisation(Objectify objectify, ObjectResponse<Initialisation> response, Logger logger)
 			throws IOException {
 
 		// Obtain the administration

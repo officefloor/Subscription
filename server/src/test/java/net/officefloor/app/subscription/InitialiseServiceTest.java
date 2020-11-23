@@ -71,7 +71,7 @@ public class InitialiseServiceTest {
 	public void notYetInitialised() throws Exception {
 		MockWoofResponse response = this.server
 				.send(MockWoofServer.mockRequest("/initialise").secure(true).header("Accept", "application/json"));
-		response.assertJsonError(new HttpException(HttpStatus.NOT_FOUND, "Application not configured"));
+		response.assertJsonError(new HttpException(HttpStatus.INTERNAL_SERVER_ERROR, "Application not configured"));
 	}
 
 	@Test
