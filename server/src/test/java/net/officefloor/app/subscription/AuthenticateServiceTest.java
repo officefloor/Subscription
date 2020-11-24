@@ -4,6 +4,7 @@ import static org.junit.Assert.assertArrayEquals;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.fail;
 
 import java.time.ZonedDateTime;
 import java.time.temporal.ChronoUnit;
@@ -172,18 +173,37 @@ public class AuthenticateServiceTest {
 		this.authenticate();
 		String refreshToken = this.authenticateResponse.getRefreshToken();
 
-		// Refresh the token
-		MockHttpResponse response = this.server.send(
-				MockWoofServer.mockJsonRequest(HttpMethod.POST, "/refreshAccessToken", new RefreshRequest(refreshToken))
-						.secure(true));
-		assertEquals("Should be successful", 200, response.getStatus().getStatusCode());
-		RefreshResponse refreshResponse = mapper.readValue(response.getEntity(null), RefreshResponse.class);
+		// Ensure token in database
+		this.objectify.get(GoogleSignin.class, 1, (load) -> load.filter("email", "guest.user@officefloor.org"));
 
-		// As using same keys, should be same access token (times to second)
-		assertEquals("Should be same token", this.authenticateResponse.getAccessToken(),
-				refreshResponse.getAccessToken());
-		assertEquals("Incorrect expire time", this.authenticateResponse.getAccessExpireTime(),
-				refreshResponse.getAccessExpireTime());
+		// Due to timing access token may be different
+		String previousAccessToken = this.authenticateResponse.getAccessToken();
+		String previousExpireTime = this.authenticateResponse.getAccessExpireTime();
+		for (int i = 0; i < 3; i++) {
+
+			// Refresh the token
+			MockHttpResponse response = this.server.send(MockWoofServer
+					.mockJsonRequest(HttpMethod.POST, "/refreshAccessToken", new RefreshRequest(refreshToken))
+					.secure(true));
+			assertEquals("Should be successful", 200, response.getStatus().getStatusCode());
+			RefreshResponse refreshResponse = mapper.readValue(response.getEntity(null), RefreshResponse.class);
+
+			// Determine if match
+			if (previousAccessToken.equals(refreshResponse.getAccessToken())) {
+
+				// As using same keys, should be same access token (times to second)
+				assertEquals("Should be same token", previousAccessToken, refreshResponse.getAccessToken());
+				assertEquals("Incorrect expire time", previousExpireTime, refreshResponse.getAccessExpireTime());
+
+				// Successfully refreshed in same second to get same access token
+				return;
+			}
+
+			// Invoked across second boundary, so try again
+			previousAccessToken = refreshResponse.getAccessToken();
+			previousExpireTime = refreshResponse.getAccessExpireTime();
+		}
+		fail("Should have matched access token");
 	}
 
 	private String getGoogleUserId(String name) {
