@@ -51,8 +51,7 @@ export class AuthenticationService {
 
                 // Determine when ready
                 return this.authService.initState.pipe(
-                    filter(( ready: any ) => {
-                        const isReady: boolean = ready[0] && ( ready[0] === 'GOOGLE' )
+                    filter(( isReady: boolean ) => {
                         if ( isReady ) {
                             this.ready.next( isReady ) // flag ready
                         }

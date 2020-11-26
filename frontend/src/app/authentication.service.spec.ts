@@ -18,7 +18,7 @@ describe( 'AuthenticationService', () => {
     let authServiceMock: any
     let httpClient: HttpClient
     let httpTestingController: HttpTestingController
-    let initState = new BehaviorSubject<[string]>( null )
+    let initState = new BehaviorSubject<boolean>( null )
     let authState = new BehaviorSubject<SocialUser>( null )
 
     beforeEach(() => {
@@ -101,7 +101,7 @@ describe( 'AuthenticationService', () => {
 
     it( 'should be ready', ( done: DoneFn ) => {
         initialisationServiceSpy.initialisation.and.returnValue( of( newInitialisation() ) )
-        initState.next( ['GOOGLE'] )
+        initState.next( true )
         authState.next( null )
         service.initialise().pipe(
             concatFMap(( init ) => service.readyState() ),
@@ -113,7 +113,7 @@ describe( 'AuthenticationService', () => {
 
     it( 'not authenticated', ( done: DoneFn ) => {
         initialisationServiceSpy.initialisation.and.returnValue( of( newInitialisation() ) )
-        initState.next( ['GOOGLE'] )
+        initState.next( true )
         authState.next( null )
         service.initialise().pipe(
             concatFMap(( init ) => service.authenticationState() ),
@@ -128,7 +128,7 @@ describe( 'AuthenticationService', () => {
         const accessExpire = formatDate( moment().add( 20, 'minute' ) )
         const user = new SocialUser()
         initialisationServiceSpy.initialisation.and.returnValue( of( newInitialisation() ) )
-        initState.next( ['GOOGLE'] )
+        initState.next( true )
         authState.next( user )
         service.initialise().pipe(
             concatFMap(( init ) => service.authenticationState() ),
@@ -155,7 +155,7 @@ describe( 'AuthenticationService', () => {
 
     it( 'cached authentication', ( done: DoneFn ) => {
         initialisationServiceSpy.initialisation.and.returnValue( of( newInitialisation() ) )
-        initState.next( ['GOOGLE'] )
+        initState.next( true )
         const user = new SocialUser()
         authState.next( user )
         setItemInLocalStorage( AuthenticationService.REFRESH_EXPIRE, formatDate( moment().add( 8, 'hours' ) ) )
@@ -174,7 +174,7 @@ describe( 'AuthenticationService', () => {
         setItemInLocalStorage( AuthenticationService.REFRESH_EXPIRE, formatDate( moment().subtract( 1, 'minute' ) ) )
         const user = new SocialUser()
         initialisationServiceSpy.initialisation.and.returnValue( of( newInitialisation() ) )
-        initState.next( ['GOOGLE'] )
+        initState.next( true )
         authState.next( user )
         service.initialise().pipe(
             concatFMap(( init ) => service.authenticationState() ),
@@ -192,7 +192,7 @@ describe( 'AuthenticationService', () => {
 
     it( 'authentication error', ( done: DoneFn ) => {
         initialisationServiceSpy.initialisation.and.returnValue( of( newInitialisation() ) )
-        initState.next( ['GOOGLE'] )
+        initState.next( true )
         authState.next( new SocialUser() )
         service.initialise().pipe(
             catchError(( init ) => service.authenticationState() )
