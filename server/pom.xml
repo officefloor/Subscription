@@ -56,9 +56,6 @@
 			<groupId>net.officefloor.web</groupId>
 			<artifactId>officeweb_openapi</artifactId>
 		</dependency>
-
-		<!-- <dependency> <groupId>net.officefloor.server</groupId> <artifactId>officeserver_appengineemulator</artifactId> </dependency> -->
-
 		<dependency>
 			<groupId>org.projectlombok</groupId>
 			<artifactId>lombok</artifactId>
@@ -171,4 +168,30 @@
 			</plugin>
 		</plugins>
 	</build>
+	<profiles>
+		<profile>
+			<!-- Setup for running locally for testing -->
+			<id>run-local</id>
+			<dependencies>
+				<dependency>
+					<groupId>net.officefloor.server</groupId>
+					<artifactId>officeserver_appengineemulator</artifactId>
+				</dependency>
+			</dependencies>
+			<build>
+				<plugins>
+					<plugin>
+						<groupId>net.officefloor.maven</groupId>
+						<artifactId>officefloor-appengine-maven-plugin</artifactId>
+						<configuration>
+							<port>8080</port>
+							<environment>
+								<initialise_file_path>${user.home}/subscription.init</initialise_file_path>
+							</environment>
+						</configuration>
+					</plugin>
+				</plugins>
+			</build>
+		</profile>
+	</profiles>
 </project>
