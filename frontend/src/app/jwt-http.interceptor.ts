@@ -50,8 +50,7 @@ export class JwtHttpInterceptor implements HttpInterceptor {
 		try {
 			authenticationService = this.injector.get(AuthenticationService)
 			if (!authenticationService['getAccessToken']) {
-				console.log('Did not retrieve AuthenticationService', authenticationService)
-				authenticationService = null
+				authenticationService = null // avoid invalid service
 			}
 		} catch (e) {
 			authenticationService = null
