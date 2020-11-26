@@ -48,11 +48,15 @@ export class JwtHttpInterceptor implements HttpInterceptor {
         // Obtain the authorization (ignore initially on cyclic dependency)
 		let authenticationService = null
 		try {
-			authenticationService = this.injector.get(AuthenticationService)		
+			authenticationService = this.injector.get(AuthenticationService)
+			if (!authenticationService['getAccessToken']) {
+				console.log('Did not retrieve AuthenticationService', authenticationService)
+				authenticationService = null
+			}
 		} catch (e) {
 			authenticationService = null
 		}
-        const authorization = authenticationService ? authenticationService.getAccessToken() : null
+        const authorization = authenticationService && authenticationService.getAccessToken ? authenticationService.getAccessToken() : null
 
         // Determine if server request
 		const serverApiService = this.injector.get(ServerApiService)
