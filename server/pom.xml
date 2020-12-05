@@ -21,12 +21,12 @@
 
 	<dependencies>
 		<dependency>
-			<groupId>net.officefloor.web</groupId>
-			<artifactId>woof</artifactId>
+			<groupId>net.officefloor.server</groupId>
+			<artifactId>officeserver_appengine</artifactId>
 		</dependency>
 		<dependency>
 			<groupId>net.officefloor.web</groupId>
-			<artifactId>woof_test</artifactId>
+			<artifactId>woof</artifactId>
 		</dependency>
 		<dependency>
 			<groupId>net.officefloor.web</groupId>
@@ -49,10 +49,6 @@
 			<artifactId>officepay_paypal</artifactId>
 		</dependency>
 		<dependency>
-			<groupId>net.officefloor.server</groupId>
-			<artifactId>officeserver_servlet</artifactId>
-		</dependency>
-		<dependency>
 			<groupId>net.officefloor.web</groupId>
 			<artifactId>officeweb_openapi</artifactId>
 		</dependency>
@@ -65,6 +61,11 @@
 			<groupId>javax.servlet</groupId>
 			<artifactId>javax.servlet-api</artifactId>
 			<scope>provided</scope>
+		</dependency>
+		<dependency>
+			<groupId>net.officefloor.web</groupId>
+			<artifactId>woof_test</artifactId>
+			<scope>test</scope>
 		</dependency>
 		<dependency>
 			<groupId>net.officefloor.maven</groupId>

@@ -53,10 +53,22 @@
 		<module>frontend</module>
 		<module>server</module>
 	</modules>
+	<repositories>
+		<repository>
+			<id>Central first</id>
+			<name>List central first so is used first</name>
+			<url>https://repo.maven.apache.org/maven2/</url>
+		</repository>
+		<repository>
+			<id>maven2-repository.officefloor.net</id>
+			<name>OfficeFloor staging repository for Maven</name>
+			<url>https://github.com/officefloor/maven/raw/repository/</url>
+		</repository>
+	</repositories>
 	<properties>
 		<maven.compiler.source>1.8</maven.compiler.source>
 		<maven.compiler.target>1.8</maven.compiler.target>
-		<officefloor.version>3.28.2</officefloor.version>
+		<officefloor.version>3.29.0</officefloor.version>
 	</properties>
 	<dependencyManagement>
 		<dependencies>
