@@ -37,7 +37,7 @@
     "moment": "2.29.1",
     "ng": "0.0.0",
     "popper.js": "1.16.1",
-    "rxjs": "6.6.3",
+    "rxjs": "6.6.6",
     "zone.js": "0.10.3"
   },
   "devDependencies": {
